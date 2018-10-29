@@ -1,0 +1,15 @@
+[Unit]
+Description=Openstack Network-Monitor-Api
+After=network.target
+
+[Service]
+Type=forking
+#Type=notify
+PrivateTmp=True
+PIDFile=/root/NetworkMonitor/src/api/api.pid
+User=root
+ExecStart=/root/NetworkMonitor/src/api/network_monitor_api
+#ExecStop=/root/pre-online/pre_online/pre_online_api/stop_api.py
+
+[Install]
+WantedBy=multi-user.target

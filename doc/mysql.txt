@@ -1,0 +1,4 @@
+yum install gcc python-devel mysql-devel zlib-devel openssl-devel
+pip install MySQL-python
+#mysqladmin -uroot -p111111 processlist
+#mysqladmin -uroot -p111111 status

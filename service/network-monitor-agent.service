@@ -1,0 +1,16 @@
+[Unit]
+Description=Openstack Network-Monitor-Agent
+After=network.target
+
+[Service]
+Type=forking
+#Type=notify
+PrivateTmp=True
+PIDFile=/root/NetworkMonitor/src/agent/agent.pid
+User=root
+ExecStart=/root/NetworkMonitor/src/agent/network_monitor_agent
+#ExecStart=/usr/lib/systemd/system/test.py
+#ExecStop=/root/pre-online/pre_online/pre_online_api/stop_api.py
+
+[Install]
+WantedBy=multi-user.target

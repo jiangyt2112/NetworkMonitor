@@ -1,0 +1,6 @@
+yum install erlang
+yum install rabbitmq-server
+systemctl enable rabbitmq-server.service
+systemctl start  rabbitmq-server.service
+#rabbitmqctl add_user pre-online 111111
+#rabbitmqctl set_permissions pre-online ".*" ".*" ".*"
