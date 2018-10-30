@@ -1,0 +1,2 @@
+ cp /usr/local/pre-online/service/*.service /usr/lib/systemd/system/
+ systemctl daemon-reload
