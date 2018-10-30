@@ -47,7 +47,7 @@ if __name__ == "__main__":
         'host' : "10.10.150.28",
         'user' : "network_monitor",
         'port' : 3306,
-        'passwd' : "11111",
+        'passwd' : "111111",
         'db' : "network_monitor",
         'charset' : "utf8"
     }
