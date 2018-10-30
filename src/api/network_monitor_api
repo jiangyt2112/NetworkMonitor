@@ -1,3 +1,4 @@
+#!/usr/bin/python2
 import time,platform
 import os
 import sys
@@ -6,6 +7,7 @@ from start_api import check
 
 
 def createDaemon():
+    
     check()
     try:
         if os.fork() > 0: os._exit(0)

@@ -5,7 +5,7 @@ import sys
 import os
 import signal
 from database import manager as dm
-from rpc import rpc_check
+# from rpc import rpc_check
 from utils.log import SELOG
 
 #def test(signum, frame):
@@ -37,7 +37,7 @@ def check():
     SELOG.info("[api] check [start]")
     db = dm.Manager()
     db.api_check()
-    rpc_check.start_check()
+    # rpc_check.start_check()
     SELOG.info("[api] check [end]")
 
 

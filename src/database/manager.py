@@ -494,4 +494,4 @@ if __name__ == "__main__":
     # print manager.is_auto_end("5", "1")
     # print manager.query_status("1", "1")
     # print manager.query_history("1", "1")
-    manager.start_check()
+    # manager.start_check()

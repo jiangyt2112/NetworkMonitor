@@ -1,1 +1,18 @@
-api
+curl http://127.0.0.1:6666/pre_online/resource_evaluate/123
+curl http://127.0.0.1:6666/pre_online/resource_evaluate/123 -d "a=a"
+curl http://127.0.0.1:6666/pre_online/result/123
+curl http://127.0.0.1:6666/pre_online/auto_end/1
+
+curl http://127.0.0.1:5000/pre_online/resource_evaluate/start/1 -X POST -H "Content-type:application/json" 
+-d '{"time_out":false}'
+curl http://127.0.0.1:5000/pre_online/resource_evaluate/start/2 -X POST -H "Content-type:application/json"
+-d '{"time_out":true, "day":1, "hour":1, "minute":1, "second":1}'
+
+curl http://127.0.0.1:5000/pre_online/resource_evaluate/result/1
+
+curl http://127.0.0.1:5000/pre_online/resource_evaluate/query_status -X POST -H "Content-type:application/json"
+-d '{"vm_ids":["1", "2", "3", "44"]}' -H 'Content-type:application/json'
+
+curl http://127.0.0.1:5000/pre_online/resource_evaluate/history/1
+
+curl http://127.0.0.1:5000/pre_online/resource_evaluate/end/1
