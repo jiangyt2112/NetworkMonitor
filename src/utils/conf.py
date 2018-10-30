@@ -97,25 +97,25 @@ class Conf(object):
                         }
 
     def agent_parse(self):
-    	self.cf.read(self.conf_file)
-        section = 'zabbix'
-        self.zabbix_server = self.cf.get(section, 'server')
-        self.zabbix_username = self.cf.get(section, 'username')
-        self.zabbix_password = self.cf.get(section, 'password')
-        self.zabbix_jsonrpc = self.cf.get(section, 'jsonrpc')
-        self.zabbix_key = self.cf.get(section, 'key')
+    	self.cf.read(os.path.join(conf_file_dir, "agent.conf"))
+        section = 'agent'
+        # self.zabbix_server = self.cf.get(section, 'server')
+        # self.zabbix_username = self.cf.get(section, 'username')
+        # self.zabbix_password = self.cf.get(section, 'password')
+        # self.zabbix_jsonrpc = self.cf.get(section, 'jsonrpc')
+        # self.zabbix_key = self.cf.get(section, 'key')
         # self.zabbix_frequency_secs = int(self.cf.get(section, 'frequency_secs'))
-        self.zabbix_conf = {
-                                "server": self.zabbix_server,
-                                "username": self.zabbix_username,
-                                "password": self.zabbix_password,
-                                "jsonrpc": self.zabbix_jsonrpc,
-                                "key": self.zabbix_key
+        self.agent_conf = {
+                                # "server": self.zabbix_server,
+                                # "username": self.zabbix_username,
+                                # "password": self.zabbix_password,
+                                # "jsonrpc": self.zabbix_jsonrpc,
+                                # "key": self.zabbix_key
                                # "frequency_secs": self.zabbix_frequency_secs
                             }
 
     def rabbitmq_parse(self):
-    	self.cf.read(self.conf_file)
+    	self.cf.read(os.path.join(conf_file_dir, "rabbitmq.conf"))
         section = 'rabbitmq'
         self.rabbitmq_username = self.cf.get(section, 'username')
         self.rabbitmq_passwd = self.cf.get(section, 'passwd')
@@ -133,8 +133,8 @@ CONF = Conf()
 if __name__ == "__main__":
     print CONF.db_conf
     print CONF.log_conf
-    print CONF.re_conf
+    print CONF.server_conf
     print CONF.api_conf
-    print CONF.zabbix_conf
+    print CONF.agent_conf
     print CONF.rabbitmq_conf
 
