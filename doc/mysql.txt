@@ -1,3 +1,40 @@
+yum -y install mariadb-server
+vi /etc/my.cnf
+# add follows within [mysqld] section
+[mysqld]
+character-set-server=utf8
+systemctl start mariadb
+systemctl enable mariadb
+mysql_secure_installation
+mysql -u root -p
+firewall-cmd --add-service=mysql --permanent
+firewall-cmd --reload
+
+1、以管理员身份登录mysql
+mysql -u root -p
+
+2、选择mysql数据库
+use mysql
+
+3、创建用户并设定密码
+create user 'network_monitor'@'%' identified by '111111'
+
+4、使操作生效
+flush privileges
+
+5、为用户创建数据库
+create database network_monitor
+
+6、为用户赋予操作数据库testdb的所有权限
+grant all privileges on network_monitor.* to 'network_monitor'@'%' identified  by '111111'
+
+7、使操作生效
+flush privileges
+
+8、用新用户登录
+mysql -u test -p
+
+
 yum install gcc python-devel mysql-devel zlib-devel openssl-devel
 pip install MySQL-python
 #mysqladmin -uroot -p111111 processlist
