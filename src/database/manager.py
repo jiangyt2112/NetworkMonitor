@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-import add_project_dir
+import __init__
 import connection
 from utils.conf import CONF
 import sys
@@ -457,7 +457,7 @@ class Manager(object):
 
 if __name__ == "__main__":
     manager = Manager()
-    # manager.any_operation()
+    manager.any_operation()
     # print manager.exist_item("1", "1")
     # manager.exist_item("3", "1")
     # print manager.task_start("2", "1", time.time(), time.time() + 10)
