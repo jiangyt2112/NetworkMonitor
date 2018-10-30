@@ -5,9 +5,9 @@ from os.path import dirname
 
 class Conf(object):
     def __init__(self):
-        conf_file_dir = dirname(dirname(os.path.split(os.path.realpath(__file__))[0]))
-        conf_file_dir = os.path.join(conf_file_dir, "confgi/")
-        print conf_file_dir
+        self.conf_file_dir = dirname(dirname(os.path.split(os.path.realpath(__file__))[0]))
+        self.conf_file_dir = os.path.join(self.conf_file_dir, "config/")
+        print self.conf_file_dir
         # self.conf_file = os.path.join(conf_file_dir, "etc/pre_online.conf")
         
         self.cf = ConfigParser()
@@ -15,11 +15,11 @@ class Conf(object):
         self.server_parse()
         self.log_parse()
         self.api_parse()
-        self.zabbix_parse()
+        self.agent_parse()
         self.rabbitmq_parse()
     
     def db_parse(self):
-    	self.cf.read(os.path.join(conf_file_dir, "mysql.conf"))
+    	self.cf.read(os.path.join(self.conf_file_dir, "mysql.conf"))
         section = "mysql"
         self.host = self.cf.get(section, 'host')
         self.port = int(self.cf.get(section, 'port'))
@@ -37,7 +37,7 @@ class Conf(object):
                         }
     
     def server_parse(self):
-    	self.cf.read(os.path.join(conf_file_dir, "server.conf"))
+    	self.cf.read(os.path.join(self.conf_file_dir, "server.conf"))
         section = "server"
         # self.max_days = int(self.cf.get(section, 'max_days'))
         
@@ -47,7 +47,7 @@ class Conf(object):
 						}
         
     def log_parse(self):
-    	self.cf.read(os.path.join(conf_file_dir, "log.conf"))
+    	self.cf.read(os.path.join(self.conf_file_dir, "log.conf"))
         section = "log"
         self.database_log = self.cf.get(section, 'database_log')
         self.database_log_max_size = int(self.cf.get(section, 'database_log_max_size'))
@@ -55,12 +55,12 @@ class Conf(object):
         self.api_log = self.cf.get(section, 'api_log')
         self.api_log_max_size = int(self.cf.get(section, 'api_log_max_size'))
         self.api_log_backup_num = int(self.cf.get(section, 'api_log_backup_num'))
-        self.re_log = self.cf.get(section, 'server_log')
-        self.re_log_max_size = int(self.cf.get(section, 'server_log_max_size'))
-        self.re_log_backup_num = int(self.cf.get(section, 'server_log_backup_num'))
-        self.zb_log = self.cf.get(section, 'agent_log')
-        self.zb_log_max_size = int(self.cf.get(section, 'agent_log_max_size'))
-        self.zb_log_backup_num = int(self.cf.get(section, 'agent_log_backup_num'))
+        self.server_log = self.cf.get(section, 'server_log')
+        self.server_log_max_size = int(self.cf.get(section, 'server_log_max_size'))
+        self.server_log_backup_num = int(self.cf.get(section, 'server_log_backup_num'))
+        self.agent_log = self.cf.get(section, 'agent_log')
+        self.agent_log_max_size = int(self.cf.get(section, 'agent_log_max_size'))
+        self.agent_log_backup_num = int(self.cf.get(section, 'agent_log_backup_num'))
         self.fatal_log = self.cf.get(section, 'fatal_log')
         self.fatal_log_max_size = int(self.cf.get(section, 'fatal_log_max_size'))
         self.fatal_log_backup_num = int(self.cf.get(section, 'fatal_log_backup_num'))
@@ -89,7 +89,7 @@ class Conf(object):
                         }
 
     def api_parse(self):
-    	self.cf.read(os.path.join(conf_file_dir, "api.conf"))
+    	self.cf.read(os.path.join(self.conf_file_dir, "api.conf"))
         section = "api"
         self.api_port = int(self.cf.get(section, 'port'))
         self.api_conf = {
@@ -97,7 +97,7 @@ class Conf(object):
                         }
 
     def agent_parse(self):
-    	self.cf.read(os.path.join(conf_file_dir, "agent.conf"))
+    	self.cf.read(os.path.join(self.conf_file_dir, "agent.conf"))
         section = 'agent'
         # self.zabbix_server = self.cf.get(section, 'server')
         # self.zabbix_username = self.cf.get(section, 'username')
@@ -115,7 +115,7 @@ class Conf(object):
                             }
 
     def rabbitmq_parse(self):
-    	self.cf.read(os.path.join(conf_file_dir, "rabbitmq.conf"))
+    	self.cf.read(os.path.join(self.conf_file_dir, "rabbitmq.conf"))
         section = 'rabbitmq'
         self.rabbitmq_username = self.cf.get(section, 'username')
         self.rabbitmq_passwd = self.cf.get(section, 'passwd')
