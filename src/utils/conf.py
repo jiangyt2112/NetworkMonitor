@@ -7,7 +7,7 @@ class Conf(object):
     def __init__(self):
         self.conf_file_dir = dirname(dirname(os.path.split(os.path.realpath(__file__))[0]))
         self.conf_file_dir = os.path.join(self.conf_file_dir, "config/")
-        print self.conf_file_dir
+        # print self.conf_file_dir
         # self.conf_file = os.path.join(conf_file_dir, "etc/pre_online.conf")
         
         self.cf = ConfigParser()

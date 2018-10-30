@@ -46,9 +46,7 @@ SELOG = Log("service_log", CONF.log_conf['service_log'], CONF.log_conf['service_
 
 
 if __name__ == "__main__":
-    LOG = Log('network_monitor.utils.log')
-    LOG.debug("aaa")
-    LOG.info("bbb")
+    DBLOG.info("aaaa")
     FALOG.info("aaa")
     SELOG.info("bbb")
     pass
