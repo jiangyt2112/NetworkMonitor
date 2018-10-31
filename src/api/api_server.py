@@ -33,6 +33,7 @@ class ApiServer(object):
 
 def handler(signum, frame):
     APILOG.info("sigterm")
+    os.exit(0)
 
 def run_server():
     signal.signal(signal.SIGTERM, handler)
