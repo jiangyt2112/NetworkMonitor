@@ -122,10 +122,12 @@ class Conf(object):
         self.rabbitmq_username = self.cf.get(section, 'username')
         self.rabbitmq_passwd = self.cf.get(section, 'passwd')
         self.rabbitmq_host = self.cf.get(section, 'host')
+        self.rabbitmq_vhost = self.cf.get(section, 'vhost')
         self.rabbitmq_port = int(self.cf.get(section, 'port'))
         self.rabbitmq_conf = {
                                 "username": self.rabbitmq_username,
                                 "passwd": self.rabbitmq_passwd,
+                                "vhost" : self.rabbitmq_vhost,
                                 "host": self.rabbitmq_host,
                                 "port": self.rabbitmq_port
                             }
