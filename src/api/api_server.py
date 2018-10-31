@@ -6,7 +6,9 @@ from api import app
 import os
 import multiprocessing
 import sys
+import signal
 from utils.conf import CONF
+from utils.log import APILOG
 
 class ApiServer(object):
     """
@@ -29,7 +31,11 @@ class ApiServer(object):
             print "Ctrl+C to stop"
             IOLoop.instance().start()
 
+def handler(signum, frame):
+    APILOG.info("sigterm")
+
 def run_server():
+    signal.signal(signal.SIGTERM, handler)
     port = CONF.api_conf['port']
     api_server = ApiServer(port)
     api_server.run()
