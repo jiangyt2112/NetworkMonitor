@@ -43,6 +43,7 @@ class Client(object):
         self.response = None
         if self.routing_key.split('.')[1] == rpc:
             self.corr_id = str(uuid.uuid4())
+            self.rpc_call()
             try:
                 self.channel.basic_publish(exchange = self.exchange,
                                     routing_key = self.routing_key,
@@ -99,7 +100,7 @@ if __name__ == "__main__":
     req_id = str(uuid.uuid4())
     vm_id = str(uuid.uuid4()) 
     msg = {"req_id": req_id, "vm_id": vm_id}
-    rpc_client = RpcClient("resource_evaluation", "start_re", msg)
+    rpc_client = RpcClient("network_monitor_server", "", msg)
     rpc_client()
     # rpc_client()
 

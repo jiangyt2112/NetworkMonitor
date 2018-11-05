@@ -69,13 +69,13 @@ class Server(object):
                         #time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(eval(body)['end_time']))
                         }
         else:
-            response = "no routing_key"
+            response = "rpc routing_key"
  
-        ch.basic_publish(exchange='',
-                 routing_key=props.reply_to,
-                 properties=pika.BasicProperties(correlation_id = \
-                                                     props.correlation_id),
-                 body=str(response))
+            ch.basic_publish(exchange='',
+                     routing_key=props.reply_to,
+                     properties=pika.BasicProperties(correlation_id = \
+                                                         props.correlation_id),
+                     body=str(response))
         ch.basic_ack(delivery_tag = method.delivery_tag)
         print(" [x] %r:%r" % (method.routing_key, body))
 
