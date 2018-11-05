@@ -88,6 +88,6 @@ class T(RpcServer):
     # override callback    
 
 if __name__ == "__main__":
-    rpc_server = RpcServer("network_monitor_server", ["api_to_server", "agent_to_server"])
+    rpc_server = RpcServer("server", ["api_to_server", "agent_to_server"])
     rpc_server.run()
     #t = T("top", ["bbb"])

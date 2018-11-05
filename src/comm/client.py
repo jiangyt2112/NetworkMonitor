@@ -97,10 +97,10 @@ def end_re_rpc(vm_id):
     rpc_client("network_monitor", "end_re", msg)
 
 if __name__ == "__main__":
-    req_id = str(uuid.uuid4())
-    vm_id = str(uuid.uuid4()) 
+    # req_id = str(uuid.uuid4())
+    # vm_id = str(uuid.uuid4()) 
     msg = {"req_id": req_id, "vm_id": vm_id}
-    rpc_client = RpcClient("network_monitor_server", "", msg)
+    rpc_client = RpcClient("server", "api_to_server", msg)
     rpc_client()
     # rpc_client()
 
