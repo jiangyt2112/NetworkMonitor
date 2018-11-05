@@ -6,8 +6,8 @@ import pika
 import sys
 
 class Server(object):
-    def __init__(self, exchange, binding_keys, username = 'network_monitor', passwd = '111111', vhost = 'network_monitor'
-                host = '192.168.122.1', port = 5672):
+    def __init__(self, exchange, binding_keys, username = 'network_monitor', passwd = '111111', vhost = 'network_monitor',
+                host = '192.168.122.9', port = 5672):
 
         credentials = pika.PlainCredentials(username, passwd)
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host, port, vhost, credentials))
@@ -80,7 +80,7 @@ class Server(object):
         print(" [x] %r:%r" % (method.routing_key, body))
 
 
-class T(RpcServer):
+class T(Server):
     def __init__(self, exchange, binding_keys):
         super(T, self).__init__(exchange, binding_keys)
     #def callback(self):
@@ -88,6 +88,6 @@ class T(RpcServer):
     # override callback    
 
 if __name__ == "__main__":
-    rpc_server = RpcServer("server", ["api_to_server", "agent_to_server"])
-    rpc_server.run()
+    server = Server("server", ["api_to_server", "agent_to_server"])
+    server.run()
     #t = T("top", ["bbb"])
