@@ -5,8 +5,8 @@ import sys
 import uuid
 
 class Client(object):
-    def __init__(self, exchange, routing_key, message = "", username = 'network_monitor', passwd = '111111', vhost = "network_monitor"
-                host = '192.168.122.1', port = 5672):
+    def __init__(self, exchange, routing_key, message = "", username = 'network_monitor', passwd = '111111', vhost = "network_monitor",
+                host = '192.168.122.9', port = 5672):
         self.credentials = pika.PlainCredentials(username, passwd)
         # self.connection = pika.BlockingConnection(pika.ConnectionParameters(host, port, '/', credentials))
         # self.channel = self.connection.channel()
@@ -41,7 +41,7 @@ class Client(object):
             return False, str(e)
 
         self.response = None
-        if self.routing_key.split('.')[1] == rpc:
+        if False and self.routing_key.split('.')[1] == rpc:
             self.corr_id = str(uuid.uuid4())
             self.rpc_call()
             try:
@@ -97,10 +97,10 @@ def end_re_rpc(vm_id):
     rpc_client("network_monitor", "end_re", msg)
 
 if __name__ == "__main__":
-    # req_id = str(uuid.uuid4())
-    # vm_id = str(uuid.uuid4()) 
+    req_id = str(uuid.uuid4())
+    vm_id = str(uuid.uuid4()) 
     msg = {"req_id": req_id, "vm_id": vm_id}
-    rpc_client = RpcClient("server", "api_to_server", msg)
+    rpc_client = Client("server", "api_to_server", msg)
     rpc_client()
     # rpc_client()
 
