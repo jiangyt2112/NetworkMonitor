@@ -1,5 +1,4 @@
 #!/usr/bin/python2
-
 import pika
 import sys
 import uuid
@@ -40,8 +39,27 @@ class Client(object):
             self.close()
             return False, str(e)
 
+        # agent client
+        if self.routing_key == "" and self.exchange == "agent":
+            try:
+                self.channel.basic_publish(exchange = self.exchange,
+                                        routing_key = self.routing_key,
+                                        body = self.message)
+                self.close()
+            except Exception, e:
+                print str(e)
+                self.close()
+                return False, str(e)
+            return True, None
+
+
+        # server client
         self.response = None
-        if False and self.routing_key.split('.')[1] == rpc:
+        msg_type = self.routing_key.split('.')
+        if len(msg_type) != 2:
+            return False, "routing_key with wrong format."
+
+        if msg_type[1] == rpc:
             self.corr_id = str(uuid.uuid4())
             self.rpc_call()
             try:
@@ -83,24 +101,44 @@ class Client(object):
     def __del__(self):
         pass
 
-def start_re_rpc(vm_id):
-    # start resource evaluation rpc
-    req_id = "req-" + str(uuid.uuid4())
-    msg = {"req_id": req_id, "vm_id": vm_id}
-    rpc_client("network_monitor", "start_re", msg)
-    
+def api_to_server_msg(msg):
+    client = Client("server", "api_to_server.msg", msg)
+    ret = client()
+    return ret
 
-def end_re_rpc(vm_id):
-    # end resource evaluation rpc
-    req_id = "req-" + str(uuid.uuid4())
+def api_to_server_rpc(msg):
+    client = Client("server", "api_to_server.rpc", msg)
+    ret = client()
+    return ret
+
+def agent_to_server_msg(msg):
+    client = Client("server", "agent_to_server.msg", msg)
+    ret = client()
+    return ret
+
+
+def agent_to_server_rpc(msg):
+    client = Client("server", "agent_to_server.rpc", msg)
+    ret = client()
+    return ret
+
+def server_to_agent_msg(msg):
+    client = Client("agent", "", msg)
+    ret = client()
+    return ret
+
+
+def test(req_id, vm_id):
     msg = {"req_id": req_id, "vm_id": vm_id}
-    rpc_client("network_monitor", "end_re", msg)
+    print api_to_server_msg(msg)
+    print api_to_server_rpc(msg)
+    print agent_to_server_msg(msg)
+    print agent_to_server_rpc(msg)
+    print server_to_agent_msg(msg)
 
 if __name__ == "__main__":
     req_id = str(uuid.uuid4())
     vm_id = str(uuid.uuid4()) 
-    msg = {"req_id": req_id, "vm_id": vm_id}
-    rpc_client = Client("server", "api_to_server", msg)
-    rpc_client()
+    test(req_id, vm_id)
     # rpc_client()
 
