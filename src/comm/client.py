@@ -59,7 +59,7 @@ class Client(object):
         if len(msg_type) != 2:
             return False, "routing_key with wrong format."
 
-        if msg_type[1] == rpc:
+        if msg_type[1] == "rpc":
             self.corr_id = str(uuid.uuid4())
             self.rpc_call()
             try:

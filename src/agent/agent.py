@@ -8,9 +8,9 @@ from utils.time import format_time
 import json
 
 class Server(Base_Server):
-	def __init__(self, exchange = "agent", binding_keys = "", exchange_type = "fanout"):
-		rabbit_conf = CONF.rabbitmq_conf
-		host = rabbit_conf['host']
+    def __init__(self, exchange = "agent", binding_keys = "", exchange_type = "fanout"):
+        rabbit_conf = CONF.rabbitmq_conf
+        host = rabbit_conf['host']
         port = rabbit_conf['port']
         username = rabbit_conf['username']
         passwd = rabbit_conf['passwd']
