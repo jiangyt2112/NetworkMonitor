@@ -4,7 +4,7 @@ from comm.server import Server as Base_Server
 import pika
 from utils.log import SELOG
 from utils.conf import CONF
-from utils.time import format_time
+from utils.ftime import format_time
 import json
 
 class Server(Base_Server):
