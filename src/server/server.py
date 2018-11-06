@@ -8,14 +8,14 @@ from utils.time import format_time
 import json
 
 class Server(Base_Server):
-    def __init__(self, exchange = "server", binding_keys = ["api_to_server.*", "agent_to_server.*"]):
+    def __init__(self, exchange = "server", binding_keys = ["api_to_server.*", "agent_to_server.*"], exchange_type = "topic"):
         rabbit_conf = CONF.rabbitmq_conf
         host = rabbit_conf['host']
         port = rabbit_conf['port']
         username = rabbit_conf['username']
         passwd = rabbit_conf['passwd']
         vhost = rabbit_conf['vhost']
-        super(Server, self).__init__(exchange, binding_keys, host = host, port = port, username = username, 
+        super(Server, self).__init__(exchange, binding_keys, exchange_type, host = host, port = port, username = username, 
         							passwd = passwd, vhost = vhost)
 
     def callback(self, ch, method, props, body):
