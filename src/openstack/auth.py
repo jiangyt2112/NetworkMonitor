@@ -3,10 +3,7 @@ from keystoneauth1.identity import v3
 from keystoneauth1 import session
 from keystoneclient.v3 import client
 from keystoneclient.v3 import tokens
-auth_url = 'http://192.168.122.9:5000/v3'
-username = 'test'
-password = '111111'
-project_name = 'test'
+
 def get_token(username, password, auth_url, project_name):
 	auth = v3.Password(auth_url= auth_url,
 		               username=username,
@@ -15,7 +12,10 @@ def get_token(username, password, auth_url, project_name):
 		               project_domain_name='Default',
 		               user_domain_name='Default')
 	sess = session.Session(auth=auth)
-	auth_token = sess.get_token()
+	try:
+		auth_token = sess.get_token()
+	except Exception, e:
+		return None
 	return auth_token
 
 
@@ -33,5 +33,9 @@ def check_auth(auth_url, token, project_name):
 	return keystone.authenticate()
 
 if __name__ == "__main__":
+	auth_url = 'http://192.168.122.9:5000/v3'
+	username = 'test'
+	password = '111111'
+	project_name = 'test'
 	auth_token = get_token(username, password, auth_url, project_name)
 	print check_auth(auth_url, auth_token, project_name)
