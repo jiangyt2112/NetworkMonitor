@@ -10,10 +10,10 @@ from auth import get_token
 def get_project_server_info(auth_token, auth_url, project_name):
 	kw = {}
 	kw['project_domain_id'] = 'default'
-	nova = nvclient.Client("2", auth_token=auth_token, auth_url='http://192.168.122.9:5000/v3',project_name='admin', **kw)
+	nova = nvclient.Client("2", auth_token = auth_token, auth_url = auth_url, project_name = project_name, **kw)
 	print nova.servers.list()
 	s = nova.servers.list()
-	print s[0].__dict__
+	print s[0].__dict__:
 	print s[0]._info
 	print s[0].to_dict()
 
@@ -25,6 +25,6 @@ if __name__ == '__main__':
 	auth_token = get_token(username, password, auth_url, project_name)
 	if auth_token == None:
 		print 'auth fail.'
-		return
+		exit(0)
 	get_project_server_info(auth_token, auth_url, project_name)
 
