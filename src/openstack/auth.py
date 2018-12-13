@@ -29,7 +29,7 @@ print auth_token
 def check_auth(auth_url, token, project_name):
 	auth = v3.Token(auth_url = auth_url, token = token, project_domain_name='Default', project_name= project_name)
 	sess = session.Session(auth = auth)
-	keystone = client.Client(auth_url = auth_url, session = sess, endpoint = auth_url)
+	keystone = client.Client(token = auth_token, auth_url = auth_url, session = sess, endpoint = auth_url)
 	return keystone.authenticate()
 
 if __name__ == "__main__":
