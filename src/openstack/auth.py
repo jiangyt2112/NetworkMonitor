@@ -7,15 +7,17 @@ auth_url = 'http://192.168.122.9:5000/v3'
 username = 'test'
 password = '111111'
 project_name = 'test'
-auth = v3.Password(auth_url= auth_url,
-                   username=username,
-                   password=password,
-                   project_name=project_name,
-                   project_domain_name='Default',
-                   user_domain_name='Default')
-sess = session.Session(auth=auth)
-auth_token = sess.get_token()
-print auth_token
+def get_token(username, password, auth_url, project_name):
+	auth = v3.Password(auth_url= auth_url,
+		               username=username,
+		               password=password,
+		               project_name=project_name,
+		               project_domain_name='Default',
+		               user_domain_name='Default')
+	sess = session.Session(auth=auth)
+	auth_token = sess.get_token()
+	return auth_token
+
 
 #auth = v3.Token(auth_url='http://192.168.122.9:5000/v3', token = auth_token,project_domain_name='Default',project_name='test')
 #sess = session.Session(auth=auth)
@@ -31,4 +33,5 @@ def check_auth(auth_url, token, project_name):
 	return keystone.authenticate()
 
 if __name__ == "__main__":
+	auth_token = get_token(username, password, auth_url, project_name)
 	print check_auth(auth_url, auth_token, project_name)
