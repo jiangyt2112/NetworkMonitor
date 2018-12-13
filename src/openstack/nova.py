@@ -1,9 +1,5 @@
 #!/usr/bin/python2
 from novaclient import client as nvclient
-from keystoneauth1.identity import v3
-from keystoneauth1 import session
-from keystoneclient.v3 import client
-from keystoneclient.v3 import tokens
 from auth import get_token
 
 
