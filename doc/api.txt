@@ -13,6 +13,10 @@ curl http://127.0.0.1:5000/pre_online/resource_evaluate/result/1
 curl http://127.0.0.1:5000/pre_online/resource_evaluate/query_status -X POST -H "Content-type:application/json"
 -d '{"vm_ids":["1", "2", "3", "44"]}' -H 'Content-type:application/json'
 
-curl http://127.0.0.1:5000/pre_online/resource_evaluate/history/1
 
-curl http://127.0.0.1:5000/pre_online/resource_evaluate/end/1
+curl http://127.0.0.1:8001/network_monitor/check/project_name -X POST -H "Content-type:application/json"
+-d '{"token":"123455"}'
+curl http://127.0.0.1:8001/network_monitor/status/project_name
+curl http://127.0.0.1:8001/network_monitor/result/project_name
+curl http://127.0.0.1:8001/network_monitor/history/project_name
+

@@ -17,6 +17,7 @@ class Conf(object):
         self.api_parse()
         self.agent_parse()
         self.rabbitmq_parse()
+        self.openstack_parse()
     
     def db_parse(self):
     	self.cf.read(os.path.join(self.conf_file_dir, "mysql.conf"))
@@ -132,6 +133,16 @@ class Conf(object):
                                 "port": self.rabbitmq_port
                             }
 
+    def openstack_parse(self):
+        self.cf.read(os.path.join(self.conf_file_dir, "openstack.conf"))
+        section = 'keystone'
+        self.openstack_auth_url = self.cf.get(section, 'auth_url')
+        self.openstack_endpoint = self.cf.get(section, 'endpoint')
+        self.openstack_conf = {
+                                "auth_url": self.openstack_auth_url,
+                                "endpoint": self.openstack_endpoint
+                            }
+
 CONF = Conf()
 
 if __name__ == "__main__":
@@ -141,4 +152,5 @@ if __name__ == "__main__":
     print CONF.api_conf
     print CONF.agent_conf
     print CONF.rabbitmq_conf
+    print CONF.openstack_conf
 
