@@ -39,7 +39,6 @@ class NetworkMonitorCheck(Resource):
         # the 
         #print "get vm_id"
         req_id = str(uuid.uuid4())
-        #try:
         data = request.get_json()       
         print data
 
@@ -48,11 +47,11 @@ class NetworkMonitorCheck(Resource):
                             'exe_result': False,
                             'task_type': 'check',        
                             'req_id': req_id,
+                            'project_name': project_name,
                             'error_msg': "data format illegal"
                         }
-            code = 400
             APILOG.info("api.NetworkMonitorCheck.post - req-%s - project-%s request data format illegal" %(req_id, project_name))
-            return response, code
+            return response, 400
             
         
         msg = {'req_id': req_id, 'project_name': project_name, 'token': data['token']}
@@ -66,7 +65,7 @@ class NetworkMonitorCheck(Resource):
             APILOG.info("api.NetworkMonitorCheck.post - req-%s - project-%s check project:fail info:%s" %(req_id, project_name, response['error_msg']))
             return response, 400
         else:
-            APILOG.info("api.NetworkMonitorCheck.post - req-%s - project_name-%s check project:success info:%s" %(req_id, project_name, response['error_msg']))
+            APILOG.info("api.NetworkMonitorCheck.post - req-%s - project-%s check project:success info:%s" %(req_id, project_name, response['result']))
             return response, 200
 
 class NetworkMonitorStatus(Resource):
@@ -75,7 +74,19 @@ class NetworkMonitorStatus(Resource):
         #print "post vm_id" 
         req_id = str(uuid.uuid4())
         data = request.get_json()
-        msg = {'req_id': req_id, 'vm_id': project_name, 'token': data['token']}
+
+        if data == None or "token" not in data:
+            response = {
+                            'exe_result': False,
+                            'task_type': 'get_status',        
+                            'req_id': req_id,
+                            'project_name': project_name,
+                            'error_msg': "data format illegal"
+                        }
+            APILOG.info("api.NetworkMonitorStatus.post - req-%s - project-%s request data format illegal" %(req_id, project_name))
+            return response, 400
+
+        msg = {'req_id': req_id, 'project_name': project_name, 'token': data['token']}
 
         APILOG.info("api.NetworkMonitorStatus.post - req-%s - project_name-%s api get request: get task status" %(req_id, project_name))
         
@@ -86,45 +97,41 @@ class NetworkMonitorStatus(Resource):
             APILOG.info("api.ResourceEvaluate.post - req-%s - project_name-%s get status:fail info:%s" %(req_id, project_name, response['error_msg']))
             return response, 400
         else:
-            APILOG.info("api.ResourceEvaluate.post - req-%s - project_name-%s get status:success info:%s" %(req_id, project_name, response['error_msg']))
+            APILOG.info("api.ResourceEvaluate.post - req-%s - project_name-%s get status:success info:%s" %(req_id, project_name, response['result']))
             return response, 200
         
 class NetworkMonitorResult(Resource):
     """
-        evaluation result api
+        result api
     """
     def post(self, project_name):
         # write log
         req_id = str(uuid.uuid4())
-        APILOG.info("api.NetworkMonitorResult.post - req-%s - project-%s api get request:get resource evaluation result" %(req_id, project_name))
+        data = request.get_json()
 
-        # read result from database
-        # exception
-        # 检查授权
-
-        db_manager = Manager()
-        res, msg = db_manager.get_result(project_name, req_id)
-
-        if res:
-            # true, success
-            APILOG.info("api.NetworkMonitorResult.post - req-%s - project-%s get result:success info:%s" %(req_id, project_name, str(msg)))
+        if data == None or "token" not in data:
             response = {
-                'task_type': 'get_result',
-                'exe_res': True,
-                'req_id': req_id,
-                'project_name': project_name,
-                'info': msg 
+                            'exe_result': False,
+                            'task_type': 'get_result',        
+                            'req_id': req_id,
+                            'project_name': project_name,
+                            'error_msg': "data format illegal"
                         }
+            APILOG.info("api.NetworkMonitorResult.post - req-%s - project-%s request data format illegal" %(req_id, project_name))
+            return response, 400
+
+        msg = {"project_name": project_name, "req_id": req_id, "token": data["token"]}
+
+        APILOG.info("api.NetworkMonitorResult.post - req-%s - project-%s api post request:get result" %(req_id, project_name))
+
+        response = get_result(msg)
+        
+        if response['exe_result']:
+            # true, success
+            APILOG.info("api.NetworkMonitorResult.post - req-%s - project-%s get result:success info:%s" %(req_id, project_name, response['result']))
             return response, 200
         else:
-            APILOG.info("api.NetworkMonitorResult.post - req-%s - project-%s get result:fail info:%s" %(req_id, project_name, str(msg)))
-            response = {
-                'task_type': 'get_result',
-                'exe_res': False,
-                'req_id': req_id,
-                'project_name': project_name,
-                'error_msg': msg 
-                        }
+            APILOG.info("api.NetworkMonitorResult.post - req-%s - project-%s get result:fail info:%s" %(req_id, project_name, response['error_msg']))
             return response, 400
 
 
@@ -133,32 +140,32 @@ class NetworkMonitorHistory(Resource):
     def post(self, vm_id):
         # write log
         req_id = str(uuid.uuid4())
-        APILOG.info("api.NetworkMonitorHistory.post - req-%s - project-%s api get request:get history" %(req_id, project_name))       
+        data = request.get_json()
+
+        if data == None or "token" not in data:
+            response = {
+                            'exe_result': False,
+                            'task_type': 'get_history',        
+                            'req_id': req_id,
+                            'project_name': project_name,
+                            'error_msg': "data format illegal"
+                        }
+            APILOG.info("api.NetworkMonitorHistory.post - req-%s - project-%s request data format illegal" %(req_id, project_name))
+            return response, 400
+
+        msg = {"project_name": project_name, "req_id": req_id, "token": data["token"]}
+
+        APILOG.info("api.NetworkMonitorHistory.post - req-%s - project-%s api post request:get history" %(req_id, project_name))       
 
         # exception
-        db_manager = Manager()
-        res, msg = db_manager.query_history(vm_id, req_id)
-        if res:
-            response = {
-                            'exe_res': True,
-                            'task_type': 'query_history',        
-                            'req_id': req_id,
-                            'project_name': project_name,
-                            'info': msg
-                        }
-            APILOG.info("api.NetworkMonitorHistory.post - req-%s - project-%s history:%d items" %(req_id, project_name, msg['history_num']))
-            code = 200
+        response = get_history(msg)
+        
+        if response['exe_result']:
+            APILOG.info("api.NetworkMonitorHistory.post - req-%s - project-%s get history:success info:%s" %(req_id, project_name, response['result']))
+            return response, 200
         else:
-            response = {
-                            'exe_res': False,
-                            'task_type': 'query_history',        
-                            'req_id': req_id,
-                            'project_name': project_name,
-                            'error_msg': msg
-                        }
-            APILOG.info("api.NetworkMonitorHistory.post - req-%s - project-%s history:%d items" %(req_id, project_name, msg['history_num']))
-            code = 400
-        return response, code
+            APILOG.info("api.NetworkMonitorHistory.post - req-%s - project-%s get history:fail info:%s" %(req_id, project_name, response['error_msg']))
+            return response, 400
 
 
 # api.add_resource(HelloWorld, '/')
