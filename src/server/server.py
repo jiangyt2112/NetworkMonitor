@@ -43,7 +43,7 @@ class Server(Base_Server):
                      routing_key=props.reply_to,
                      properties=pika.BasicProperties(correlation_id = \
                                                          props.correlation_id),
-                     body=str(response))
+                     body=json.dumps(response))
             elif msg_type[1] == "msg":
                 print "receive msg"
             else:
@@ -65,7 +65,7 @@ class Server(Base_Server):
                      routing_key=props.reply_to,
                      properties=pika.BasicProperties(correlation_id = \
                                                          props.correlation_id),
-                     body=str(response))
+                     body=json.dumps(response))
             elif msg_type[1] == "msg":
                 print "receive msg"
             else:

@@ -2,6 +2,7 @@
 import pika
 import sys
 import uuid
+import json
 
 class Client(object):
     def __init__(self, exchange, routing_key, message = "", username = 'network_monitor', passwd = '111111', vhost = "network_monitor",
@@ -12,7 +13,7 @@ class Client(object):
         self.host = host
         self.port = port
         self.vhost = vhost
-        self.message = str(message)
+        self.message = json.dumps(message)
         self.exchange = exchange
         self.routing_key = routing_key
 

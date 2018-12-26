@@ -4,6 +4,7 @@ from utils.log import FALOG
 import time
 import pika
 import sys
+import json
 
 class Server(object):
     def __init__(self, exchange, binding_keys, exchange_type, username = 'network_monitor', passwd = '111111', vhost = 'network_monitor',
@@ -80,7 +81,7 @@ class Server(object):
                      routing_key=props.reply_to,
                      properties=pika.BasicProperties(correlation_id = \
                                                          props.correlation_id),
-                     body=str(response))
+                     body = json.dumps(response))
             elif msg_type[1] == "msg":
                 print "receive msg"
             else:
@@ -102,7 +103,7 @@ class Server(object):
                      routing_key=props.reply_to,
                      properties=pika.BasicProperties(correlation_id = \
                                                          props.correlation_id),
-                     body=str(response))
+                     body=json.dumps(response))
             elif msg_type[1] == "msg":
                 print "receive msg"
             else:
