@@ -23,51 +23,94 @@ def check_msg(msg):
 		response['error_msg'] = 'no authorization'
 		return response
 
-	# database
-	# 数据库查和创建任务
+	# call database api to create a check task entry
+	db_manager = Manager()
+    ret, result = db_manager.create_task(msg['project_name'], msg['req_id'])
+    if ret == False:
+    	response['error_msg'] = result
+    	return response
 
 	# dispatch task to back end
 	task = {'type': 'check', 'req_id': msg['req_id'], 'project': msg['project_name'], 'token': msg['token']}
-	ret = api_to_server_msg(task)
-	if ret[0] == False:
-		response['error_msg'] = ret[1]
+	ret, result = api_to_server_msg(task)
+	if ret == False:
+		response['error_msg'] = result
 	else:
 		response['exe_result'] = True
 		response['result'] = 'run check task'
+
 	return response
 
 def get_status(msg):
-	# 授权
-	# 数据库
-	# response = {
-    #             'task_type': 'end_re',
-    #             'exe_result': False,
-    #             'req_id': req_id,
-    #             'vm_id': vm_id,
-    #             'error_msg': msg 
-    #             }
-	pass
+	response = {
+            'task_type': 'get_status',
+            'exe_result': False,
+            'req_id': msg['req_id'],
+            'project': msg['project_name'],
+            'result': None,
+            'error_msg': None 
+            }
+    # check authority
+    if check_auth(msg) == False:
+		response['error_msg'] = 'no authorization'
+		return response
+
+	# call database api to obtain check task status
+	db_manager = Manager()
+    ret, result = db_manager.get_status(msg['project_name'], msg['req_id'])
+	if ret == False:
+		response['error_msg'] = result
+	else:
+		response['exe_result'] = True
+		response['result'] = result
+
+	return response
 
 def get_result(msg):
+	response = {
+            'task_type': 'get_result',
+            'exe_result': False,
+            'req_id': msg['req_id'],
+            'project': msg['project_name'],
+            'result': None,
+            'error_msg': None 
+            }
+    # check authority
+    if check_auth(msg) == False:
+		response['error_msg'] = 'no authorization'
+		return response
+
 	db_manager = Manager()
-    res, msg = db_manager.get_result(project_name, req_id)
-    # response = {
-    #             'task_type': 'get_result',
-    #             'exe_result': True,
-    #             'req_id': req_id,
-    #             'project_name': project_name,
-    #             'result': msg 
-    #                     }
-	pass
+    ret, result = db_manager.get_result(msg['project_name'], msg['req_id'])
+    if ret == False:
+    	response['error_msg'] = result
+    else:
+    	response['exe_result'] = True
+    	response['result'] = result
+
+    return response
 
 def get_history(msg):
+	response = {
+            'task_type': 'get_history',
+            'exe_result': False,
+            'req_id': msg['req_id'],
+            'project': msg['project_name'],
+            'result': None,
+            'error_msg': None 
+            }
+    # check authority
+    if check_auth(msg) == False:
+		response['error_msg'] = 'no authorization'
+		return response
+
+	# call database api to obtain project check task history
 	db_manager = Manager()
-    res, msg = db_manager.query_history(vm_id, req_id)
-    # response = {
-    #                         'exe_res': False,
-    #                         'task_type': 'query_history',        
-    #                         'req_id': req_id,
-    #                         'project_name': project_name,
-    #                         'error_msg': msg
-    #                     }
-	pass
+    ret, result = db_manager.get_history(msg['project_name'], msg['req_id'])
+    if ret == False:
+    	response['error_msg'] = result
+    else:
+    	response['exe_result'] = True
+    	response['result'] = result
+
+    return response
