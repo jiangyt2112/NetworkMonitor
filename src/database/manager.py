@@ -170,49 +170,38 @@ class Manager(object):
 
         DBLOG.info("database.get_result - vm-%s req-%s result:%s" %(project_name, req_id, ret[0]))
         return True, ret[0]
-# here
+
     def get_history(self, project_name, req_id):
         conn = None
         try:
             conn = connection.Connection(conf_dict = self.db_conf)
         except MySQLdb.Error, e:
-            DBLOG.error("database.query_history - vm-%s req-%s get result fail:%s" %(vm_id, req_id, str(e)))
+            DBLOG.error("database.get_history - project-%s req-%s get result fail:%s" %(project_name, req_id, str(e)))
             return False, str(e)
              
-        sql = "select * from history where vm_id = '%s' order by history_id desc;" %(vm_id)
+        sql = "select * from history where project = '%s' order by id desc;" %(project_name)
         try:
             conn.execute(sql)
-            # res = conn.fetchone()
             all_res = conn.fetchall()
-            # print res
         except MySQLdb.Error, e:
             conn.close()
-            DBLOG.error("database.query_history - vm-%s req-%s get result fail:%s" %(vm_id, req_id, str(e)))
+            DBLOG.error("database.get_history - project-%s req-%s get result fail:%s" %(project_name, req_id, str(e)))
             return False, str(e)
-        # time.sleep(20)
         conn.close()
 
         history_num = len(all_res)
         # vm item column index map
-        item_index_map = {
-                            'vm_id': 1,
-                            'start_time': 2,
-                            'end_time': 3,
-                            'status': 4,
-                            'vcpu': 5,
-                            'cpu_rate': 6,
-                            'recommend_vcpu': 7,
-                            'expect_cpu_rate': 8,
-                            'maxmem': 9,
-                            'usedmem': 10,
-                            'memory_rate': 11,
-                            'actual': 12,
-                            'used': 13,
-                            'recommend_mem': 14,
-                            'expect_mem_rate': 15,
-                            'nic_num': 16,
-                            'nic_info': 17,
-                            'expire_time': 18
+        history_index_map = {
+                            'id': 0,
+                            'project': 1,
+                            'req_id': 2,
+                            'status': 3,
+                            'receive_time': 4,
+                            'start_time': 5,
+                            'stop_time': 6,
+                            'network_info': 7,
+                            'vm_info': 8,
+                            'result': 9
                             }
         history_result = {
                             'history_num': history_num,
@@ -221,100 +210,171 @@ class Manager(object):
         
         for i in range(history_num):
             res = all_res[i]
-            result = {
-                        # 'vm_id': res[item_index_map['vm_id']],
-                        'start_time': str(res[item_index_map['start_time']]),
-                        'end_time': str(res[item_index_map['end_time']]),
-                        'status': res[item_index_map['status']],
-                        'vcpu': res[item_index_map['vcpu']],
-                        'cpu_rate': '{:g}%'.format(res[item_index_map['cpu_rate']]*100),
-                        'recommend_vcpu': res[item_index_map['recommend_vcpu']],
-                        'expect_cpu_rate': '{:g}%'.format(res[item_index_map['expect_cpu_rate']]*100),
-                        'maxmem': res[item_index_map['maxmem']],
-                        'usedmem': res[item_index_map['usedmem']],
-                        'memory_rate': '{:g}%'.format(res[item_index_map['memory_rate']] * 100),
-                        'actual': res[item_index_map['actual']],
-                        'used': res[item_index_map['used']],
-                        'recommend_mem': res[item_index_map['recommend_mem']],
-                        'expect_mem_rate': '{:g}%'.format(res[item_index_map['expect_mem_rate']] * 100),
-                        'nic_num': res[item_index_map['nic_num']],
-                        'nic_info': json.loads(res[item_index_map['nic_info']]),
-                        'expire_time': str(res[item_index_map['expire_time']])
-                    }
+            result = {"index": i, "result": res[history_index_map['result']]}
             history_result['history_info'].append(result)
-        DBLOG.info("database.query_history - vm-%s req-%s get result success:%d items"
-                %(vm_id, req_id, history_result['history_num']))
+        DBLOG.info("database.get_history - project-%s req-%s get result success:%d items"
+                %(project, req_id, history_result['history_num']))
         return True, history_result
 
-    def start_task(self):
-        pass
+    def start_task(self, project_name, req_id, network_info, vm_info, network_num, vm_num):
+        start_time = format_time(time.time())
+        update_sql = ("update task set status = 'START', start_time = '%s',"
+                "network_info = '%s', vm_info = '%s', vm_num = %d, network_num = %d "
+                "where project = '%s';") %(start_time, network_info, vm_info, network_num, vm_num, project_name)
 
-    def stop_task(self):
-        pass
+        conn = None
+        try:
+            conn = connection.Connection(conf_dict = self.db_conf)
+            conn.execute(update_sql)
+            conn.commit()
+            conn.close()
+        except MySQLdb.Error, e:
+            conn.close()
+            DBLOG.error("database.start_task - project-%s req-%s start task fail:%s" %(project_name, req_id, str(e)))
+            return False, str(e)
+        else:
+            DBLOG.info("database.start_task - project-%s req-%s start task:%s" %(project_name, req_id, start_time))
+            return True, None
 
-    # def task_stop(self, vm_id, req_id, end_time, info, auto_exit = False):
-    #     conn = None
-    #     try:
-    #         conn = connection.Connection(conf_dict = self.db_conf)
-    #     except MySQLdb.Error, e:
-    #         DBLOG.error("database.task_end - vm-%s req-%s task_end fail:%s" %(vm_id, req_id, str(e)))
-    #         return False, str(e)
-            
-    #     str_time = format_time(end_time)
-
-    #     sql = "select * from vm where vm_id = '%s';" %(vm_id)
-    #     res = None
-    #     try:
-    #         conn.execute(sql)
-    #         res = conn.fetchone()
-    #     except MySQLdb.Error, e:
-    #         conn.close()
-    #         DBLOG.info("database.task_end - vm-%s req-%s task_end fail:%s" %(vm_id, req_id, str(e)))
-    #         return False, str(e)
-
-    #     start_time = str(res[1])
-    #     expire_time = str(res[17])
-    #     #status = res[3]
-    #     print start_time
+    def receive_item(self, project_name, req_id, receive_vm_num, receive_network_num, info):
+        receive_time = format_time(time.time())
+        get_id_sql = ("select id from task where project = '%s';") %(project_name)
         
-    #     if auto_exit:
-    #         status = 'auto_end'
-    #     else:
-    #         status = 'end'
-    #     # start transaction
-    #     try:
-    #         conn.execute('begin;')
+        conn = NULL
+        task_id = None
+        try:
+            conn = connection.Connection(conf_dict = self.db_conf)
+            conn.execute(get_id_sql)
+            ret = conn.fetchone()
+            task_id = ret[0]
+        except MySQLdb.Error, e:
+            conn.close()
+            DBLOG.error("database.receive_item - project-%s req-%s receive item fail, "
+                "can't get task id:%s" %(project_name, req_id, str(e)))
+            return False, str(e)
+
+        set_task_sql = ("update task set status = 'RUNNING', "
+                "receive_vm_num = %d, receive_network_num = %d "
+                "where project = '%s';") %(receive_vm_num, receive_network_num, project_name)
+        store_item_sql = ("insert into item set task_id = %d, receive_time = '%s', info = '%s';") 
+                        %(task_id, receive_time, info)
+
+        try:
+            conn.execute(set_task_sql)
+            conn.execute(store_item_sql)
+            conn.commit()
+            conn.close()
+        except MySQLdb.Error, e:
+            conn.close()
+            DBLOG.error("database.receive_item - project-%s req-%s receive item fail:%s" %(project_name, req_id, str(e)))
+            return False, str(e)
+        else:
+            DBLOG.error("database.receive_item - project-%s req-%s receive item:%s" %(project_name, req_id, receive_time))
+            return True, None
         
-    #         sql = ("insert into history set vm_id = '%s', start_time = '%s', end_time = '%s', status = '%s', vcpu = %d,"
-    #                 "cpu_rate = %f,recommend_vcpu = %d, expect_cpu_rate = %f, maxmem = %d, usedmem = %d, "
-    #                 "memory_rate=%f, actual=%d, used=%d, recommend_mem = %d, expect_mem_rate = %f,"
-    #                 "nic_num = %d, nic_info = '%s', expire_time = '%s';") %(vm_id, start_time, str_time, status, 
-    #                 info['vcpu'], info['cpu_rate'], info['recommend_vcpu'], info['expect_cpu_rate'], info['maxmem'], 
-    #                 info['usedmem'], info['memory_rate'], info['actual'], info['used'], info['recommend_mem'], 
-    #                 info['expect_mem_rate'], info['nic_num'], info['nic_info'], expire_time)
-    #         # print sql
-    #         conn.execute(sql)
+    def stop_task(self, project_name, req_id, status, result):
+        stop_time = format_time(time.time())
+        get_task_sql = ("select * from task where project = '%s';") %(project_name)
+        
+        conn = NULL
+        task_info = None
+        try:
+            conn = connection.Connection(conf_dict = self.db_conf)
+            conn.execute(get_id_sql)
+            task_info = conn.fetchone()
+        except MySQLdb.Error, e:
+            conn.close()
+            DBLOG.error("database.stop_task - project-%s req-%s stop task fail, "
+                "can't get task info:%s" %(project_name, req_id, str(e)))
+            return False, str(e)
 
-    #         sql = ("update vm set end_time = '%s', status = '%s', vcpu = %d,"
-    #                 "cpu_rate = %f,recommend_vcpu = %d, expect_cpu_rate = %f, maxmem = %d, usedmem = %d, "
-    #                 "memory_rate=%f, actual=%d, used=%d, recommend_mem = %d, expect_mem_rate = %f,"
-    #                 "nic_num = %d, nic_info = '%s' where vm_id = '%s';") %(str_time, status, info['vcpu'], 
-    #                 info['cpu_rate'], info['recommend_vcpu'], info['expect_cpu_rate'], info['maxmem'], 
-    #                 info['usedmem'], info['memory_rate'], info['actual'], info['used'], info['recommend_mem'], 
-    #                 info['expect_mem_rate'], info['nic_num'], info['nic_info'], vm_id)
+        task_index_map = {
+                    'id': 0,
+                    'project': 1,
+                    'req_id': 2,
+                    'status': 3,
+                    'receive_time': 4,
+                    'start_time': 5,
+                    'stop_time': 6,
+                    'network_info': 7,
+                    'vm_info': 8,
+                    'vm_num': 9,
+                    'receive_vm_num': 10,
+                    'network_num': 11,
+                    'receive_network_num': 12,
+                    'result': 13
+                    }
 
-    #         conn.execute(sql)
-    #         conn.commit()
-    #     except MySQLdb.Error, e:
-    #         # auto rollback
-    #         conn.close()
-    #         DBLOG.error("database.task_end - vm-%s req-%s task_end fail:%s" %(vm_id, req_id, str(e)))
-    #         return False, str(e)
-    #     conn.close()
+        set_task_sql = ("update task set status = '%s', stop_time = '%s', result = '%s' "
+                "where project = '%s';") %(status, stop_time, result, project_name)
 
-    #     DBLOG.info("database.task_end - vm-%s req-%s task_end:%s" %(vm_id, req_id, str_time))
-    #     return True, None
+        store_history_sql = ("insert into history set project = '%s', req_id = '%s', status = '%s',"
+                            "receive_time = '%s', start_time = '%s', stop_time = '%s', network_info = '%s',"
+                            "vm_info = '%s', result = '%s';") %(task_info[task_index_map['project']],
+                            task_info[task_index_map['req_id']], status, task_info[task_index_map['receive_time']],
+                            task_info[task_index_map['start_time']], stop_time, task_info[task_index_map['network_info']],
+                            task_info[task_index_map['vm_info']], result)
+        
+        delete_item_sql = ("delete from item where task_id = %d;" %(task_info[task_index_map['id']]))
 
+        try:
+            conn.execute(set_task_sql)
+            conn.execute(store_history_sql)
+            conn.execute(delete_item_sql)
+            conn.commit()
+            conn.close()
+        except MySQLdb.Error, e:
+            conn.close()
+            DBLOG.error("database.stop_task - project-%s req-%s stop task fail:%s" %(project_name, req_id, str(e)))
+            return False, str(e)
+        else:
+            DBLOG.error("database.stop_task - project-%s req-%s stop task item:%s" %(project_name, req_id, stop_time))
+            return True, None
+
+    def get_items(self, project_name, req_id):
+        task_id_sql = ("select id from task where project = '%s';") %(project_name)
+        
+        conn = NULL
+        task_id = None
+        try:
+            conn = connection.Connection(conf_dict = self.db_conf)
+            conn.execute(get_id_sql)
+            ret = conn.fetchone()
+            task_id = ret[0]
+        except MySQLdb.Error, e:
+            conn.close()
+            DBLOG.error("database.get_items - project-%s req-%s get items fail, "
+                "can't get task id:%s" %(project_name, req_id, str(e)))
+            return False, str(e)
+
+        get_items_sql = ("select * from item where task_id = %d;") %(task_id)
+
+        try:
+            conn.execute(get_items_sql)
+            ret = conn.fetchall()
+            conn.commit()
+            conn.close()
+        except MySQLdb.Error, e:
+            conn.close()
+            DBLOG.error("database.get_items - project-%s req-%s get items fail:%s" %(project_name, req_id, str(e)))
+            return False, str(e)
+        else:
+            # process data
+            item_num = len(ret)
+            item_index_map = {
+                        'id': 0,
+                        'task_id': 1,
+                        'receive_time': 2,
+                        'info': 3
+            }
+            result = {
+                    'item_num': item_num,
+                    'item_info': []
+            }
+            for item in ret:
+                result['item_info'].append(item[item_index_map['info']])
+            DBLOG.error("database.get_items - project-%s req-%s get items:%d" %(project_name, req_id, item_num))
+            return True, result
 
     def api_check(self):
         SELOG.info("[database] check [start]")
@@ -344,7 +404,7 @@ class Manager(object):
 
         SELOG.info("database connection success")
         
-        sql = "select count(*) from vm where status = 'running';"
+        sql = "select count(*) from task where status = 'RUNNING' or status = 'START' or status = 'RECEIVED';"
         n = 0
         try:
             conn.execute(sql)
@@ -354,7 +414,7 @@ class Manager(object):
         except MySQLdb.Error, e:
             conn.close()
             print "database error:%s" %(str(e))
-            SELOG.error("database qeury vm fail:%s" %(str(e)))
+            SELOG.error("database qeury task fail:%s" %(str(e)))
             SELOG.info("[database] check [end]")
             sys.exit(1)
         
@@ -362,14 +422,14 @@ class Manager(object):
             SELOG.info("database items consistence")
         else:
             SELOG.info("database items inconsistence:%d items" %(n))
-            sql = "update vm set status = 'end' where status = 'running';"
+            sql = "update task set status = 'ERROR' where status = 'RUNNING' or status = 'START' or status = 'RECEIVED';"
             try:
                 conn.execute(sql)
                 conn.commit()
                 conn.close()
             except MySQLdb.Error, e:
                 conn.close()
-                SELOG.error("database update vm status fail:%s" %(str(e)))
+                SELOG.error("database update task status fail:%s" %(str(e)))
                 SELOG.info("[database] check [end]")
                 print "database error:%s" %(str(e))
                 sys.exit(1)
