@@ -41,10 +41,10 @@ class Conf(object):
     	self.cf.read(os.path.join(self.conf_file_dir, "server.conf"))
         section = "server"
         # self.max_days = int(self.cf.get(section, 'max_days'))
-        
+        self.worker_num = int(self.cf.get(section, 'worker_num'))
 
         self.server_conf = {
-							
+						      "worker_num": self.worker_num
 						}
         
     def log_parse(self):

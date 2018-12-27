@@ -49,4 +49,3 @@ if __name__ == "__main__":
     DBLOG.info("aaaa")
     FALOG.info("aaa")
     SELOG.info("bbb")
-    pass

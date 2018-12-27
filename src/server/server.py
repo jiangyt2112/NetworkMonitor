@@ -2,10 +2,66 @@
 import __init__
 from comm.server import Server as Base_Server
 import pika
-from utils.log import SELOG
+from utils.log import SELOG, SERVERLOG
 from utils.conf import CONF
 from utils.ftime import format_time
 import json
+import threading 
+import Queue as q
+
+class Task:
+    def __init__(self, msg):
+        #{'type': 'check', 'req_id': msg['req_id'], 'project': msg['project_name'], 'token': msg['token']}
+        self.type = msg['type']
+        self.req_id = msg['req_id']
+        self.project = msg['project']
+        self.token = msg['token']
+        self.get_info_from_openstack()
+        self.status = None
+        self.start_time = None
+
+    def get_info_from_openstack(self):
+        self.network_info = None
+        self.vm_info = None
+        self.vm_num = 0
+        self.receive_vm_num = 0
+        self.receive_network_num = 0
+        self.result = None
+    
+    def is_down(self):
+        return False    
+
+    def start_task(self):
+        pass
+
+    def stop_task(self):
+        pass
+
+class Tasks:
+    def __init__(self):
+        self.num = 0
+        self.tasks = {}
+
+    def append(self, task):
+        pass
+
+    def update_task(self, item):
+        pass
+
+    
+
+
+class Item:
+    def __init__(self):
+        pass
+
+class Worker:
+    def __init__(self):
+        pass
+
+class WorkerPoll:
+    def __init__(self):
+        pass
 
 class Server(Base_Server):
     def __init__(self, exchange = "server", binding_keys = ["api_to_server.*", "agent_to_server.*"], exchange_type = "topic"):
@@ -45,11 +101,17 @@ class Server(Base_Server):
                                                          props.correlation_id),
                      body=json.dumps(response))
             elif msg_type[1] == "msg":
-                print "receive msg"
+                SERVERLOG.info("receive api to server msg: %s" %(body))
+                msg = json.loads(body)
+                # {'type': 'check', 'req_id': msg['req_id'], 'project': msg['project_name'], 'token': msg['token']}
+                if msg['type'] == 'check':
+                    pass
+                    # 建立对象，加入队列
+                else:
+                    SERVERLOG.error("receive api to server msg: invalid msg type %s" %(msg['type']))
             else:
                 FALOG.error("receive msg routing_key with wrong format[part 2].")
             
-
         elif msg_type[0] == "agent_to_server":
             if msg_type[1] == "rpc":
                 response = {
@@ -67,11 +129,17 @@ class Server(Base_Server):
                                                          props.correlation_id),
                      body=json.dumps(response))
             elif msg_type[1] == "msg":
-                print "receive msg"
+                SERVERLOG.info("receive agent to server msg: %s" %(body))
+                msg = json.loads(body)
+                # {'type': 'item', 'req_id': msg['req_id'], 'project': msg['project_name'], 'info': msg['info']}
+                if msg['type'] == 'check':
+                    pass
+                    # 建立对象，加入队列
+                else:
+                    SERVERLOG.error("receive agent to server msg: invalid msg type %s" %(msg['type']))
             else:
                 FALOG.error("receive msg routing_key with wrong format[part 2].")
             # other process
-            
         else:
             FALOG.error("receive msg routing_key with wrong format[part 1].")
             
