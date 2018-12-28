@@ -1,6 +1,7 @@
 #!/usr/bin/python2
 import __init__
 from server import Server
+from server import WorkerPoll
 from utils.log import SELOG
 import os
 import signal
@@ -28,7 +29,9 @@ def start():
     fp.close()
     print "pid in " + f 
     global server
-    server = Server()
+    wp = WorkerPoll()
+    wp.run()
+    server = Server(wp)
     #signal.signal(signal.SIGINT, sigint_callback)
     signal.signal(signal.SIGTERM, sigint_callback)
     server.run()

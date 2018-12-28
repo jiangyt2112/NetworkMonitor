@@ -42,9 +42,11 @@ class Conf(object):
         section = "server"
         # self.max_days = int(self.cf.get(section, 'max_days'))
         self.worker_num = int(self.cf.get(section, 'worker_num'))
+        self.max_task_time = int(self.cf.get(section, 'max_task_time'))
 
         self.server_conf = {
-						      "worker_num": self.worker_num
+						      "worker_num": self.worker_num,
+                              "max_task_time": self.max_task_time
 						}
         
     def log_parse(self):

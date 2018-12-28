@@ -216,8 +216,8 @@ class Manager(object):
                 %(project, req_id, history_result['history_num']))
         return True, history_result
 
-    def start_task(self, project_name, req_id, network_info, vm_info, network_num, vm_num):
-        start_time = format_time(time.time())
+    def start_task(self, project_name, req_id, start_time, network_info, vm_info, network_num, vm_num):
+        # start_time = format_time(time.time())
         update_sql = ("update task set status = 'START', start_time = '%s',"
                 "network_info = '%s', vm_info = '%s', vm_num = %d, network_num = %d "
                 "where project = '%s';") %(start_time, network_info, vm_info, network_num, vm_num, project_name)

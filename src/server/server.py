@@ -5,9 +5,12 @@ import pika
 from utils.log import SELOG, SERVERLOG
 from utils.conf import CONF
 from utils.ftime import format_time
+from database.manager import Manager
 import json
+import time
 import threading 
-import Queue as q
+import Queue as Q
+from comm.client import server_to_agent_msg
 
 class Task:
     def __init__(self, msg):
@@ -16,56 +19,237 @@ class Task:
         self.req_id = msg['req_id']
         self.project = msg['project']
         self.token = msg['token']
+        self.item_flag = False
         self.get_info_from_openstack()
         self.status = None
         self.start_time = None
+        self.receive_time = None
+        self.stop_time = None
+        self.max_task_time = CONF.server_conf['max_task_time']
 
     def get_info_from_openstack(self):
         self.network_info = None
         self.vm_info = None
         self.vm_num = 0
         self.receive_vm_num = 0
+        self.network_num = 0
         self.receive_network_num = 0
         self.result = None
+        # to do
     
     def is_down(self):
-        return False    
+        if self.vm_num == self.receive_vm_num and self.network_num == self.receive_network_num:
+            return True
+        else if time.time() - self.start_time > self.max_task_time:
+            return True
+        return False 
 
     def start_task(self):
-        pass
+        manager = Manager()
+        self.start_time = time.time()
+        self.status = "START"
 
-    def stop_task(self):
-        pass
+        # send to agent
+        msg = {
+                'type': 'check', 
+                'project': self.project, 
+                'req_id': self.req_id, 
+                "vm_info": self.vm_info,
+                "network_info": self.network_info
+            }
+        ret, msg = server_to_agent_msg(msg)
+        if ret == False:
+            self.status = "ERROR"
+            SERVERLOG.error("server.Task.start_task - project-%s - req_id-%s server_to_agent_msg return error:%s" 
+                %(self.project, self.req_id, msg))
+            return False
+
+        #def start_task(self, project_name, req_id, start_time, network_info, vm_info, network_num, vm_num):
+        ret, msg = manager.start_task(self.project, req_id, format_time(self.start_time), self.network_info, 
+            self.vm_info, self.network_num, self.vm_num)
+        if ret == False:
+            self.status = "ERROR"
+            SERVERLOG.error("server.Task.start_task - project-%s - req_id-%s manager.start_task return error:%s" 
+                %(self.project, self.req_id, msg))
+            return False
+        else:
+            SERVERLOG.info("server.Task.start_task - project-%s - req_id-%s task start success." %(self.project, self.req_id))
+            return True
+
+    def receive_item(self, item):
+        manager = Manager()
+        if self.item_flag == False:
+            self.receive_time = time.time()
+            self.item_flag = True
+        #def receive_item(self, project_name, req_id, receive_vm_num, receive_network_num, info):
+        self.process_item(self, item)
+        ret, msg = manager.receive_item(self.project, self.req_id, self.receive_vm_num, self.receive_network_num, item)
+        if ret == False:
+            SERVERLOG.error("server.Task.receive_item - project-%s - req_id-%s manager.receive_item return error:%s" 
+                %(self.project, self.req_id, msg))
+            self.status = "ERROR"
+            return False
+
+        SERVERLOG.info("server.Task.receive_item - project-%s - req_id-%s receive item success." 
+                %(self.project, self.req_id, msg))
+        return True
+
+    def stop_task(self, status = "END"):
+        manager = Manager()
+        self.stop_time = time.time()
+        self.status = status
+        # def get_items(self, project_name, req_id):
+        # def stop_task(self, project_name, req_id, status, result):
+        ret, items = manager.get_items(self.project, self.req_id)
+        if ret == False:
+            self.status = "ERROR"
+            SERVERLOG.error("server.Task.stop_task - project-%s - req_id-%s manager.get_items return error:%s" 
+                %(self.project, self.req_id, items))
+            return False
+        SERVERLOG.info("server.Task.stop_task - project-%s - req_id-%s manager.get_items success:%d items" 
+                %(self.project, self.req_id, items['item_num']))
+
+        self.result = self.process_items(items)
+
+        ret, msg = manager.stop_task(self.project, self.req_id, self.status, self.result)
+        if ret == False:
+            self.status = "ERROR"
+            SERVERLOG.error("server.Task.stop_task - project-%s - req_id-%s manager.stop_task return error:%s" 
+                %(self.project, self.req_id, msg))
+            return False
+        SERVERLOG.info("server.Task.stop_task - project-%s - req_id-%s task stop success." 
+                %(self.project, self.req_id))
+        return True
+
+    def stop_task_expire(self):
+        return self.stop_task("EXPIRED")
+
+    def process_items(self, items):
+        # process items into result
+        # to do
+        return items
+
+    def process_item(self, item):
+        # process item to update receive_vm_num receive_network_num
+        # to do
+        return item
 
 class Tasks:
     def __init__(self):
         self.num = 0
-        self.tasks = {}
+        self.tasks = {} # project_name: task
+        self.mutex = threading.Lock()
+        self.run_flag = True
 
     def append(self, task):
-        pass
+        self.mutex.acquire()
+        if task.project in self.tasks:
+            SERVERLOG.error("server.Tasks.append - project-%s - req_id-%s task already in tasks." %(task.project, task.req_id))
+        else:
+            SERVERLOG.info("server.Tasks.append - project-%s - req_id-%s task append tasks." %(task.project, task.req_id))
+            self.tasks[task.project] = task
+            self.num += 1
+        self.mutex.release()
 
     def update_task(self, item):
-        pass
+        self.mutex.acquire()
+        if item.project not in task:
+            SERVERLOG.error("server.Tasks.update_task - project-%s - req_id-%s task not in tasks." %(item.project, item.req_id))
+        else:
+            SERVERLOG.info("server.Tasks.update_task - project-%s - req_id-%s update task success." %(item.project, item.req_id))
+            self.tasks[item.project].receive_item(item)
+            if self.tasks[item.project].is_down() == True:
+                self.tasks[item.project].stop_task()
+                del self.tasks[item.project]
+                self.num -= 1
+        self.mutex.release()
 
-    
+    def task_expire(self):
+        while self.run_flag:
+            self.mutex.acquire()
+            del_key = []
+            for key in tasks:
+                if tasks[key].is_down() == True:
+                    tasks[key].stop_task_expire()
+                    del_key.append(key)
+            for key in del_key:
+                del tasks[key]
+                num -= 1
+            self.mutex.release()
+            time.sleep(1)
 
+    def start_expire_check(self):
+        t = threading.Thread(target = Tasks.task_expire,args=(self,))
+        t.setDaemon(True)
+        t.start()
+
+    def stop_expire_check(self):
+        self.run_flag = False
 
 class Item:
-    def __init__(self):
-        pass
+    def __init__(self, msg):
+        #{'type': 'item', 'req_id': msg['req_id'], 'project': msg['project_name'], 'info': msg['info']}
+        self.type = msg['type']
+        self.req_id = msg['req_id']
+        self.project = msg['project']
+        self.info = msg['info']
 
-class Worker:
-    def __init__(self):
-        pass
+class Worker(threading.Thread):
+    def __init__(self, queue, tasks):
+        self.queue = queue
+        self.tasks = tasks
+
+    def run(self):
+        while True:
+            task = self.queue.get()
+            SERVERLOG.info("server.Worker.run - project-%s - req_id-%s get a task type:%s." %(task.project, task.req_id, task.type))
+            if type(task) == Task:
+                ret = task.start_task()
+                if ret:
+                    self.tasks.append(task)
+            elif type(task) == Item:
+                self.tasks.update_task(task)
+            else:
+                SERVERLOG.error("server.Worker.run - project-%s - req_id-%s unkown task type:%s." %(task.project, task.req_id, task.type))
+                SERVERLOG.info("server.Worker.run worker exit.")
+                break
+
+    def stop(self):
+        self.queue.put(1)
 
 class WorkerPoll:
     def __init__(self):
-        pass
+        self.queue = Q()
+        self.worker_num = CONF.server_conf['worker_num']
+        self.worker_list = []
+        self.tasks = Tasks()
+        self.worker_poll_flag = True
+        for i in range(self.worker_num):
+            self.worker_list.append(Worker(self.queue))
+
+    def run(self):
+        for w in self.worker_list:
+            w.setDaemon(True)
+            w.start()
+
+    def stop(self):
+        self.worker_poll_flag = False
+        self.queue.join()
+        for w in self.worker_list:
+            w.stop()
+
+    def push_task(self, task):
+        if self.worker_poll_flag == True:
+            self.queue.put(task)
+            return True
+        else:
+            return False
 
 class Server(Base_Server):
-    def __init__(self, exchange = "server", binding_keys = ["api_to_server.*", "agent_to_server.*"], exchange_type = "topic"):
+    def __init__(self, worker_poll, exchange = "server", binding_keys = ["api_to_server.*", "agent_to_server.*"], 
+                exchange_type = "topic"):
         rabbit_conf = CONF.rabbitmq_conf
+        self.worker_poll = worker_poll
         host = rabbit_conf['host']
         port = rabbit_conf['port']
         username = rabbit_conf['username']
@@ -105,8 +289,7 @@ class Server(Base_Server):
                 msg = json.loads(body)
                 # {'type': 'check', 'req_id': msg['req_id'], 'project': msg['project_name'], 'token': msg['token']}
                 if msg['type'] == 'check':
-                    pass
-                    # 建立对象，加入队列
+                    self.worker_poll.push_task(Task(msg))
                 else:
                     SERVERLOG.error("receive api to server msg: invalid msg type %s" %(msg['type']))
             else:
@@ -132,9 +315,8 @@ class Server(Base_Server):
                 SERVERLOG.info("receive agent to server msg: %s" %(body))
                 msg = json.loads(body)
                 # {'type': 'item', 'req_id': msg['req_id'], 'project': msg['project_name'], 'info': msg['info']}
-                if msg['type'] == 'check':
-                    pass
-                    # 建立对象，加入队列
+                if msg['type'] == 'item':
+                    self.worker_poll.push_task(Item(msg))
                 else:
                     SERVERLOG.error("receive agent to server msg: invalid msg type %s" %(msg['type']))
             else:
