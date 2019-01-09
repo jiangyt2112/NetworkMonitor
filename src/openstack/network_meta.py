@@ -1,8 +1,7 @@
 {'networks': 
 	[
 		{u'provider:physical_network': None, 
-		u'ipv6_address_scope': None, 
-		u'revision_number': 3, 
+		
 		u'port_security_enabled': True, 
 		u'provider:network_type': u'vxlan', 
 		u'id': u'956df7c4-25d9-4564-8b81-843462ae707a', 

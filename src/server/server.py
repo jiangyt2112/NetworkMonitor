@@ -10,7 +10,9 @@ import json
 import time
 import threading 
 import Queue as Q
-from comm.client import server_to_agent_msg
+from comm.client import agent_to_server_msg
+from openstack.nova import get_project_server_info
+from openstack.neutron import get_project_network_info
 
 class Task:
     def __init__(self, msg):
@@ -36,6 +38,13 @@ class Task:
         self.receive_network_num = 0
         self.result = None
         # to do
+        auth_url = CONF.openstack_conf["auth_url"]
+        endpoint_url = CONF.openstack_conf["endpoint"]
+        self.vm_info = get_project_server_info(self.token, auth_url, self.project)
+        self.vm_num = len(self.vm_info)
+
+        self.network_info = get_project_network_info(self.token, auth_url, endpoint_url)
+        self.network_num = len(self.network_info)
     
     def is_down(self):
         if self.vm_num == self.receive_vm_num and self.network_num == self.receive_network_num:

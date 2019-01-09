@@ -104,14 +104,10 @@ class Conf(object):
     def agent_parse(self):
     	self.cf.read(os.path.join(self.conf_file_dir, "agent.conf"))
         section = 'agent'
-        # self.zabbix_server = self.cf.get(section, 'server')
-        # self.zabbix_username = self.cf.get(section, 'username')
-        # self.zabbix_password = self.cf.get(section, 'password')
-        # self.zabbix_jsonrpc = self.cf.get(section, 'jsonrpc')
-        # self.zabbix_key = self.cf.get(section, 'key')
-        # self.zabbix_frequency_secs = int(self.cf.get(section, 'frequency_secs'))
+        self.worker_num = int(self.cf.get(section, 'worker_num'))
+       
         self.agent_conf = {
-                                # "server": self.zabbix_server,
+                                "worker_num": self.worker_num
                                 # "username": self.zabbix_username,
                                 # "password": self.zabbix_password,
                                 # "jsonrpc": self.zabbix_jsonrpc,
