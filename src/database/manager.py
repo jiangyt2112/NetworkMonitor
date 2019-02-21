@@ -444,4 +444,11 @@ if __name__ == "__main__":
     print manager.get_result("root", "2")
 
     print manager.get_history("root", "2")
-    print manager.start_task("root", "2", "2018-10-09 16:43:00", "none", "none", 0, 0)
+    #print manager.start_task("root", "2", "2018-10-09 16:43:00", "none", "none", 0, 0)
+
+    print manager.receive_item("root", "2", 2, 3, "info")
+    print manager.stop_task("root", "2", "END", "result")
+
+
+
+
