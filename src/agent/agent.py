@@ -117,15 +117,7 @@ class WorkerPoll:
 
     def stop(self):
         self.worker_poll_flag = False
-        print "bbbbb"
-        print self.queue.qsize() 
-        print self.queue.empty()
-        while not self.queue.empty():
-            temp = self.queue.get()
-            print temp
-        print "---" + str(self.queue.empty())
         self.queue.join()
-        print "aaaaa"
         for w in self.worker_list:
             w.stop()
 
@@ -177,5 +169,5 @@ if __name__ == "__main__":
     wp.push_task(Task(msg))
     wp.push_task(Task(msg))
     print "down"
-    wp.stop()
+    # wp.stop()
     print "stop"
