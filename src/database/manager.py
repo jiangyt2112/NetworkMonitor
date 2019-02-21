@@ -442,19 +442,6 @@ if __name__ == "__main__":
     print manager.create_task("root", "2")
     print manager.get_status("root", "2")
     print manager.get_result("root", "2")
-    # print manager.task_stop("2", "1", time.time(), info)
-    
-    # print manager.is_auto_exit("1", "1")
-    # print manager.is_auto_exit("1", "1")
-    # print manager.is_auto_exit("5", "1")
 
-    # print manager.get_result("2", "1")
-    # print manager.get_result("4", "1")
-    # print manager.get_result("5", "1")
-    
-    # print manager.is_auto_end("1", "1")
-    # print manager.is_auto_end("2", "1")
-    # print manager.is_auto_end("5", "1")
-    # print manager.query_status("1", "1")
-    # print manager.query_history("1", "1")
-    # manager.start_check()
+    print manager.get_history("root", "2")
+    print manager.start_task("root", "2", "2018-10-09 16:43:00", "none", "none", 0, 0)
