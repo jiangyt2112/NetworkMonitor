@@ -438,26 +438,8 @@ class Manager(object):
 if __name__ == "__main__":
     manager = Manager()
     manager.any_operation()
-    # print manager.exist_item("1", "1")
-    # manager.exist_item("3", "1")
-    # print manager.task_start("2", "1", time.time(), time.time() + 10)
-    # manager.task_start("3", "1", time.time())
-    # manager.task_start("4", "1", time.time())
-    # info = {
-    #        'vcpu': 4,
-    #        'cpu_rate': 20.9,
-    #        'recommend_vcpu': 3,
-    #        'expect_cpu_rate': 1.0,
-    #        'maxmem': 65536
-    #        'usedmem': 65536,
-    #        'memory_rate': 1.0,
-    #        'actual': 65536,
-    #        'used':65536,
-    #        'recommend_mem': 2048,
-    #        'expect_mem_rate': 0.5,
-    #        'nic_num': 2,
-    #        'nic_info': json.dumps([{"mac":"123"},{'mac':"234"}])
-    #        }
+    print manager.exist_item("admin", "1")
+
 
     # print manager.task_stop("2", "1", time.time(), info)
     
