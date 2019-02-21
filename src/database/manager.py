@@ -334,7 +334,7 @@ class Manager(object):
     def get_items(self, project_name, req_id):
         task_id_sql = ("select id from task where project = '%s';") %(project_name)
         
-        conn = NULL
+        conn = None
         task_id = None
         try:
             conn = connection.Connection(conf_dict = self.db_conf)
