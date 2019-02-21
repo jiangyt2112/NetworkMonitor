@@ -338,7 +338,7 @@ class Manager(object):
         task_id = None
         try:
             conn = connection.Connection(conf_dict = self.db_conf)
-            conn.execute(get_id_sql)
+            conn.execute(task_id_sql)
             ret = conn.fetchone()
             task_id = ret[0]
         except MySQLdb.Error, e:
