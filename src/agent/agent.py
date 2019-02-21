@@ -70,7 +70,7 @@ class Task:
 
     def get_info(self):
         # to do
-        return info
+        return True, "info"
 
 
 class Worker(threading.Thread):
@@ -85,7 +85,7 @@ class Worker(threading.Thread):
             if type(task) == Item:
                 ret = task.start_task()
             else:
-                AGENTLOG.error("agent.Worker.run - project-%s - req_id-%s unkown task type:%s." %(task.project, task.req_id, task.type))
+                # AGENTLOG.error("agent.Worker.run - project-%s - req_id-%s unkown task type:%s." %(task.project, task.req_id, task.type))
                 AGENTLOG.info("agent.Worker.run worker exit.")
                 break
 
@@ -149,5 +149,11 @@ class Server(Base_Server):
         print(" [x] %r:%r" % (method.routing_key, body))
 
 if __name__ == "__main__":
-	ser = Server()
-	ser.run()
+	#ser = Server()
+	#ser.run()
+    wp = WorkerPoll()
+    wp.run()
+
+    
+    
+    wp.stop()
