@@ -81,12 +81,16 @@ class Worker(threading.Thread):
     def run(self):
         while True:
             task = self.queue.get()
-            AGENTLOG.info("agent.Worker.run - project-%s - req_id-%s get a task type:%s." %(task.project, task.req_id, task.type))
-            if type(task) == Item:
+            if type(task) == int and task == 1:
+                AGENTLOG.info("agent.Worker.run - receive int 1, worker exit.")
+                break
+            elif type(task) == Item:
+                AGENTLOG.info("agent.Worker.run - project-%s - req_id-%s get a task type:%s." %(task.project, task.req_id, task.type))
                 ret = task.start_task()
+                print ret
             else:
                 # AGENTLOG.error("agent.Worker.run - project-%s - req_id-%s unkown task type:%s." %(task.project, task.req_id, task.type))
-                AGENTLOG.info("agent.Worker.run worker exit.")
+                AGENTLOG.info("agent.Worker.run - unknown task type, worker exit.")
                 break
 
     def stop(self):
@@ -154,6 +158,6 @@ if __name__ == "__main__":
     wp = WorkerPoll()
     wp.run()
 
-    
-    
+
+
     wp.stop()
