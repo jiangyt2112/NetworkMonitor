@@ -31,7 +31,7 @@ def start():
     wp = WorkerPoll()
     wp.run()
     global server
-    server = Server()
+    server = Server(wp)
     #signal.signal(signal.SIGINT, sigint_callback)
     signal.signal(signal.SIGTERM, sigint_callback)
     server.run()

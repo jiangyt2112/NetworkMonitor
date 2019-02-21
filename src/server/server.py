@@ -205,6 +205,7 @@ class Item:
 
 class Worker(threading.Thread):
     def __init__(self, queue, tasks):
+        threading.Thread.__init__(self)
         self.queue = queue
         self.tasks = tasks
 

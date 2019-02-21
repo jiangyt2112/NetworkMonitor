@@ -121,7 +121,7 @@ class WorkerPoll:
 
 
 class Server(Base_Server):
-    def __init__(self,worker_poll, exchange = "agent", binding_keys = "", exchange_type = "fanout"):
+    def __init__(self, worker_poll, exchange = "agent", binding_keys = "", exchange_type = "fanout"):
         rabbit_conf = CONF.rabbitmq_conf
         host = rabbit_conf['host']
         port = rabbit_conf['port']
