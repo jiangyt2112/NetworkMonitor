@@ -6,11 +6,11 @@ from openstack.auth import check_auth as os_check_auth
 from comm.client import api_to_server_msg
 
 def check_auth(msg):
-	auth_url = CONF.openstack_conf['auth_url']
-	return os_check_auth(auth_url, msg['token'], msg['project_name'])
+    auth_url = CONF.openstack_conf['auth_url']
+    return os_check_auth(auth_url, msg['token'], msg['project_name'])
 
 def check_msg(msg):
-	response = {
+    response = {
             'task_type': 'check',
             'exe_result': False,
             'req_id': msg['req_id'],
@@ -18,14 +18,15 @@ def check_msg(msg):
             'result': None,
             'error_msg': None 
             }
-	# check auth
-	if check_auth(msg) == False:
-		response['error_msg'] = 'no authorization'
-		return response
+    # check auth
+    if check_auth(msg) == False:
+        response['error_msg'] = 'no authorization'
+        return response
 
-	# call database api to create a check task entry
-	db_manager = Manager()
+    # call database api to create a check task entry
+    db_manager = Manager()
     ret, result = db_manager.create_task(msg['project_name'], msg['req_id'])
+
     if ret == False:
     	response['error_msg'] = result
     	return response
