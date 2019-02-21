@@ -235,7 +235,7 @@ class WorkerPoll:
         self.tasks = Tasks()
         self.worker_poll_flag = True
         for i in range(self.worker_num):
-            self.worker_list.append(Worker(self.queue))
+            self.worker_list.append(Worker(self.queue, self.tasks))
 
     def run(self):
         for w in self.worker_list:
