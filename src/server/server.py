@@ -9,7 +9,7 @@ from database.manager import Manager
 import json
 import time
 import threading 
-import Queue as Q
+from Queue import Queue as Q
 from comm.client import agent_to_server_msg
 from openstack.nova import get_project_server_info
 from openstack.neutron import get_project_network_info

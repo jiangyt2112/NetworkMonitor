@@ -9,7 +9,7 @@ from utils.ftime import format_time
 import json
 import time
 import threading 
-import Queue as Q
+from Queue import Queue as Q
 from comm.client import agent_to_server_msg
 
 class Task:
