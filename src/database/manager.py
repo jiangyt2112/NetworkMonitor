@@ -276,7 +276,7 @@ class Manager(object):
         stop_time = format_time(time.time())
         get_task_sql = ("select * from task where project = '%s';") %(project_name)
         
-        conn = NULL
+        conn = None
         task_info = None
         try:
             conn = connection.Connection(conf_dict = self.db_conf)
