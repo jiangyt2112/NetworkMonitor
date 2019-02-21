@@ -74,7 +74,7 @@ class Task:
 
 
 class Worker(threading.Thread):
-    def __init__(self, queue, tasks):
+    def __init__(self, queue):
         self.queue = queue
 
     def run(self):
