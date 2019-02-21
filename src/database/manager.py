@@ -77,7 +77,7 @@ class Manager(object):
         try:
             if self.exist_item(project_name, req_id):
                 # update
-                ret, status = self.get_status(project_name, req_id):
+                ret, status = self.get_status(project_name, req_id)
                 if ret == False:
                     conn.close()
                     DBLOG.error("database.create_task - project-%s req-%s create start fail:%s" %(project_name, req_id, status))
