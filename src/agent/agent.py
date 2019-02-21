@@ -165,4 +165,5 @@ if __name__ == "__main__":
     wp.push_task(Task(msg))
     wp.push_task(Task(msg))
     wp.push_task(Task(msg))
+    print "down"
     wp.stop()
