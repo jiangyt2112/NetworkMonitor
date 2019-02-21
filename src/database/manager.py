@@ -213,7 +213,7 @@ class Manager(object):
             result = {"index": i, "result": res[history_index_map['result']]}
             history_result['history_info'].append(result)
         DBLOG.info("database.get_history - project-%s req-%s get result success:%d items"
-                %(project, req_id, history_result['history_num']))
+                %(project_name, req_id, history_result['history_num']))
         return True, history_result
 
     def start_task(self, project_name, req_id, start_time, network_info, vm_info, network_num, vm_num):
