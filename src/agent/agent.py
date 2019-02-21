@@ -57,7 +57,7 @@ class Task:
         # self.process
 
         msg["info"] = info
-        ret, info = agent_to_server_msg(msg)
+        # ret, info = agent_to_server_msg(msg)
         
         if ret == False:
             self.status = "ERROR"
