@@ -2,8 +2,7 @@
 import __init__
 from comm.client import api_to_server_msg
 from utils.conf import CONF
-from openstack import auth
-from auth import check_auth as os_check_auth
+from openstack.auth import check_auth as os_check_auth
 from comm.client import api_to_server_msg
 
 def check_auth(msg):
