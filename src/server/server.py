@@ -11,8 +11,8 @@ import time
 import threading 
 from Queue import Queue as Q
 from comm.client import agent_to_server_msg
-from openstack.nova import get_project_server_info
-from openstack.neutron import get_project_network_info
+from openstackapi.nova import get_project_server_info
+from openstackapi.neutron import get_project_network_info
 
 class Task:
     def __init__(self, msg):
