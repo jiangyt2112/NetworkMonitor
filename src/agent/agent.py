@@ -82,6 +82,7 @@ class Worker(threading.Thread):
         while True:
             task = self.queue.get()
             print task
+            print type(task) == Task
             if type(task) == int and task == 1:
                 AGENTLOG.info("agent.Worker.run - receive int 1, worker exit.")
                 break
