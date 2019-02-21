@@ -85,14 +85,17 @@ class Worker(threading.Thread):
             #print type(task) == Task
             if isinstance(task, int) and task == 1:
                 AGENTLOG.info("agent.Worker.run - receive int 1, worker exit.")
+                self.queue.task_down()
                 break
             elif isinstance(task, Task):
                 AGENTLOG.info("agent.Worker.run - project-%s - req_id-%s get a task type:%s." %(task.project, task.req_id, task.type))
                 ret = task.start_task()
+                self.queue.task_down()
                 print ret
             else:
                 # AGENTLOG.error("agent.Worker.run - project-%s - req_id-%s unkown task type:%s." %(task.project, task.req_id, task.type))
                 AGENTLOG.info("agent.Worker.run - unknown task type, worker exit.")
+                self.queue.task_down()
                 break
 
     def stop(self):
