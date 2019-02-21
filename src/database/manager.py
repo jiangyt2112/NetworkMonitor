@@ -240,7 +240,7 @@ class Manager(object):
         receive_time = format_time(time.time())
         get_id_sql = ("select id from task where project = '%s';") %(project_name)
         
-        conn = NULL
+        conn = None
         task_id = None
         try:
             conn = connection.Connection(conf_dict = self.db_conf)
