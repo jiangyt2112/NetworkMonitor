@@ -82,11 +82,11 @@ class Worker(threading.Thread):
         while True:
             task = self.queue.get()
             print task
-            print type(task) == Task
-            if type(task) == int and task == 1:
+            #print type(task) == Task
+            if isinstance(int, task) and task == 1:
                 AGENTLOG.info("agent.Worker.run - receive int 1, worker exit.")
                 break
-            elif type(task) == Task:
+            elif isinstance(Task, task):
                 AGENTLOG.info("agent.Worker.run - project-%s - req_id-%s get a task type:%s." %(task.project, task.req_id, task.type))
                 ret = task.start_task()
                 print ret
