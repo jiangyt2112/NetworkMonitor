@@ -120,6 +120,7 @@ class WorkerPoll:
         while not self.queue.empty():
             temp = self.queue.get()
             print temp
+        print "---" + self.queue.empty()
         self.queue.join()
         print "aaaaa"
         for w in self.worker_list:
