@@ -1,7 +1,4 @@
 #!/usr/bin/bash
-for((;0 < 1;))
-do
-	git add .
-	git commit . -m debug
-	git push
-done
+git add .
+git commit . -m debug
+git push
