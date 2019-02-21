@@ -155,9 +155,12 @@ class Server(Base_Server):
 if __name__ == "__main__":
 	#ser = Server()
 	#ser.run()
+
+    msg = {"type": "Item", "req_id": "1", "project": "admin", "vm_info": "None", "network_info": "None"} 
+
     wp = WorkerPoll()
     wp.run()
-
-
-
+    wp.push_task(Task(msg))
+    wp.push_task(Task(msg))
+    wp.push_task(Task(msg))
     wp.stop()
