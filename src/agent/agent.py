@@ -115,6 +115,7 @@ class WorkerPoll:
     def stop(self):
         self.worker_poll_flag = False
         print "bbbbb"
+        print self.queue.qsize() 
         self.queue.join()
         print "aaaaa"
         for w in self.worker_list:
