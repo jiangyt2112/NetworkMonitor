@@ -440,7 +440,8 @@ if __name__ == "__main__":
     manager.any_operation()
     print manager.exist_item("admin", "1")
     print manager.create_task("root", "2")
-
+    print manager.get_status("root", "2")
+    print manager.get_result("root", "2")
     # print manager.task_stop("2", "1", time.time(), info)
     
     # print manager.is_auto_exit("1", "1")
