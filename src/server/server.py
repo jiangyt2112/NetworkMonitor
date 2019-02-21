@@ -49,7 +49,7 @@ class Task:
     def is_down(self):
         if self.vm_num == self.receive_vm_num and self.network_num == self.receive_network_num:
             return True
-        else if time.time() - self.start_time > self.max_task_time:
+        elif time.time() - self.start_time > self.max_task_time:
             return True
         return False 
 
