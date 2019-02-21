@@ -127,13 +127,13 @@ class Manager(object):
 
         state = False
         if ret != None:
-            if res[0] == "RECEIVED" or res[0] == "START" or res[0] == "RUNNING" or res[0] == "END" or res[0] == "EXPIRED":
-                DBLOG.info("databtase.get_status - project-%s req-%s status: %s" %(project_name, req_id, res[0]))
+            if ret[0] == "RECEIVED" or ret[0] == "START" or ret[0] == "RUNNING" or ret[0] == "END" or ret[0] == "EXPIRED":
+                DBLOG.info("databtase.get_status - project-%s req-%s status: %s" %(project_name, req_id, ret[0]))
                 state = True
-                result = res[0]
+                result = ret[0]
             else:
-                DBLOG.error("databtase.get_status - project-%s req-%s unkown status: %s" %(project_name, req_id, res[0]))
-                result = "unkown status:" + res[0]
+                DBLOG.error("databtase.get_status - project-%s req-%s unkown status: %s" %(project_name, req_id, ret[0]))
+                result = "unkown status:" + ret[0]
         else:
             DBLOG.info("database.get_status - project--%s req-%s status: there is no the task" %(project_name, req_id))
             result = "no task"
