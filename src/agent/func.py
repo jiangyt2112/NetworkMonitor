@@ -12,7 +12,7 @@ def exe(cmd):
 
 def get_vm_uuids():
 	# get all vm uuid in the host
-	uuids = ()
+	uuids = set()
 	conn = libvirt.openReadOnly(None)
 
 	if conn is None:
