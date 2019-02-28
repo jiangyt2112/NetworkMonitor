@@ -354,5 +354,6 @@ if __name__ == "__main__":
     wp = WorkerPoll()
     wp.run()
     wp.push_task(Task(msg_task))
+    time.sleep(1)
     wp.push_task(Item(msg_item))
     wp.stop()
