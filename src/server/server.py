@@ -40,11 +40,11 @@ class Task:
         # to do
         auth_url = CONF.openstack_conf["auth_url"]
         endpoint_url = CONF.openstack_conf["endpoint"]
-        self.vm_info = get_project_server_info(self.token, auth_url, self.project)
-        self.vm_num = len(self.vm_info)
+        self.vm_info = "None"#get_project_server_info(self.token, auth_url, self.project)
+        self.vm_num = 0#len(self.vm_info)
 
-        self.network_info = get_project_network_info(self.token, auth_url, endpoint_url)
-        self.network_num = len(self.network_info)
+        self.network_info = "None"#get_project_network_info(self.token, auth_url, endpoint_url)
+        self.network_num = 0#len(self.network_info)
     
     def is_down(self):
         if self.vm_num == self.receive_vm_num and self.network_num == self.receive_network_num:
@@ -66,7 +66,7 @@ class Task:
                 "vm_info": self.vm_info,
                 "network_info": self.network_info
             }
-        ret, msg = server_to_agent_msg(msg)
+        ret, msg = True, None#server_to_agent_msg(msg)
         if ret == False:
             self.status = "ERROR"
             SERVERLOG.error("server.Task.start_task - project-%s - req_id-%s server_to_agent_msg return error:%s" 
@@ -91,7 +91,7 @@ class Task:
             self.receive_time = time.time()
             self.item_flag = True
         #def receive_item(self, project_name, req_id, receive_vm_num, receive_network_num, info):
-        self.process_item(self, item)
+        self.process_item(item)
         ret, msg = manager.receive_item(self.project, self.req_id, self.receive_vm_num, self.receive_network_num, item)
         if ret == False:
             SERVERLOG.error("server.Task.receive_item - project-%s - req_id-%s manager.receive_item return error:%s" 
@@ -188,7 +188,7 @@ class Tasks:
             time.sleep(1)
 
     def start_expire_check(self):
-        t = threading.Thread(target = Tasks.task_expire,args=(self,))
+        t = threading.Thread(target = Tasks.task_expire, args=(self,))
         t.setDaemon(True)
         t.start()
 
@@ -212,16 +212,24 @@ class Worker(threading.Thread):
     def run(self):
         while True:
             task = self.queue.get()
-            SERVERLOG.info("server.Worker.run - project-%s - req_id-%s get a task type:%s." %(task.project, task.req_id, task.type))
-            if type(task) == Task:
+            if isinstance(task, Task):
+                SERVERLOG.info("server.Worker.run - project-%s - req_id-%s get a task type:%s." %(task.project, task.req_id, "Task"))
                 ret = task.start_task()
                 if ret:
                     self.tasks.append(task)
-            elif type(task) == Item:
+                    self.queue.task_done()
+                else:
+                    pass
+            elif isinstance(task, Item):
+                SERVERLOG.info("server.Worker.run - project-%s - req_id-%s get a task type:%s." %(task.project, task.req_id, "Item"))
                 self.tasks.update_task(task)
-            else:
-                SERVERLOG.error("server.Worker.run - project-%s - req_id-%s unkown task type:%s." %(task.project, task.req_id, task.type))
+                self.queue.task_done()
+            elif isinstance(task, int) and task == 1:
                 SERVERLOG.info("server.Worker.run worker exit.")
+                self.queue.task_done()
+                break
+            else:
+                SERVERLOG.error("server.Worker.run - unkown task type:%s." %(str(type(task))))
                 break
 
     def stop(self):
@@ -339,5 +347,10 @@ class Server(Base_Server):
         print(" [x] %r:%r" % (method.routing_key, body))
 
 if __name__ == "__main__":
-	ser = Server()
-	ser.run()
+	#ser = Server()
+	#ser.run()
+    msg = {'type': 'check', 'req_id': "1", 'project': "admin", 'token': "123456"}
+    wp = WorkerPoll()
+    wp.run()
+    wp.push_task(Task(msg))
+    wp.stop()
