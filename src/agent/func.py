@@ -41,6 +41,9 @@ def is_network_node():
 		return True
 	return False
 
+def get_topo():
+	pass
+	return True, None
 
 if __name__ == '__main__':
 	print get_vm_uuids()
