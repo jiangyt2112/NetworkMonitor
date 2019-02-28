@@ -12,6 +12,9 @@ import threading
 from Queue import Queue as Q
 from comm.client import agent_to_server_msg
 from func import get_vm_uuids
+from func import get_hostname
+from func import get_host_ip
+from func import is_network_node
 
 class Task:
     def __init__(self, msg):
@@ -29,6 +32,7 @@ class Task:
         self.project = msg['project']
         # [{"id": 1}, {}, {}]
         self.vm_info = msg['vm_info']
+        self.valid_vm_info = None
         self.network_info = msg["network_info"]
         self.info = None  
         self.status = None
@@ -81,15 +85,36 @@ class Task:
 
     def is_consumer(self):
         uuids = get_vm_uuids()
-        
-        return True
+        self.valid_vm_info = []
+        for info in self.vm_info:
+            if info["id"] in uuids:
+                valid_vm_info.append(info)
+
+        return len(self.valid_vm_info) > 0
 
     def get_info(self):
         # to do
+        ret, hostname = get_hostname()
+        if ret == False:
+            AGENTLOG.error("agent.Task.get_info - project-%s - req_id-%s get hostname error:%s." 
+                %(self.project, self.req_id, hostname))
+            return False, None
+
+        ret, ips = get_host_ip()
+        if ret == False:
+            AGENTLOG.error("agent.Task.get_info - project-%s - req_id-%s get host ip error:%s." 
+                %(self.project, self.req_id, ips))
+
+        ret, network_node_flag = is_network_node()
+        if ret == False:
+            AGENTLOG.error("agent.Task.get_info - project-%s - req_id-%s get network node flag error:%s." 
+                %(self.project, self.req_id, network_node_flag))
+
         info = {
-            "vm_num": 0,
-            "host": "ip_addr",
-            "is_network_node": False,
+            "vm_num": len(self.valid_vm_info),
+            "hostname": hostname,
+            "host": ips,
+            "is_network_node": network_node_flag,
             "topo": "topo_struct"
         }
         return True, info
