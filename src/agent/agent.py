@@ -11,6 +11,7 @@ import time
 import threading 
 from Queue import Queue as Q
 from comm.client import agent_to_server_msg
+from func import get_vm_uuids
 
 class Task:
     def __init__(self, msg):
@@ -26,6 +27,7 @@ class Task:
         self.type = msg['type']
         self.req_id = msg['req_id']
         self.project = msg['project']
+        # [{"id": 1}, {}, {}]
         self.vm_info = msg['vm_info']
         self.network_info = msg["network_info"]
         self.info = None  
@@ -78,6 +80,7 @@ class Task:
             return True
 
     def is_consumer(self):
+        uuids = get_vm_uuids()
         
         return True
 
