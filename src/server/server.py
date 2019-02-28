@@ -353,6 +353,6 @@ if __name__ == "__main__":
     msg = {'type': 'item', 'req_id': "1", 'project': "admin", 'info': "info"}
     wp = WorkerPoll()
     wp.run()
-    #wp.push_task(Task(msg))
+    wp.push_task(Task(msg))
     wp.push_task(Item(msg))
     wp.stop()
