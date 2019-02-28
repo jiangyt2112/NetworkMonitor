@@ -36,7 +36,7 @@ def check_auth(auth_url, token, project_name):
 if __name__ == "__main__":
 	auth_url = 'http://192.168.122.9:5000/v3'
 	username = 'admin'
-	password = '111111'
+	password = 'e60ed34c828d44b9'
 	project_name = 'admin'
 	auth_token = get_token(username, password, auth_url, project_name)
 	print auth_token
