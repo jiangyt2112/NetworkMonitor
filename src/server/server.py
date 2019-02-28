@@ -74,7 +74,7 @@ class Task:
             return False
 
         #def start_task(self, project_name, req_id, start_time, network_info, vm_info, network_num, vm_num):
-        ret, msg = manager.start_task(self.project, req_id, format_time(self.start_time), self.network_info, 
+        ret, msg = manager.start_task(self.project, self.req_id, format_time(self.start_time), self.network_info, 
             self.vm_info, self.network_num, self.vm_num)
         if ret == False:
             self.status = "ERROR"
