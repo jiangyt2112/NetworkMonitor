@@ -26,7 +26,7 @@ def get_vm_uuids():
 def get_host_ip():
 	ret, ips = exe('ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk \'{print $2}\'|tr -d "addr:"')
 	if ret == False:
-		return False, None
+		return False, ips
 	return True, ips.split()
 
 if __name__ == '__main__':
