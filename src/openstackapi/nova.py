@@ -25,11 +25,7 @@ def get_project_server_info(auth_token, auth_url, project_name):
         info.append(s_info)
 
     return info
-    #print h[0].__dict__
-    # print s[0].__dict__
-    # print s[0]._info
-    #print len(s)
-    #print s[0].to_dict()
+
 
 if __name__ == '__main__':
     auth_url = 'http://192.168.122.9:5000/v3'

@@ -40,11 +40,11 @@ class Task:
         # to do
         auth_url = CONF.openstack_conf["auth_url"]
         endpoint_url = CONF.openstack_conf["endpoint"]
-        self.vm_info = "None"#get_project_server_info(self.token, auth_url, self.project)
-        self.vm_num = 0#len(self.vm_info)
+        self.vm_info = get_project_server_info(self.token, auth_url, self.project)
+        self.vm_num = len(self.vm_info)
 
-        self.network_info = "None"#get_project_network_info(self.token, auth_url, endpoint_url)
-        self.network_num = 0#len(self.network_info)
+        self.network_info = get_project_network_info(self.token, auth_url, endpoint_url)
+        self.network_num = self.vm_num + 1
     
     def is_down(self):
         if self.vm_num == self.receive_vm_num and self.network_num == self.receive_network_num:
@@ -66,7 +66,7 @@ class Task:
                 "vm_info": self.vm_info,
                 "network_info": self.network_info
             }
-        ret, msg = True, None#server_to_agent_msg(msg)
+        ret, msg = server_to_agent_msg(msg)
         if ret == False:
             self.status = "ERROR"
             SERVERLOG.error("server.Task.start_task - project-%s - req_id-%s server_to_agent_msg return error:%s" 
@@ -91,7 +91,7 @@ class Task:
             self.receive_time = time.time()
             self.item_flag = True
         #def receive_item(self, project_name, req_id, receive_vm_num, receive_network_num, info):
-        self.process_item(item)
+        item = self.process_item(item)
         ret, msg = manager.receive_item(self.project, self.req_id, self.receive_vm_num, self.receive_network_num, item)
         if ret == False:
             SERVERLOG.error("server.Task.receive_item - project-%s - req_id-%s manager.receive_item return error:%s" 
@@ -110,6 +110,20 @@ class Task:
         # def get_items(self, project_name, req_id):
         # def stop_task(self, project_name, req_id, status, result):
         ret, items = manager.get_items(self.project, self.req_id)
+
+        # item_info struct
+        # item_index_map = {
+        #     'id': 0,
+        #     'task_id': 1,
+        #     'receive_time': 2,
+        #     'info': 3
+        # }
+        # items struct
+        # result = { 
+        #         'item_num': item_num,
+        #         'item_info': []
+        # }
+
         if ret == False:
             self.status = "ERROR"
             SERVERLOG.error("server.Task.stop_task - project-%s - req_id-%s manager.get_items return error:%s" 
@@ -136,12 +150,46 @@ class Task:
     def process_items(self, items):
         # process items into result
         # to do
-        return items
+        # item_info struct
+        # item_info = {
+        #     'id': 0,
+        #     'task_id': 1,
+        #     'receive_time': 2,
+        #     'info': 3
+        # }
+        # items struct
+        # result = { 
+        #         'item_num': item_num,
+        #         'item_info': []
+        # }
+        # info struct
+        # {
+        #     "vm_num": 0,
+        #     "host": "ip_addr",
+        #     "is_network_node": False,
+        #     "topo": "topo_struct"
+        # }
+        return json.dumps(items)
 
     def process_item(self, item):
         # process item to update receive_vm_num receive_network_num
         # to do
-        return item
+        SERVERLOG.info("server.Task.process_item - project-%s - req_id-%s process received item." 
+                %(self.project, self.req_id))
+        info = item.info()
+        # info struct
+        # {
+        #     "vm_num": 0,
+        #     "host": "ip_addr",
+        #     "is_network_node": False,
+        #     "topo": "topo_struct"
+        # }
+        self.receive_vm_num -= info["vm_num"]
+        if info["is_network_node"]:
+            self.receive_network_num -= info["vm_num"] + 1
+        else:
+            self.receive_network_num -= info["vm_num"]
+        return item.to_json()
 
 class Tasks:
     def __init__(self):
@@ -202,6 +250,14 @@ class Item:
         self.req_id = msg['req_id']
         self.project = msg['project']
         self.info = msg['info']
+
+    def to_json(self):
+        return {
+            "type": self.type,
+            "req_id": self.req_id,
+            "project": self.project,
+            "info": json.dumps(self.info)
+        }
 
 class Worker(threading.Thread):
     def __init__(self, queue, tasks):

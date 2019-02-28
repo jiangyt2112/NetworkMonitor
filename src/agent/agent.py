@@ -34,6 +34,15 @@ class Task:
         self.stop_time = None
 
     def start_task(self):
+
+        if self.is_consumer():
+            AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s receive task and is consumer." 
+                %(self.project, self.req_id))
+        else:
+            AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s receive task and not the task's consumer, return." 
+                %(self.project, self.req_id))
+            return True
+
         self.start_time = time.time()
         self.status = "START"
 
@@ -57,7 +66,7 @@ class Task:
         # self.process
 
         msg["info"] = info
-        # ret, info = agent_to_server_msg(msg)
+        ret, info = agent_to_server_msg(msg)
         
         if ret == False:
             self.status = "ERROR"
@@ -68,9 +77,19 @@ class Task:
             AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s task start success." %(self.project, self.req_id))
             return True
 
+    def is_consumer(self):
+        
+        return True
+
     def get_info(self):
         # to do
-        return True, "info"
+        info = {
+            "vm_num": 0,
+            "host": "ip_addr",
+            "is_network_node": False,
+            "topo": "topo_struct"
+        }
+        return True, info
 
 
 class Worker(threading.Thread):
@@ -81,8 +100,7 @@ class Worker(threading.Thread):
     def run(self):
         while True:
             task = self.queue.get()
-            print task
-            #print type(task) == Task
+
             if isinstance(task, int) and task == 1:
                 AGENTLOG.info("agent.Worker.run - receive int 1, worker exit.")
                 self.queue.task_done()
@@ -93,7 +111,6 @@ class Worker(threading.Thread):
                 self.queue.task_done()
                 print ret
             else:
-                # AGENTLOG.error("agent.Worker.run - project-%s - req_id-%s unkown task type:%s." %(task.project, task.req_id, task.type))
                 AGENTLOG.info("agent.Worker.run - unknown task type, worker exit.")
                 self.queue.task_done()
                 break
