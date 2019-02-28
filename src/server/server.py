@@ -349,10 +349,10 @@ class Server(Base_Server):
 if __name__ == "__main__":
 	#ser = Server()
 	#ser.run()
-    msg = {'type': 'check', 'req_id': "1", 'project': "admin", 'token': "123456"}
-    msg = {'type': 'item', 'req_id': "1", 'project': "admin", 'info': "info"}
+    msg_task = {'type': 'check', 'req_id': "1", 'project': "admin", 'token': "123456"}
+    msg_item = {'type': 'item', 'req_id': "1", 'project': "admin", 'info': "info"}
     wp = WorkerPoll()
     wp.run()
-    wp.push_task(Task(msg))
-    wp.push_task(Item(msg))
+    wp.push_task(Task(msg_task))
+    wp.push_task(Item(msg_item))
     wp.stop()
