@@ -100,7 +100,7 @@ class Task:
             return False
 
         SERVERLOG.info("server.Task.receive_item - project-%s - req_id-%s receive item success." 
-                %(self.project, self.req_id, msg))
+                %(self.project, self.req_id))
         return True
 
     def stop_task(self, status = "END"):
