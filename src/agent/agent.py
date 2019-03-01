@@ -86,7 +86,10 @@ class Task:
             return True
 
     def is_consumer(self):
-        uuids = get_vm_uuids()
+        ret, uuids = get_vm_uuids()
+        if ret == False:
+            AGENTLOG.info("agent.Task.is_consumer - project-%s - req_id-%s get uuids error:%s." %(self.project, self.req_id, uuids))
+            return False
         print uuids
         self.valid_vm_info = []
         for info in self.vm_info:
