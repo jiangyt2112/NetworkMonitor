@@ -210,6 +210,8 @@ class Tasks:
 
     def update_task(self, item):
         self.mutex.acquire()
+        print item.project
+        print self.tasks
         if item.project not in self.tasks:
             SERVERLOG.error("server.Tasks.update_task - project-%s - req_id-%s task not in tasks." %(item.project, item.req_id))
         else:
