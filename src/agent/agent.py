@@ -87,10 +87,12 @@ class Task:
 
     def is_consumer(self):
         uuids = get_vm_uuids()
+        print uuids
         self.valid_vm_info = []
         for info in self.vm_info:
+            print info["id"]
             if info["id"] in uuids:
-                valid_vm_info.append(info)
+                self.valid_vm_info.append(info)
 
         return len(self.valid_vm_info) > 0
 
