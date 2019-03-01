@@ -135,6 +135,7 @@ class Worker(threading.Thread):
         self.queue = queue
 
     def run(self):
+        print "worker is running"
         while True:
             task = self.queue.get()
 
@@ -215,13 +216,22 @@ if __name__ == "__main__":
 	#ser = Server()
 	#ser.run()
 
-    msg = {"type": "Item", "req_id": "1", "project": "admin", "vm_info": "None", "network_info": "None"} 
+    # msg = {"type": "Item", "req_id": "1", "project": "admin", "vm_info": "None", "network_info": "None"} 
+
+    # wp = WorkerPoll()
+    # wp.run()
+    # wp.push_task(Task(msg))
+    # wp.push_task(Task(msg))
+    # wp.push_task(Task(msg))
+    # print "down"
+    # # wp.stop()
+    # print "stop"
+
 
     wp = WorkerPoll()
     wp.run()
-    wp.push_task(Task(msg))
-    wp.push_task(Task(msg))
-    wp.push_task(Task(msg))
-    print "down"
-    # wp.stop()
-    print "stop"
+    
+    server = Server(wp)
+    #signal.signal(signal.SIGINT, sigint_callback)
+    # signal.signal(signal.SIGTERM, sigint_callback)
+    server.run()

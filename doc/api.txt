@@ -1,22 +1,12 @@
-curl http://127.0.0.1:6666/pre_online/resource_evaluate/123
-curl http://127.0.0.1:6666/pre_online/resource_evaluate/123 -d "a=a"
-curl http://127.0.0.1:6666/pre_online/result/123
-curl http://127.0.0.1:6666/pre_online/auto_end/1
+# check
+curl http://127.0.0.1:8002/network_monitor/check/admin -X POST -H "Content-type:application/json" -d '{"token":"gAAAAABceIzLlS1NqlPOzKKSFemRFZwEO-GHujLpT7b8J1Zg6gy-1PSkdUm78L03XOLkMapQbQtJzkn1eso5Kvzgc37ME9FkQXbqmFyAYV4BWuvUgwXU_hnNryz2pYPT9-UeFhcHhOD4BylFFgGesDa6WIW2LIbJSvvwyu2fZ_SZiWTcuNx1cEQ"}'
 
-curl http://127.0.0.1:5000/pre_online/resource_evaluate/start/1 -X POST -H "Content-type:application/json" 
--d '{"time_out":false}'
-curl http://127.0.0.1:5000/pre_online/resource_evaluate/start/2 -X POST -H "Content-type:application/json"
--d '{"time_out":true, "day":1, "hour":1, "minute":1, "second":1}'
+# status
+curl http://127.0.0.1:8002/network_monitor/status/admin -X POST -H "Content-type:application/json" -d '{"token":"gAAAAABceIzLlS1NqlPOzKKSFemRFZwEO-GHujLpT7b8J1Zg6gy-1PSkdUm78L03XOLkMapQbQtJzkn1eso5Kvzgc37ME9FkQXbqmFyAYV4BWuvUgwXU_hnNryz2pYPT9-UeFhcHhOD4BylFFgGesDa6WIW2LIbJSvvwyu2fZ_SZiWTcuNx1cEQ"}'
 
-curl http://127.0.0.1:5000/pre_online/resource_evaluate/result/1
+# result
+curl http://127.0.0.1:8002/network_monitor/result/admin -X POST -H "Content-type:application/json" -d '{"token":"gAAAAABceIzLlS1NqlPOzKKSFemRFZwEO-GHujLpT7b8J1Zg6gy-1PSkdUm78L03XOLkMapQbQtJzkn1eso5Kvzgc37ME9FkQXbqmFyAYV4BWuvUgwXU_hnNryz2pYPT9-UeFhcHhOD4BylFFgGesDa6WIW2LIbJSvvwyu2fZ_SZiWTcuNx1cEQ"}'
 
-curl http://127.0.0.1:5000/pre_online/resource_evaluate/query_status -X POST -H "Content-type:application/json"
--d '{"vm_ids":["1", "2", "3", "44"]}' -H 'Content-type:application/json'
-
-
-curl http://127.0.0.1:8001/network_monitor/check/project_name -X POST -H "Content-type:application/json"
--d '{"token":"123455"}'
-curl http://127.0.0.1:8001/network_monitor/status/project_name
-curl http://127.0.0.1:8001/network_monitor/result/project_name
-curl http://127.0.0.1:8001/network_monitor/history/project_name
+# history
+curl http://127.0.0.1:8002/network_monitor/history/admin -X POST -H "Content-type:application/json" -d '{"token":"gAAAAABceIzLlS1NqlPOzKKSFemRFZwEO-GHujLpT7b8J1Zg6gy-1PSkdUm78L03XOLkMapQbQtJzkn1eso5Kvzgc37ME9FkQXbqmFyAYV4BWuvUgwXU_hnNryz2pYPT9-UeFhcHhOD4BylFFgGesDa6WIW2LIbJSvvwyu2fZ_SZiWTcuNx1cEQ"}'
 

@@ -266,6 +266,7 @@ class Worker(threading.Thread):
         self.tasks = tasks
 
     def run(self):
+        print "worker is running"
         while True:
             task = self.queue.get()
             if isinstance(task, Task):
@@ -405,11 +406,17 @@ class Server(Base_Server):
 if __name__ == "__main__":
 	#ser = Server()
 	#ser.run()
-    msg_task = {'type': 'check', 'req_id': "1", 'project': "admin", 'token': "123456"}
-    msg_item = {'type': 'item', 'req_id': "1", 'project': "admin", 'info': "info"}
+    # msg_task = {'type': 'check', 'req_id': "1", 'project': "admin", 'token': "123456"}
+    # msg_item = {'type': 'item', 'req_id': "1", 'project': "admin", 'info': "info"}
+    # wp = WorkerPoll()
+    # wp.run()
+    # wp.push_task(Task(msg_task))
+    # time.sleep(1)
+    # wp.push_task(Item(msg_item))
+    # wp.stop()
+
+
     wp = WorkerPoll()
     wp.run()
-    wp.push_task(Task(msg_task))
-    time.sleep(1)
-    wp.push_task(Item(msg_item))
-    wp.stop()
+    server = Server(wp)
+    server.run()
