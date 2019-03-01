@@ -113,7 +113,7 @@ class Task:
                 %(self.project, self.req_id, ips))
             return False, None
 
-        ret, network_node_flag = is_network_node()
+        network_node_flag = is_network_node()
         if ret == False:
             AGENTLOG.error("agent.Task.get_info - project-%s - req_id-%s get network node flag error:%s." 
                 %(self.project, self.req_id, network_node_flag))
