@@ -93,13 +93,12 @@ class NetworkMonitorStatus(Resource):
         # exception
         response = get_status(msg)
 
-        # if response['exe_result'] == False:
-        #     APILOG.info("api.ResourceEvaluate.post - req-%s - project_name-%s get status:fail info:%s" %(req_id, project_name, response['error_msg']))
-        #     return response, 400
-        # else:
-        response = "abdc"
-        #APILOG.info("api.ResourceEvaluate.post - req-%s - project_name-%s get status:success info:%s" %(req_id, project_name, response['result']))
-        return response, 200
+        if response['exe_result'] == False:
+            APILOG.info("api.ResourceEvaluate.post - req-%s - project_name-%s get status:fail info:%s" %(req_id, project_name, response['error_msg']))
+            return response, 400
+        else:
+            APILOG.info("api.ResourceEvaluate.post - req-%s - project_name-%s get status:success info:%s" %(req_id, project_name, response['result']))
+            return response, 200
         
 class NetworkMonitorResult(Resource):
     """
@@ -169,7 +168,7 @@ class NetworkMonitorHistory(Resource):
             return response, 400
 
 
-api.add_resource(HelloWorld, '/')
+# api.add_resource(HelloWorld, '/')
 api.add_resource(NetworkMonitorCheck, '/network_monitor/check/<string:project_name>')
 api.add_resource(NetworkMonitorStatus, '/network_monitor/status/<string:project_name>')
 api.add_resource(NetworkMonitorResult, '/network_monitor/result/<string:project_name>')
