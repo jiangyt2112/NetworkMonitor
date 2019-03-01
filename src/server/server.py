@@ -10,7 +10,7 @@ import json
 import time
 import threading 
 from Queue import Queue as Q
-from comm.client import agent_to_server_msg
+from comm.client import server_to_agent_msg
 from openstackapi.nova import get_project_server_info
 from openstackapi.neutron import get_project_network_info
 

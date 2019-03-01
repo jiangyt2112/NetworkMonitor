@@ -4,9 +4,9 @@ from auth import get_token
 
 def get_project_network_info(auth_token, auth_url, endpoint):
 	neutron = client.Client(auth_url = auth_url, token = auth_token, endpoint_url = endpoint)
-	print neutron.list_networks()
-	print neutron.list_subnets()
-	print neutron.list_ports()
+	#print neutron.list_networks()
+	#print neutron.list_subnets()
+	#print neutron.list_ports()
 	network_info = {"networks": [], "subnets": [], "ports": []}
 	network_attributes = ['provider:physical_network', 'port_security_enabled', 'provider:network_type', 'id',
 						'router:external', 'availability_zones', 'shared', 'project_id', 'status', 'subnets',
