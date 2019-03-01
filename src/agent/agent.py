@@ -59,7 +59,7 @@ class Task:
                 'type': 'item', 
                 'project': self.project, 
                 'req_id': self.req_id, 
-                "info": None
+                'info': None
             }
 
         ret, info = self.get_info()
@@ -126,11 +126,11 @@ class Task:
             return False, None
 
         info = {
-            "vm_num": len(self.valid_vm_info),
-            "hostname": hostname,
-            "host": ips,
-            "is_network_node": network_node_flag,
-            "topo": topo
+            'vm_num': len(self.valid_vm_info),
+            'hostname': hostname,
+            'host': ips,
+            'is_network_node': network_node_flag,
+            'topo': topo
         }
         return True, info
 
