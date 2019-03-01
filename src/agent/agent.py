@@ -203,13 +203,15 @@ class Server(Base_Server):
             properties:prop.reply_to
         """
         # FALOG.error("receive msg routing_key with wrong format[part 2].")
-        SERVERLOG.info("receive server to agent msg: %s" %(body))
+        AGENTLOG.info("agent.Server.callback - receive server to agent msg: %s" %(body))
         msg = json.loads(body)
         # {'type': 'check', 'req_id': msg['req_id'], 'project': msg['project_name'], 'token': msg['token']}
-        if msg['type'] == 'Item':
+        if msg['type'] == 'check':
+            AGENTLOG.info("agent.Server.callback - project-%s - req_id-%s get a task type:check." 
+                %(msg['project'], msg['req_id']))
             self.worker_poll.push_task(Task(msg))
         else:
-            SERVERLOG.error("receive server to agent msg: invalid msg type %s" %(msg['type']))
+            AGENTLOG.error("agent.Server.callback - receive server to agent msg: invalid msg type:%s." %(msg['type']))
 
         print(" [x] %r:%r" % (method.routing_key, body))
 
