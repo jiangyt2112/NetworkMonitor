@@ -139,7 +139,7 @@ class NetworkMonitorResult(Resource):
 
 class NetworkMonitorHistory(Resource):
     # query vm history info
-    def post(self, vm_id):
+    def post(self, project_name):
         # write log
         req_id = str(uuid.uuid4())
         data = request.get_json()
