@@ -91,7 +91,7 @@ class NetworkMonitorStatus(Resource):
         APILOG.info("api.NetworkMonitorStatus.post - req-%s - project_name-%s api get request: get task status" %(req_id, project_name))
         
         # exception
-        # response = get_status(msg)
+        response = get_status(msg)
 
         # if response['exe_result'] == False:
         #     APILOG.info("api.ResourceEvaluate.post - req-%s - project_name-%s get status:fail info:%s" %(req_id, project_name, response['error_msg']))
