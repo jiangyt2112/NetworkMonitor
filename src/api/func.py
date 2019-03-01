@@ -4,6 +4,7 @@ from comm.client import api_to_server_msg
 from utils.conf import CONF
 from openstackapi.auth import check_auth as os_check_auth
 from comm.client import api_to_server_msg
+from database.manager import Manager
 
 def check_auth(msg):
     auth_url = CONF.openstack_conf['auth_url']
