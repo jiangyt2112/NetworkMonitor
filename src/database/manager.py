@@ -219,7 +219,7 @@ class Manager(object):
     def start_task(self, project_name, req_id, start_time, network_info, vm_info, network_num, vm_num):
         # start_time = format_time(time.time())
         update_sql = ("update task set status = 'START', start_time = '%s',"
-                "network_info = '%s', vm_info = '%s', vm_num = %d, network_num = %d "
+                "network_info = \"%s\", vm_info = \"%s\", vm_num = %d, network_num = %d "
                 "where project = '%s';") %(start_time, str(network_info), str(vm_info), network_num, vm_num, project_name)
         print update_sql
         conn = None
@@ -257,7 +257,7 @@ class Manager(object):
                 "receive_vm_num = %d, receive_network_num = %d "
                 "where project = '%s';") %(receive_vm_num, receive_network_num, project_name)
         store_item_sql = ("insert into item set task_id = %d, receive_time = '%s', "
-            "info = '%s';") %(task_id, receive_time, info)
+            "info = \"%s\";") %(task_id, receive_time, info)
 
         try:
             conn.execute(set_task_sql)
