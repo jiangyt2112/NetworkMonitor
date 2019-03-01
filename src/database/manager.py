@@ -305,12 +305,12 @@ class Manager(object):
                     'result': 13
                     }
 
-        set_task_sql = ("update task set status = '%s', stop_time = '%s', result = '%s' "
+        set_task_sql = ("update task set status = '%s', stop_time = '%s', result = \"%s\""
                 "where project = '%s';") %(status, stop_time, result, project_name)
 
         store_history_sql = ("insert into history set project = '%s', req_id = '%s', status = '%s',"
                             "receive_time = '%s', start_time = '%s', stop_time = '%s', network_info = '%s',"
-                            "vm_info = '%s', result = '%s';") %(task_info[task_index_map['project']],
+                            "vm_info = '%s', result = \"%s\"';") %(task_info[task_index_map['project']],
                             task_info[task_index_map['req_id']], status, task_info[task_index_map['receive_time']],
                             task_info[task_index_map['start_time']], stop_time, task_info[task_index_map['network_info']],
                             task_info[task_index_map['vm_info']], result)

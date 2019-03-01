@@ -176,7 +176,7 @@ class Task:
         # to do
         SERVERLOG.info("server.Task.process_item - project-%s - req_id-%s process received item." 
                 %(self.project, self.req_id))
-        info = item.info()
+        info = item.info
         # info struct
         # {
         #     "vm_num": 0,
@@ -189,7 +189,7 @@ class Task:
             self.receive_network_num -= info["vm_num"] + 1
         else:
             self.receive_network_num -= info["vm_num"]
-        return item.to_json()
+        return json.dumps(item.to_json())
 
 class Tasks:
     def __init__(self):
