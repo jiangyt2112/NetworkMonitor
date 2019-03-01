@@ -4,6 +4,7 @@ from comm.server import Server as Base_Server
 import pika
 from utils.log import SELOG
 from utils.log import AGENTLOG
+from utils.log import SERVERLOG
 from utils.conf import CONF
 from utils.ftime import format_time
 import json
@@ -208,7 +209,7 @@ class Server(Base_Server):
         if msg['type'] == 'Item':
             self.worker_poll.push_task(Task(msg))
         else:
-            SERVERLOG.error("receive api to server msg: invalid msg type %s" %(msg['type']))
+            SERVERLOG.error("receive server to agent msg: invalid msg type %s" %(msg['type']))
 
         print(" [x] %r:%r" % (method.routing_key, body))
 
