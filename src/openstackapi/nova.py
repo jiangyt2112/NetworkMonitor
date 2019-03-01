@@ -29,11 +29,11 @@ def get_project_server_info(auth_token, auth_url, project_name):
 
 if __name__ == '__main__':
     auth_url = 'http://192.168.122.9:5000/v3'
-    username = 'test'
-    password = '111111'
-    project_name = 'test'
+    username = 'admin'
+    password = 'e60ed34c828d44b9'
+    project_name = 'admin'
     auth_token = get_token(username, password, auth_url, project_name)
     if auth_token == None:
         print 'auth fail.'
         exit(0)
-    get_project_server_info(auth_token, auth_url, project_name)
+    print get_project_server_info(auth_token, auth_url, project_name)
