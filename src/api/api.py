@@ -75,6 +75,7 @@ class NetworkMonitorStatus(Resource):
         req_id = str(uuid.uuid4())
         data = request.get_json()
 
+        """
         if data == None or "token" not in data:
             response = {
                             'exe_result': False,
@@ -85,7 +86,7 @@ class NetworkMonitorStatus(Resource):
                         }
             APILOG.info("api.NetworkMonitorStatus.post - req-%s - project-%s request data format illegal" %(req_id, project_name))
             return response, 400
-
+        """
         msg = {'req_id': req_id, 'project_name': project_name, 'token': data['token']}
 
         APILOG.info("api.NetworkMonitorStatus.post - req-%s - project_name-%s api get request: get task status" %(req_id, project_name))
@@ -98,7 +99,7 @@ class NetworkMonitorStatus(Resource):
         #     return response, 400
         # else:
         response = "abdc"
-        APILOG.info("api.ResourceEvaluate.post - req-%s - project_name-%s get status:success info:%s" %(req_id, project_name, response['result']))
+        #APILOG.info("api.ResourceEvaluate.post - req-%s - project_name-%s get status:success info:%s" %(req_id, project_name, response['result']))
         return response, 200
         
 class NetworkMonitorResult(Resource):
