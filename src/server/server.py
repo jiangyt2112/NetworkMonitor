@@ -255,10 +255,10 @@ class Item:
 
     def to_json(self):
         return {
-            "type": self.type,
-            "req_id": self.req_id,
-            "project": self.project,
-            "info": json.dumps(self.info)
+            'type': self.type,
+            'req_id': self.req_id,
+            'project': self.project,
+            'info': json.dumps(self.info)
         }
 
 class Worker(threading.Thread):
