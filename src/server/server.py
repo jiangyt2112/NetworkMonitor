@@ -39,7 +39,7 @@ class Task:
         self.result = None
         # to do
         auth_url = CONF.openstack_conf["auth_url"]
-        endpoint_url = CONF.openstack_conf["endpoint"]
+        endpoint_url = CONF.openstack_conf["endpoint_url"]
         self.vm_info = get_project_server_info(self.token, auth_url, self.project)
         self.vm_num = len(self.vm_info)
 

@@ -136,9 +136,11 @@ class Conf(object):
         section = 'keystone'
         self.openstack_auth_url = self.cf.get(section, 'auth_url')
         self.openstack_endpoint = self.cf.get(section, 'endpoint')
+        self.openstack_endpoint_url = self.cf.get(section, 'endpoint_url')
         self.openstack_conf = {
                                 "auth_url": self.openstack_auth_url,
-                                "endpoint": self.openstack_endpoint
+                                "endpoint": self.openstack_endpoint,
+                                "endpoint_url": self.openstack_endpoint_url
                             }
 
 CONF = Conf()
