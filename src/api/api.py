@@ -9,6 +9,8 @@ from utils.conf import CONF
 from database.manager import Manager
 from func import check_msg
 from func import get_status
+from func import get_result
+from func import get_history
 from func import check_auth
 
 app = Flask(__name__)
