@@ -37,7 +37,7 @@ def get_project_network_info(auth_token, auth_url, endpoint):
 		info = {}
 		for key in port_attributes:
 			info[key] = port[key]
-		port_info["ports"].append(info)
+		network_info["ports"].append(info)
 
 	return network_info
 
