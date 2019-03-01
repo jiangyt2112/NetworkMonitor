@@ -31,8 +31,14 @@ def get_token(username, password, auth_url, project_name):
 
 def check_auth(auth_url, auth_token, project_name):
 	print auth_url
-	keystone = client.Client(token = auth_token, auth_url = auth_url)#, endpoint = auth_url)
-	return keystone.authenticate()
+	ret = False
+	try:
+		keystone = client.Client(token = auth_token, auth_url = auth_url)#, endpoint = auth_url)
+		ret = keystone.authenticate()
+	except Exception, e:
+		print str(e)
+		return False
+	return ret
 
 if __name__ == "__main__":
 	auth_url = 'http://192.168.122.9:5000/v3'
