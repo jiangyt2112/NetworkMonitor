@@ -10,11 +10,11 @@ def get_project_server_info(auth_token, auth_url, project_name):
     # print nova.servers.list()
     s = nova.servers.list()
     #h = nova.hypervisors.list()
-    #print h[0].to_dict()
+    print h[0].to_dict()
     attributes = ['OS-EXT-STS:task_state', 'addresses', 'OS-EXT-STS:vm_state', 'OS-EXT-SRV-ATTR:instance_name',
-                'OS-SRV-SG:launched_at', 'id', 'security_groups', 'ser_id', 'progress', 'OS-EXT-STS:power_state',
+                'OS-SRV-USG:launched_at', 'id', 'security_groups', 'user_id', 'progress', 'OS-EXT-STS:power_state',
                 'OS-EXT-AZ:availability_zone', 'status', 'updated', 'hostId', 'OS-EXT-SRV-ATTR:host', 
-                'OS-SRV-SG:terminated_at', 'OS-EXT-SRV-ATTR:hypervisor_hostname', 'name', 'created', 'tenant_id'
+                'OS-SRV-USG:terminated_at', 'OS-EXT-SRV-ATTR:hypervisor_hostname', 'name', 'created', 'tenant_id'
     ]
     info = []
     for server in s:
