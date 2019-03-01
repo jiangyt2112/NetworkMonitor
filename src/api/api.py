@@ -169,7 +169,7 @@ class NetworkMonitorHistory(Resource):
             return response, 400
 
 
-# api.add_resource(HelloWorld, '/')
+api.add_resource(HelloWorld, '/')
 api.add_resource(NetworkMonitorCheck, '/network_monitor/check/<string:project_name>')
 api.add_resource(NetworkMonitorStatus, '/network_monitor/status/<string:project_name>')
 api.add_resource(NetworkMonitorResult, '/network_monitor/result/<string:project_name>')
