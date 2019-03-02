@@ -1,4 +1,5 @@
 #!/usr/bin/python2
+import __init__
 from ovs import bridge
 br = Bridge()
 
