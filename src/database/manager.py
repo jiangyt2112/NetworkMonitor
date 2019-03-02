@@ -220,7 +220,7 @@ class Manager(object):
         # start_time = format_time(time.time())
         update_sql = ("update task set status = 'START', start_time = '%s',"
                 "network_info = \"%s\", vm_info = \"%s\", vm_num = %d, network_num = %d "
-                "where project = '%s';") %(start_time, str(network_info), str(vm_info), network_num, vm_num, project_name)
+                "where project = '%s';") %(start_time, str(network_info), str(vm_info), vm_num, network_num, project_name)
         print update_sql
         conn = None
         try:

@@ -185,11 +185,11 @@ class Task:
         #     "is_network_node": False,
         #     "topo": "topo_struct"
         # }
-        self.receive_vm_num -= info["vm_num"]
+        self.receive_vm_num += info["vm_num"]
         if info["is_network_node"]:
-            self.receive_network_num -= info["vm_num"] + 1
+            self.receive_network_num += info["vm_num"] + 1
         else:
-            self.receive_network_num -= info["vm_num"]
+            self.receive_network_num += info["vm_num"]
         return json.dumps(item.to_json())
 
 class Tasks:
