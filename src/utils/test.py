@@ -1,6 +1,6 @@
 #!/usr/bin/python2
 import __init__
-from ovs import bridge
+from ovs.bridge import Bridge
 br = Bridge()
 
 if __name__ == '__main__':
