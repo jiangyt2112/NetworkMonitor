@@ -170,7 +170,17 @@ class Task:
         #     "is_network_node": False,
         #     "topo": "topo_struct"
         # }
-        return json.dumps(items)
+        result = {
+            "project": self.project,
+            "req_id": self.req_id,
+            "item_num": items["item_num"],
+            "info": None
+        }
+        info = []
+        for i in items["item_info"]:
+            info.append(json.loads(i))
+        result["info"] = info
+        return json.dumps(result)
 
     def process_item(self, item):
         # process item to update receive_vm_num receive_network_num
