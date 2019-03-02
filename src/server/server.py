@@ -259,7 +259,7 @@ class Item:
             'type': self.type,
             'req_id': self.req_id,
             'project': self.project,
-            'info': json.dumps(self.info)
+            'info': self.info
         }
 
 class Worker(threading.Thread):
