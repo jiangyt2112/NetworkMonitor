@@ -9,7 +9,11 @@ from ovs.bridge import Bridge
 # 61205745-b2bf-4db0-ad50-e7a60bf08bd5
 
 def exe(cmd):
-	return commands.getstatusoutput(cmd)
+	ret, result = commands.getstatusoutput(cmd)
+	if ret == 0:
+		return True, result
+	else:
+		return False, result
 
 def get_vm_uuids():
 	# get all vm uuid in the host
@@ -26,13 +30,13 @@ def get_vm_uuids():
 
 def get_hostname():
 	ret, name = exe('hostname')
-	if ret != 0:
+	if not ret:
 		return false, name
 	return True, name
 
 def get_host_ip():
 	ret, ips = exe('ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk \'{print $2}\'|tr -d "addr:"')
-	if ret != 0:
+	if not ret:
 		return False, ips
 	return True, ips.split()
 
@@ -53,7 +57,7 @@ def get_bridge():
 
 def check_service(service):
 	ret, result = exe("systemctl status %s" %(service))
-	if ret == False:
+	if not ret:
 		return False, None
 	status = result.split("\n").split()[1]
 	if status == "active":
