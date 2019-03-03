@@ -59,7 +59,7 @@ def check_service(service):
 	ret, result = exe("systemctl status %s" %(service))
 	if not ret:
 		return False, None
-	status = result.split("\n").split()[1]
+	status = result.split("\n")[2].split()[1]
 	if status == "active":
 		return True, True
 	else:
