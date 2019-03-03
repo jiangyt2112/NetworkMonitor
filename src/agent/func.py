@@ -49,7 +49,7 @@ def get_topo():
 
 def get_bridge():
 	br = Bridge()
-    return br.show_br()
+	return br.show_br()
 
 def check_service(service):
 	ret, result = exe("systemctl status %s" %(service))
