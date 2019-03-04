@@ -20,6 +20,7 @@ def get_project_network_info(auth_token, auth_url, endpoint):
 	networks = (neutron.list_networks())["networks"]
 	subnets = (neutron.list_subnets())["subnets"]
 	ports = (neutron.list_ports())["ports"]
+	print neutron.list_routers()
 	
 	for network in networks:
 		info = {}
