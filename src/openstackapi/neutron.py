@@ -7,7 +7,7 @@ def get_project_network_info(auth_token, auth_url, endpoint):
 	#print neutron.list_networks()
 	#print neutron.list_subnets()
 	#print neutron.list_ports()
-	network_info = {"networks": [], "subnets": [], "ports": []}
+	network_info = {"networks": [], "subnets": [], "ports": [], "routers": None}
 	network_attributes = ['provider:physical_network', 'port_security_enabled', 'provider:network_type', 'id',
 						'router:external', 'availability_zones', 'shared', 'project_id', 'status', 'subnets',
 						'updated_at', 'provider:segmentation_id', 'name', 'admin_state_up', 'tenant_id', 'created_at',
@@ -20,7 +20,7 @@ def get_project_network_info(auth_token, auth_url, endpoint):
 	networks = (neutron.list_networks())["networks"]
 	subnets = (neutron.list_subnets())["subnets"]
 	ports = (neutron.list_ports())["ports"]
-	print neutron.list_routers()
+	routers = (neutron.list_routers())["routers"]
 	
 	for network in networks:
 		info = {}
@@ -40,6 +40,7 @@ def get_project_network_info(auth_token, auth_url, endpoint):
 			info[key] = port[key]
 		network_info["ports"].append(info)
 
+	network_info["routers"] = routers
 	return network_info
 
 if __name__ == '__main__':

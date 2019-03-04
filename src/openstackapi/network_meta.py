@@ -233,3 +233,40 @@
 		}
 	]
 }
+
+
+{'routers': 
+	[
+		{
+			u'status': u'ACTIVE', 
+			u'external_gateway_info': 
+				{
+					u'network_id': u'f89e858b-b386-47b5-b987-7a70bd72e861', 
+					u'enable_snat': True, 
+					u'external_fixed_ips': 
+						[
+							{
+								u'subnet_id': u'4d0f1eb6-16ef-4353-874a-0fe48b707e2a', 
+								u'ip_address': u'192.168.166.28'
+							}
+						]
+				}, 
+			u'availability_zone_hints': [], 
+			u'availability_zones': [u'nova'], 
+			u'description': u'', 
+			u'tags': [], 
+			u'tenant_id': u'a95424bbdca6410092073d564f1f4012', 
+			u'created_at': u'2018-10-26T09:35:38Z', 
+			u'admin_state_up': True, 
+			u'distributed': False, 
+			u'updated_at': u'2018-10-26T09:35:56Z', 
+			u'ha': False, 
+			u'flavor_id': None, 
+			u'revision_number': 4, 
+			u'routes': [], 
+			u'project_id': u'a95424bbdca6410092073d564f1f4012', 
+			u'id': u'd4edac45-231a-4b5e-9e95-c629d5c7fc62', 
+			u'name': u'R'
+		}
+	]
+}
