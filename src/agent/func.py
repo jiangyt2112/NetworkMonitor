@@ -139,6 +139,13 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips):
 		br_int_port_info['next'] = 0
 		topo['br-int-port'].append(br_int_port_info)
 
+def is_same_net(qg_info, port):
+	for addr in qg_info['addresses']:
+		if port['fixed_ips'][0]['subnet_id'] == addr['subnet_id']:
+			return True
+	return False
+
+
 def get_network_top(networks_info, topo, touch_ips):
 	# dhcp
 	for port in networks_info["port"]:
@@ -160,7 +167,7 @@ def get_network_top(networks_info, topo, touch_ips):
 			tap_info['status'] = port['status']
 			tap_info['addresses'] = []
 			for i in port['fixed_ips']:
-			 	tap_info['addresses'].append(i['ip_address'])
+			 	tap_info['addresses'].append(i)
 			tap_info['type'] = "tap device"
 			tap_info['check'] = {"result": None, "error_msg": ""}
 			tap_info['next'] = len(topo['qbr'])
@@ -199,8 +206,82 @@ def get_network_top(networks_info, topo, touch_ips):
 			br_int_port_info['check'] = {"result": None, "error_msg": ""}
 			br_int_port_info['next'] = 0
 			topo['br-int-port'].append(br_int_port_info)
-	# router
-	
+
+	for r in networks_info['routers']:
+		router_info = {}
+		router_info['id'] = r['id']
+		router_info['name'] = r['name']
+		router_info['namespaces'] = "qrouter-" + r['id']
+		router_info['status'] = r['status']
+		router_info['check'] = {"result": None, "error_msg": ""}
+		router_info['next'] = []
+		# qr qg
+		
+		for port in networks_info['port']:
+			if port['device_id'] == router_info['id']:
+				router_info['next'].append(len(topo['tap']))
+				q_info = {}
+				q_info['id'] = port['id']
+				if port['device_owner'] == 'network:router_interface':
+					q_info['name'] = "qr" + port['id'][:11]
+				else:
+					q_info['name'] = "qg" + port['id'][:11]
+				q_info['mac_addr'] = port['mac_addr']
+				q_info['status'] = port['status']
+				q_info['addresses'] = []
+				for i in port['fixed_ips']:
+				 	q_info['addresses'].append(i)
+				q_info['type'] = "ovs internal"
+				q_info['check'] = {"result": None, "error_msg": ""}
+				q_info['next'] = len(topo['qbr'])
+				router_info['next'] = len(topo['tap'])
+				topo['tap'].append(q_info)
+
+				qbr_info = {}
+				#id11 = topo['tap'][tap_index + i]['id'][:11]
+				qbr_info['name'] = ""
+				qbr_info['interfaces'] = ""
+				qbr_info['type'] = "placeholder"
+				qbr_info['check'] = {"result": None, "error_msg": ""}
+				qbr_info['next'] = len(topo['qvb'])
+				topo['qbr'].append(qbr_info)
+
+				qvb_info = {}
+				qvb_info['name'] = ""
+				qvb_info['master'] = ""
+				qvb_info['type'] = "placeholder"
+				qvb_info['check'] = {"result": None, "error_msg": ""}
+				qvb_info['next'] = len(topo['qvo'])
+				topo['qvb'].append(qvb_info)
+
+				qvo_info = {}
+				qvo_info['name'] = ""
+				qvo_info['master'] = ''
+				qvo_info['type'] = "placeholder"
+				qvo_info['check'] = {"result": None, "error_msg": ""}
+				qvo_info['next'] = len(topo['br-int-port'])
+				topo['qvo'].append(qvo_info)
+
+				br_int_port_info = {}
+				br_int_port_info['name'] = q_info['name']
+				br_int_port_info['tag'] = None
+				br_int_port_info['interface'] = br_int_info['name']
+				br_int_port_info['type'] = "internal"
+				br_int_port_info['check'] = {"result": None, "error_msg": ""}
+				br_int_port_info['next'] = 0
+				topo['br-int-port'].append(br_int_port_info)
+
+				
+	for port in networks_info['port']:
+		if port['device_owner'] == 'network:floatingip':
+			for t in topo['tap']:
+				if t['type'] == "ovs internal" and is_same_net(t, port):
+					t['addresses'].append(
+						{'subnet_id': port['addresses'][0]['subnet_id'],
+						'ip_address': port['addresses'][0]['ip_address'],
+						'type': 'floatingip'
+						})
+
 
 
 def get_topo(vms_info, networks_info):
@@ -211,6 +292,7 @@ def get_topo(vms_info, networks_info):
             "qvb":[],
             "qvo":[],
             "br-int-port":[],
+            "br-int":[],
             "ovs-provider":[],
             "nic":[],
             "physical-switch":[]
@@ -222,6 +304,7 @@ def get_topo(vms_info, networks_info):
 
 	get_network_top(networks_info, topo, touch_ips)
 
+	br = Bridge()
 	# br-int
 	# br-ex br-tun
 	# physical nic
