@@ -54,7 +54,7 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips):
 		'host': vm_info['OS-EXT-SRV-ATTR:host'],
 		'name': vm_info['name'],
 		'created': vm_info['created'],
-		'addresses': {}
+		'addresses': {},
 		'type': "virtual host",
 		'check': {"result": None, "error_msg": ""},
 		'performance': None,
