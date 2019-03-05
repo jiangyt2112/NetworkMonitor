@@ -283,6 +283,52 @@ def get_network_top(networks_info, topo, touch_ips):
 						})
 
 
+def get_network_from_ip(ip):
+	# 192.168.166.9/24
+	addr = ip.slit('/')[0].split('.')
+	mask = int(ip.slit('/')[1])
+	temp_mask = mask
+	for i in range(len(addr)):
+		addr[i] = int(addr[i])
+	index = len(addr) - 1
+	while mask >= 8:
+		addr[index] = 0
+		index -= 1
+		mask -= 8
+	if mask != 0:
+		addr[index] /= pow(2, mask)
+		addr[index] *= pow(2, mask)
+
+	ret_ip = ""
+	for i in range(len(addr)):
+		if i != 0:
+			ret_ip += '.'
+		ret_ip += addr[i]
+	ret_ip += "/" + str(mask)
+	return ret_ip
+
+def get_nic_ex_info(nic_ex_info):
+	# nic_ex_info = {}
+	# nic_ex_info['name'] = ""
+	# nic_ex_info['device'] = ""
+	# nic_ex_info['physical_device'] = ""
+	# nic_ex_info['ip_address'] = ""
+	# nic_ex_info['type'] = "ovs bridge"
+	# nic_ex_info['check'] = {"result": None, "error_msg": ""}
+	ret, result = exe("ip address | grep br-ex")
+	if ret == False:
+		return ret, result
+	nic_ex_info['ip_address'] = result.split('\n')[1].split()[1]
+	br = Bridge()
+	for pd in br['br-ex']['Port']:
+		if pd != "br-ex" and pd != "phy-br-ex":
+			nic_ex_info['physical_device'] = pd
+	return True, None
+
+def get_nic_tun_ip():
+
+
+def get_nic_tun_info():
 
 def get_topo(vms_info, networks_info):
 	topo = {
@@ -305,10 +351,80 @@ def get_topo(vms_info, networks_info):
 	get_network_top(networks_info, topo, touch_ips)
 
 	br = Bridge()
-	# br-int
-	# br-ex br-tun
-	# physical nic
+	if br == {}:
+		return False, "get ovs bridge info error."
+	br_int_info = br['br-int']
+	br_int_info['type'] = "ovs bridge"
+	br_int_info['check'] = {"result": None, "error_msg": ""}
+	br_int_info['next'] = [0]
+	topo['br-int'].append(br_int_info)
+	br_tun_info = br['br-tun']
+	br_tun_info['type'] = "ovs bridge"
+	br_tun_info['check'] = {"result": None, "error_msg": ""}
+	br_tun_info['next'] = [0]
+	topo['br-provider'].append(br_tun_info)
+	if 'br-ex' in br:
+		br_int_info['next'].append(1)
+		br_ex_info = br['br-ex']
+		br_ex_info['type'] = "ovs bridge"
+		br_ex_info['check'] = {"result": None, "error_msg": ""}
+		br_ex_info['next'] = [1]
+		topo['br-provider'].append(br_ex_info)
 
+	nic_ex_info = {}
+	nic_ex_info['name'] = ""
+	nic_ex_info['device'] = ""
+	nic_ex_info['physical_device'] = ""
+	nic_ex_info['ip_address'] = ""
+	nic_ex_info['type'] = "ovs bridge"
+	nic_ex_info['check'] = {"result": None, "error_msg": ""}
+	nic_ex_info['next'] = [1]
+	ret, error_msg = get_nic_ex_info(nic_ex_info)
+	if ret == False:
+		return ret, error_msg
+
+	nic_tun_ip = get_nic_tun_ip()
+	if nic_tun_ip == nic_ex_info['ip_address']
+		topo['nic'].append(nic_ex_info)
+		nic_ex_info['next'] = 0
+		if 'br-ex' in br:
+			br_ex_info['next'] = 0
+		physical_switch_info = {}
+		physical_switch_info['type'] = 'physical switch'
+		physical_switch_info['network'] = get_network_from_ip(nic_ex_info['ip_address'])
+		physical_switch_info['name'] = "physical switch " + physical_switch_info['network']
+		physical_switch_info['check'] = {"result": None, "error_msg": ""}
+		physical_switch_info['next'] = None
+		topo['physical-switch'].append(physical_switch_info)
+	else:
+		nic_tun_info = {}
+		nic_tun_info['name'] = ""
+		nic_tun_info['device'] = ""
+		nic_tun_info['physical_device'] = ""
+		nic_tun_info['ip_address'] = ""
+		nic_tun_info['type'] = "ovs bridge"
+		nic_tun_info['check'] = {"result": None, "error_msg": ""}
+		nic_tun_info['next'] = [0]
+		get_nic_tun_info(nic_tun_info)
+		topo['nic'].append(nic_tun)
+		topo['nic'].append(nic_ex)
+
+		physical_switch_tun_info = {}
+		physical_switch_tun_info['type'] = 'physical switch'
+		physical_switch_tun_info['network'] = get_network_from_ip(nic_tun_info['ip_address'])
+		physical_switch_tun_info['name'] = "physical switch " + physical_switch_tun_info['network']
+		physical_switch_tun_info['check'] = {"result": None, "error_msg": ""}
+		physical_switch_tun_info['next'] = None
+		topo['physical-switch'].append(physical_switch_tun_info)
+
+		physical_switch_ex_info = {}
+		physical_switch_ex_info['type'] = 'physical switch'
+		physical_switch_ex_info['network'] = get_network_from_ip(nic_ex_info['ip_address'])
+		physical_switch_ex_info['name'] = "physical switch " + physical_switch_ex_info['network']
+		physical_switch_ex_info['check'] = {"result": None, "error_msg": ""}
+		physical_switch_ex_info['next'] = None
+		topo['physical-switch'].append(physical_switch_ex_info)
+		
 	return True, topo
 
 
