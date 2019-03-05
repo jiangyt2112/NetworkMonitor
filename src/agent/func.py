@@ -385,7 +385,7 @@ def get_topo(vms_info, networks_info):
 		return ret, error_msg
 
 	nic_tun_ip = get_nic_tun_ip()
-	if nic_tun_ip == nic_ex_info['ip_address']
+	if nic_tun_ip == nic_ex_info['ip_address']:
 		topo['nic'].append(nic_ex_info)
 		nic_ex_info['next'] = 0
 		if 'br-ex' in br:
