@@ -305,7 +305,7 @@ def get_network_from_ip(ip):
 		if i != 0:
 			ret_ip += '.'
 		ret_ip += str(addr[i])
-	ret_ip += "/" + str(mask)
+	ret_ip += "/" + str(temp_mask)
 	return ret_ip
 
 def get_nic_ex_info(nic_ex_info):
@@ -327,10 +327,30 @@ def get_nic_ex_info(nic_ex_info):
 	return True, None
 
 def get_nic_tun_ip():
-	pass
+	ret, result = exe('ovs-vsctl show | grep "local_ip"')
+	if ret == False:
+		return ret, result
 
-def get_nic_tun_info():
-	pass
+	start = result.find("local_ip")
+	left = result.find("\"", start)
+	right = result.find("\"", left + 1)
+	tun_ip = result[left + 1, right]
+
+	ret, result = exe('ip a | grep ' + tun_ip)
+	if ret == False:
+		return ret, result
+
+	return True, result.strip().split(' ')[1]
+
+
+def get_nic_tun_info(nic_tun_info):
+	# nic_tun_info = {}
+	ret, result = exe('ip a | grep ' + tun_ip)
+	if ret == False:
+		return ret, result
+	nic_tun_info['name'] = result.strip().split(' ')[-1]
+	nic_tun_info['device'] = nic_tun_info['name']
+	nic_tun_info['physical_device'] = nic_tun_info['name']
 
 def get_topo(vms_info, networks_info):
 	topo = {
@@ -385,7 +405,10 @@ def get_topo(vms_info, networks_info):
 	if ret == False:
 		return ret, error_msg
 
-	nic_tun_ip = get_nic_tun_ip()
+	ret, nic_tun_ip = get_nic_tun_ip()
+	if ret == False:
+		return ret, nic_tun_ip
+
 	if nic_tun_ip == nic_ex_info['ip_address']:
 		topo['nic'].append(nic_ex_info)
 		nic_ex_info['next'] = 0
@@ -403,11 +426,14 @@ def get_topo(vms_info, networks_info):
 		nic_tun_info['name'] = ""
 		nic_tun_info['device'] = ""
 		nic_tun_info['physical_device'] = ""
-		nic_tun_info['ip_address'] = ""
-		nic_tun_info['type'] = "ovs bridge"
+		nic_tun_info['ip_address'] = nic_tun_ip
+		nic_tun_info['type'] = "interface"
 		nic_tun_info['check'] = {"result": None, "error_msg": ""}
 		nic_tun_info['next'] = [0]
-		get_nic_tun_info(nic_tun_info)
+		ret, result = get_nic_tun_info(nic_tun_info)
+		if ret == False:
+			return ret, result
+
 		topo['nic'].append(nic_tun)
 		topo['nic'].append(nic_ex)
 
