@@ -288,6 +288,7 @@ def get_network_from_ip(ip):
 	addr = ip.split('/')[0].split('.')
 	mask = int(ip.split('/')[1])
 	temp_mask = mask
+	mask = 32 - mask
 	for i in range(len(addr)):
 		addr[i] = int(addr[i])
 	index = len(addr) - 1
