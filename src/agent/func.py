@@ -286,7 +286,7 @@ def get_network_top(networks_info, topo, touch_ips):
 def get_network_from_ip(ip):
 	# 192.168.166.9/24
 	addr = ip.split('/')[0].split('.')
-	mask = int(ip.slit('/')[1])
+	mask = int(ip.split('/')[1])
 	temp_mask = mask
 	for i in range(len(addr)):
 		addr[i] = int(addr[i])
