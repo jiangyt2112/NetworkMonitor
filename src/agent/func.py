@@ -330,21 +330,21 @@ def get_nic_tun_ip():
 
 def get_nic_tun_info():
 	pass
-	
+
 def get_topo(vms_info, networks_info):
 	topo = {
-            "device": [],
-            "tap":[],
-            "qbr":[],
-            "qvb":[],
-            "qvo":[],
-            "br-int-port":[],
-            "br-int":[],
-            "ovs-provider":[],
-            "nic":[],
-            "physical-switch":[]
-        }
-    touch_ips = set()
+		"device": [],
+		"tap":[],
+		"qbr":[],
+		"qvb":[],
+		"qvo":[],
+		"br-int-port":[],
+		"br-int":[],
+		"ovs-provider":[],
+		"nic":[],
+		"physical-switch":[]
+		}
+	touch_ips = set()
 
 	for vm in vms_info:
 		get_vm_topo(vm, networks_info, topo, touch_ips)
