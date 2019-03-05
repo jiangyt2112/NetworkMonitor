@@ -326,10 +326,11 @@ def get_nic_ex_info(nic_ex_info):
 	return True, None
 
 def get_nic_tun_ip():
-
+	pass
 
 def get_nic_tun_info():
-
+	pass
+	
 def get_topo(vms_info, networks_info):
 	topo = {
             "device": [],
