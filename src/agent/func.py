@@ -303,7 +303,7 @@ def get_network_from_ip(ip):
 	for i in range(len(addr)):
 		if i != 0:
 			ret_ip += '.'
-		ret_ip += addr[i]
+		ret_ip += str(addr[i])
 	ret_ip += "/" + str(mask)
 	return ret_ip
 
