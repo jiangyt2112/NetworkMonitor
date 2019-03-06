@@ -386,11 +386,14 @@ def get_topo(vms_info, networks_info):
 	get_network_topo(networks_info, topo, touch_ips)
 	AGENTLOG.info("agent.func.get_topo -  get network topo done.")
 
-
+	AGENTLOG.info("agent.func.get_topo -  get ovs info start.")
 	br = Bridge()
 	if br == {}:
 		return False, "get ovs bridge info error."
 	br_info = br.show_br()
+	AGENTLOG.info("agent.func.get_topo -  get ovs info done.")
+
+
 	br_int_info = br_info['br-int']
 	br_int_info['type'] = "ovs bridge"
 	br_int_info['check'] = {"result": None, "error_msg": ""}
