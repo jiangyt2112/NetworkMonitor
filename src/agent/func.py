@@ -224,7 +224,7 @@ def get_network_top(networks_info, topo, touch_ips):
 		for port in networks_info['ports']:
 			if port['device_id'] == router_info['id']:
 				print router_info['next']
-				router_info['next'].append(len(topo['tap']))
+				#router_info['next'].append(len(topo['tap']))
 				q_info = {}
 				q_info['id'] = port['id']
 				if port['device_owner'] == 'network:router_interface':
@@ -239,7 +239,7 @@ def get_network_top(networks_info, topo, touch_ips):
 				q_info['type'] = "ovs internal"
 				q_info['check'] = {"result": None, "error_msg": ""}
 				q_info['next'] = len(topo['qbr'])
-				router_info['next'] = len(topo['tap'])
+				router_info['next'].append(len(topo['tap']))
 				topo['tap'].append(q_info)
 
 				qbr_info = {}
