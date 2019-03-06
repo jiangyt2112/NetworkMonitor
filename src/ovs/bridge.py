@@ -1,5 +1,5 @@
 # coding=utf-8
-
+import __init__
 from itertools import chain
 
 from ovs import ovsdb
