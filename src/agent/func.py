@@ -5,6 +5,7 @@ import libvirt
 import libxml2
 import json
 from ovs.bridge import Bridge
+from utils.log import AGENTLOG
 # 61205745-b2bf-4db0-ad50-e7a60bf08bd5
 # 61205745-b2bf-4db0-ad50-e7a60bf08bd5
 
@@ -375,12 +376,15 @@ def get_topo(vms_info, networks_info):
 		}
 	touch_ips = set()
 
+	AGENTLOG.info("agent.func.get_topo -  get vm topo start.")
 	for vm in vms_info:
 		get_vm_topo(vm, networks_info, topo, touch_ips)
+	AGENTLOG.info("agent.func.get_topo -  get vm topo done.")
 
-	print "get network topo start."
+
+	AGENTLOG.info("agent.func.get_topo -  get network topo start.")
 	get_network_topo(networks_info, topo, touch_ips)
-	print "get network topo done."
+	AGENTLOG.info("agent.func.get_topo -  get network topo done.")
 
 
 	br = Bridge()
@@ -413,13 +417,18 @@ def get_topo(vms_info, networks_info):
 	nic_ex_info['type'] = "ovs bridge"
 	nic_ex_info['check'] = {"result": None, "error_msg": ""}
 	nic_ex_info['next'] = [1]
+
+	AGENTLOG.info("agent.func.get_topo -  get_nic_ex_info start.")
 	ret, error_msg = get_nic_ex_info(nic_ex_info)
 	if ret == False:
 		return ret, error_msg
+	AGENTLOG.info("agent.func.get_topo -  get_nic_ex_info done.")
 
+	AGENTLOG.info("agent.func.get_topo -  get_nic_tun_ip start.")
 	ret, nic_tun_ip = get_nic_tun_ip()
 	if ret == False:
 		return ret, nic_tun_ip
+	AGENTLOG.info("agent.func.get_topo -  get_nic_tun_ip done.")
 
 	if nic_tun_ip == nic_ex_info['ip_address']:
 		topo['nic'].append(nic_ex_info)
@@ -442,9 +451,12 @@ def get_topo(vms_info, networks_info):
 		nic_tun_info['type'] = "interface"
 		nic_tun_info['check'] = {"result": None, "error_msg": ""}
 		nic_tun_info['next'] = [0]
+
+		AGENTLOG.info("agent.func.get_topo -  get_nic_tun_info start.")
 		ret, result = get_nic_tun_info(nic_tun_info)
 		if ret == False:
 			return ret, result
+		AGENTLOG.info("agent.func.get_topo -  get_nic_tun_info done.")
 
 		topo['nic'].append(nic_tun_info)
 		topo['nic'].append(nic_ex_info)
