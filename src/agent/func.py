@@ -340,7 +340,7 @@ def get_nic_tun_ip():
 	start = result.find("local_ip")
 	left = result.find("\"", start)
 	right = result.find("\"", left + 1)
-	tun_ip = result[left + 1, right]
+	tun_ip = result[left + 1: right]
 
 	ret, result = exe('ip a | grep ' + tun_ip)
 	if ret == False:
