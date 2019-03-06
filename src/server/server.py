@@ -196,7 +196,7 @@ class Task:
         #     "topo": "topo_struct"
         # }
         self.receive_vm_num += info["vm_num"]
-        if info["is_network_node"]:
+        if info["node_type"] == "network":
             self.receive_network_num += info["vm_num"] + 1
         else:
             self.receive_network_num += info["vm_num"]
