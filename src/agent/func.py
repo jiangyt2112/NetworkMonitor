@@ -443,8 +443,8 @@ def get_topo(vms_info, networks_info):
 		if ret == False:
 			return ret, result
 
-		topo['nic'].append(nic_tun)
-		topo['nic'].append(nic_ex)
+		topo['nic'].append(nic_tun_info)
+		topo['nic'].append(nic_ex_info)
 
 		physical_switch_tun_info = {}
 		physical_switch_tun_info['type'] = 'physical switch'
