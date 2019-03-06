@@ -150,7 +150,7 @@ def is_same_net(qg_info, port):
 	return False
 
 
-def get_network_top(networks_info, topo, touch_ips):
+def get_network_topo(networks_info, topo, touch_ips):
 	# dhcp
 	for port in networks_info["ports"]:
 		if port['device_owner'] == 'network:dhcp':
@@ -378,7 +378,10 @@ def get_topo(vms_info, networks_info):
 	for vm in vms_info:
 		get_vm_topo(vm, networks_info, topo, touch_ips)
 
-	get_network_top(networks_info, topo, touch_ips)
+	print "get network topo start."
+	get_network_topo(networks_info, topo, touch_ips)
+	print "get network topo done."
+
 
 	br = Bridge()
 	if br == {}:
