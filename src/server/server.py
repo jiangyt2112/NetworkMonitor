@@ -92,7 +92,7 @@ class Task:
             self.item_flag = True
         #def receive_item(self, project_name, req_id, receive_vm_num, receive_network_num, info):
         item = self.process_item(item)
-        print item
+        print "item len: %s" %(len(item))
         ret, msg = manager.receive_item(self.project, self.req_id, self.receive_vm_num, self.receive_network_num, item)
         if ret == False:
             SERVERLOG.error("server.Task.receive_item - project-%s - req_id-%s manager.receive_item return error:%s" 
