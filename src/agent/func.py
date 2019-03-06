@@ -358,6 +358,7 @@ def get_nic_tun_info(nic_tun_info):
 	nic_tun_info['name'] = result.strip().split(' ')[-1]
 	nic_tun_info['device'] = nic_tun_info['name']
 	nic_tun_info['physical_device'] = nic_tun_info['name']
+	return True, nic_tun_info
 
 def get_topo(vms_info, networks_info):
 	topo = {
