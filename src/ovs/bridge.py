@@ -5,6 +5,7 @@ from itertools import chain
 from ovs import ovsdb
 from ovs.utils import execute
 from ovs.utils import decorator
+from agent.func import exe
 
 class Bridge():
     
@@ -325,4 +326,40 @@ class Bridge():
                 value = params.get(key)
                 param_list.append('{0}={1}'.format(key, value))
         return ' '.join(param_list)
+
+
+def get_ovs_info():
+    brs, br = {}, ''
+    cmd = 'ovs-vsctl show'
+    ret, result = exe(cmd)
+    if not ret:
+        return ret, result
+
+    for l in result.split('\n'):
+        l = l.strip().replace('"', '')
+        if l.startswith('Bridge '):
+            br = l.lstrip('Bridge ')
+            brs[br] = {}
+            brs[br]['Controller'] = []
+            brs[br]['Port'] = {}
+            brs[br]['fail_mode'] = ''
+        else:
+            if l.startswith('Controller '):
+                brs[br]['Controller'].append(l.replace('Controller ', ''))
+            elif l.startswith('fail_mode: '):
+                brs[br]['fail_mode'] = l.replace('fail_mode: ', '')
+            elif l.startswith('Port '):
+                phy_port = l.replace('Port ', '')  # e.g., br-eth0
+                brs[br]['Port'][phy_port] = {'vlan': '', 'type': ''}
+            elif l.startswith('tag: '):
+                brs[br]['Port'][phy_port]['vlan'] = l.replace('tag: ', '')
+            elif l.startswith('Interface '):
+                brs[br]['Port'][phy_port]['intf'] = \
+                    l.replace('Interface ', '')
+            elif l.startswith('type: '):
+                brs[br]['Port'][phy_port]['type'] = l.replace('type: ', '')
+    return True, brs
+
+if __name__ == '__main__':
+    print get_ovs_info()
     
