@@ -42,7 +42,7 @@ def get_host_ip():
 
 def is_network_node():
 	ret, info = exe('systemctl status neutron-server.service')
-	if ret != 0:
+	if not ret:
 		return False, info
 
 	if info.split("\n")[2].strip().split(' ')[1] == 'active':
