@@ -42,9 +42,13 @@ def get_host_ip():
 
 def is_network_node():
 	ret, info = exe('systemctl status neutron-server.service')
-	if ret == 0:
-		return True, None
-	return False, info
+	if ret != 0:
+		return False, info
+
+	if info.split("\n")[2].strip().split(' ')[1] == 'active':
+		return True, True
+	else:
+		return True, False
 
 def get_vm_topo(vm_info, networks_info, topo, touch_ips):
 	# vm level
