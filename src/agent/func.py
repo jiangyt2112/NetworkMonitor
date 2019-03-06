@@ -137,7 +137,7 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips):
 		br_int_port_info = {}
 		br_int_port_info['name'] = "qvo" + id11
 		br_int_port_info['tag'] = None
-		br_int_port_info['interface'] = br_int_info['name']
+		br_int_port_info['interface'] = br_int_port_info['name']
 		br_int_port_info['type'] = "ovs bridge port"
 		br_int_port_info['check'] = {"result": None, "error_msg": ""}
 		br_int_port_info['next'] = 0
