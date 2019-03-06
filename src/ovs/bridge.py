@@ -5,7 +5,7 @@ from itertools import chain
 from ovs import ovsdb
 from ovs.utils import execute
 from ovs.utils import decorator
-from agent.func import exe
+
 
 class Bridge():
     
@@ -327,6 +327,13 @@ class Bridge():
                 param_list.append('{0}={1}'.format(key, value))
         return ' '.join(param_list)
 
+
+def exe(cmd):
+    ret, result = commands.getstatusoutput(cmd)
+    if ret == 0:
+        return True, result
+    else:
+        return False, result
 
 def get_ovs_info():
     brs, br = {}, ''
