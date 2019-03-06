@@ -96,7 +96,7 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips):
 			tap_info = {}
 			tap_info['id'] = port['id']
 			tap_info['name'] = "tap" + port['id'][:11]
-			tap_info['mac_addr'] = port['mac_addr']
+			tap_info['mac_address'] = port['mac_address']
 			tap_info['status'] = port['status']
 			tap_info['addresses'] = []
 			tap_info['type'] = "tap device"
@@ -167,7 +167,7 @@ def get_network_top(networks_info, topo, touch_ips):
 			tap_info = {}
 			tap_info['id'] = port['id']
 			tap_info['name'] = "tap" + port['id'][:11]
-			tap_info['mac_addr'] = port['mac_addr']
+			tap_info['mac_address'] = port['mac_address']
 			tap_info['status'] = port['status']
 			tap_info['addresses'] = []
 			for i in port['fixed_ips']:
@@ -230,7 +230,7 @@ def get_network_top(networks_info, topo, touch_ips):
 					q_info['name'] = "qr" + port['id'][:11]
 				else:
 					q_info['name'] = "qg" + port['id'][:11]
-				q_info['mac_addr'] = port['mac_addr']
+				q_info['mac_address'] = port['mac_address']
 				q_info['status'] = port['status']
 				q_info['addresses'] = []
 				for i in port['fixed_ips']:
