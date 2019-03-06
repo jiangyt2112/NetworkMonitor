@@ -474,5 +474,6 @@ if __name__ == '__main__':
 	# print get_vm_uuids()
 	# print get_host_ip()
 	# print is_network_node()
-	print check_service("openstack-nova-compute")
+	# print check_service("openstack-nova-compute")
+	print is_network_node()
 	    
