@@ -119,11 +119,10 @@ class Task:
             AGENTLOG.error("agent.Task.get_info - project-%s - req_id-%s get network node flag error:%s." 
                 %(self.project, self.req_id, network_node_flag))
             return False, network_node_flag
-
-        print "###########"
-        print self.valid_vm_info
-        print self.network_info
+            
+        print "get topo start."
         ret, topo = get_topo(self.valid_vm_info, self.network_info)
+        print "get topo done."
         if ret == False:
             AGENTLOG.error("agent.Task.get_info - project-%s - req_id-%s get topo error:%s." 
                 %(self.project, self.req_id, topo))
