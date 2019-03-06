@@ -326,7 +326,8 @@ def get_nic_ex_info(nic_ex_info):
 		return ret, result
 	nic_ex_info['ip_address'] = result.split('\n')[1].split()[1]
 	br = Bridge()
-	for pd in br['br-ex']['Port']:
+	br_info = br.show_br()
+	for pd in br_info['br-ex']['Port']:
 		if pd != "br-ex" and pd != "phy-br-ex":
 			nic_ex_info['physical_device'] = pd
 	return True, None
