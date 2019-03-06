@@ -223,6 +223,7 @@ def get_network_top(networks_info, topo, touch_ips):
 		
 		for port in networks_info['ports']:
 			if port['device_id'] == router_info['id']:
+				print router_info['next']
 				router_info['next'].append(len(topo['tap']))
 				q_info = {}
 				q_info['id'] = port['id']
