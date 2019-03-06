@@ -120,18 +120,27 @@ class Task:
                 %(self.project, self.req_id, network_node_flag))
             return False, network_node_flag
 
+        print "###########"
+        print self.valid_vm_info
+        print self.network_info
         ret, topo = get_topo(self.valid_vm_info, self.network_info)
         if ret == False:
             AGENTLOG.error("agent.Task.get_info - project-%s - req_id-%s get topo error:%s." 
                 %(self.project, self.req_id, topo))
             return False, topo
 
+        if network_node_flag:
+            node_type = "network"
+        else:
+            node_type = "compute"
+
         info = {
             'vm_num': len(self.valid_vm_info),
             'hostname': hostname,
             'host': ips,
-            'is_network_node': network_node_flag,
-            'topo': topo
+            'node_type': node_type,
+            'topo': topo,
+            'other': None
         }
         return True, info
 
