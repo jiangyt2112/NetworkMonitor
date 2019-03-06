@@ -390,14 +390,14 @@ def get_topo(vms_info, networks_info):
 	br_tun_info['type'] = "ovs bridge"
 	br_tun_info['check'] = {"result": None, "error_msg": ""}
 	br_tun_info['next'] = [0]
-	topo['br-provider'].append(br_tun_info)
+	topo['ovs-provider'].append(br_tun_info)
 	if 'br-ex' in br_info:
 		br_int_info['next'].append(1)
 		br_ex_info = br_info['br-ex']
 		br_ex_info['type'] = "ovs bridge"
 		br_ex_info['check'] = {"result": None, "error_msg": ""}
 		br_ex_info['next'] = [1]
-		topo['br-provider'].append(br_ex_info)
+		topo['ovs-provider'].append(br_ex_info)
 
 	nic_ex_info = {}
 	nic_ex_info['name'] = ""
