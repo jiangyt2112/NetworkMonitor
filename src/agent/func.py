@@ -282,8 +282,8 @@ def get_network_top(networks_info, topo, touch_ips):
 			for t in topo['tap']:
 				if t['type'] == "ovs internal" and is_same_net(t, port):
 					t['addresses'].append(
-						{'subnet_id': port['addresses'][0]['subnet_id'],
-						'ip_address': port['addresses'][0]['ip_address'],
+						{'subnet_id': port['fixed_ips'][0]['subnet_id'],
+						'ip_address': port['fixed_ips'][0]['ip_address'],
 						'type': 'floatingip'
 						})
 
