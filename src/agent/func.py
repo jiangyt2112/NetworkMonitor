@@ -351,6 +351,7 @@ def get_nic_tun_ip():
 
 def get_nic_tun_info(nic_tun_info):
 	# nic_tun_info = {}
+	tun_ip = nic_tun_ip['ip_address']
 	ret, result = exe('ip a | grep ' + tun_ip)
 	if ret == False:
 		return ret, result
