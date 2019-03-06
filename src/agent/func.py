@@ -4,7 +4,7 @@ import commands
 import libvirt
 import libxml2
 import json
-from ovs.bridge import Bridge
+from ovs.bridge import get_ovs_info
 from utils.log import AGENTLOG
 # 61205745-b2bf-4db0-ad50-e7a60bf08bd5
 # 61205745-b2bf-4db0-ad50-e7a60bf08bd5
@@ -326,8 +326,11 @@ def get_nic_ex_info(nic_ex_info):
 	if ret == False:
 		return ret, result
 	nic_ex_info['ip_address'] = result.split('\n')[1].split()[1]
-	br = Bridge()
-	br_info = br.show_br()
+	
+	ret, br_info = get_ovs_info()
+	if ret == False:
+		return ret, br_info
+
 	for pd in br_info['br-ex']['Port']:
 		if pd != "br-ex" and pd != "phy-br-ex":
 			nic_ex_info['physical_device'] = pd
@@ -387,10 +390,11 @@ def get_topo(vms_info, networks_info):
 	AGENTLOG.info("agent.func.get_topo -  get network topo done.")
 
 	AGENTLOG.info("agent.func.get_topo -  get ovs info start.")
-	br = Bridge()
-	if br == {}:
+
+	ret, br_info = get_ovs_info()
+	if ret == False:
 		return False, "get ovs bridge info error."
-	br_info = br.show_br()
+	
 	AGENTLOG.info("agent.func.get_topo -  get ovs info done.")
 
 
@@ -481,11 +485,6 @@ def get_topo(vms_info, networks_info):
 		topo['physical-switch'].append(physical_switch_ex_info)
 		
 	return True, topo
-
-
-def get_bridge():
-	br = Bridge()
-	return br.show_br()
 
 def check_service(service):
 	ret, result = exe("systemctl status %s" %(service))
