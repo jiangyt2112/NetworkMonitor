@@ -380,19 +380,20 @@ def get_topo(vms_info, networks_info):
 	br = Bridge()
 	if br == {}:
 		return False, "get ovs bridge info error."
-	br_int_info = br['br-int']
+	br_info = br.show_br()
+	br_int_info = br_info['br-int']
 	br_int_info['type'] = "ovs bridge"
 	br_int_info['check'] = {"result": None, "error_msg": ""}
 	br_int_info['next'] = [0]
 	topo['br-int'].append(br_int_info)
-	br_tun_info = br['br-tun']
+	br_tun_info = br_info['br-tun']
 	br_tun_info['type'] = "ovs bridge"
 	br_tun_info['check'] = {"result": None, "error_msg": ""}
 	br_tun_info['next'] = [0]
 	topo['br-provider'].append(br_tun_info)
-	if 'br-ex' in br:
+	if 'br-ex' in br_info:
 		br_int_info['next'].append(1)
-		br_ex_info = br['br-ex']
+		br_ex_info = br_info['br-ex']
 		br_ex_info['type'] = "ovs bridge"
 		br_ex_info['check'] = {"result": None, "error_msg": ""}
 		br_ex_info['next'] = [1]
