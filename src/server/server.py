@@ -75,7 +75,7 @@ class Task:
 
         #def start_task(self, project_name, req_id, start_time, network_info, vm_info, network_num, vm_num):
         ret, msg = manager.start_task(self.project, self.req_id, format_time(self.start_time), json.dumps(self.network_info), 
-            jsons.dumps(self.vm_info), self.network_num, self.vm_num)
+            json.dumps(self.vm_info), self.network_num, self.vm_num)
         if ret == False:
             self.status = "ERROR"
             SERVERLOG.error("server.Task.start_task - project-%s - req_id-%s manager.start_task return error:%s" 
