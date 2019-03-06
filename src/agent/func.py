@@ -152,7 +152,7 @@ def is_same_net(qg_info, port):
 
 def get_network_top(networks_info, topo, touch_ips):
 	# dhcp
-	for port in networks_info["port"]:
+	for port in networks_info["ports"]:
 		if port['device_owner'] == 'network:dhcp':
 			dhcp_info = {}
 			#dhcp_info['id'] = port['id']
@@ -221,7 +221,7 @@ def get_network_top(networks_info, topo, touch_ips):
 		router_info['next'] = []
 		# qr qg
 		
-		for port in networks_info['port']:
+		for port in networks_info['ports']:
 			if port['device_id'] == router_info['id']:
 				router_info['next'].append(len(topo['tap']))
 				q_info = {}
@@ -276,7 +276,7 @@ def get_network_top(networks_info, topo, touch_ips):
 				topo['br-int-port'].append(br_int_port_info)
 
 				
-	for port in networks_info['port']:
+	for port in networks_info['ports']:
 		if port['device_owner'] == 'network:floatingip':
 			for t in topo['tap']:
 				if t['type'] == "ovs internal" and is_same_net(t, port):
