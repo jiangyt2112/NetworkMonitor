@@ -180,6 +180,7 @@
 		 u'created_at': u'2018-10-26T09:35:56Z', 
 		 u'binding:vnic_type': u'normal'
 		 }, 
+		 
 		 {u'allowed_address_pairs': [], 
 		 u'extra_dhcp_opts': [], 
 		 u'updated_at': u'2018-10-26T10:01:30Z', 
@@ -205,6 +206,7 @@
 		 u'tenant_id': u'', 
 		 u'created_at': u'2018-10-26T10:01:30Z', 
 		 u'binding:vnic_type': u'normal'}, 
+
 		 {u'allowed_address_pairs': [], 
 		 u'extra_dhcp_opts': [], 
 		 u'updated_at': u'2018-10-26T09:35:43Z', 

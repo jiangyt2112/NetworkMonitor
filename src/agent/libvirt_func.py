@@ -1,3 +1,5 @@
+#!/usr/bin/python2
+import __init__
 import libvirt
 import libxml2
 import json
@@ -18,3 +20,6 @@ else:
         
     odic['alldomains'] = domainlist
     odic['error'] = ''
+
+def test():
+    pass

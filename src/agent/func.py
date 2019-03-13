@@ -216,6 +216,7 @@ def get_network_topo(networks_info, topo, touch_ips):
 		router_info = {}
 		router_info['id'] = r['id']
 		router_info['name'] = r['name']
+		router_info['type'] = "router"
 		router_info['namespaces'] = "qrouter-" + r['id']
 		router_info['status'] = r['status']
 		router_info['check'] = {"result": None, "error_msg": ""}
@@ -495,6 +496,79 @@ def check_service(service):
 		return True, True
 	else:
 		return True, False
+
+def check_network_device(network_topo):
+	AGENTLOG.info("agent.func.check_network_device -  1.check network device level start.")
+	AGENTLOG.info("agent.func.check_network_device -  device num:%d." %(network_topo['device']))
+
+	for dev in network_topo['device']:
+		AGENTLOG.info("agent.func.check_network_device - check device %s.%s ." %(dev['type'], dev['name']))
+		if dev['type'] == 'virtual host':
+			pass
+		elif dev['type'] == 'dhcp':
+			pass
+		elif dev['type'] == 'router':
+			pass
+		else:
+			AGENTLOG.error("agent.func.check_network_device -  unknown device type:%s." %(dev['type']))
+
+	AGENTLOG.info("agent.func.check_network_device -  1.check network device level done.")
+
+def check_network_tap(network_topo):
+	AGENTLOG.info("agent.func.check_network_tap -  1.check network tap level start.")
+	
+	AGENTLOG.info("agent.func.check_network_tap -  1.check network tap level done.")
+
+def check_network_qbr(network_topo):
+	AGENTLOG.info("agent.func.check_network_qbr -  1.check network qbr level start.")
+	
+	AGENTLOG.info("agent.func.check_network_qbr -  1.check network qbr level done.")
+
+def check_network_qvb(network_topo):
+	AGENTLOG.info("agent.func.check_network_qvb -  1.check network qvb level start.")
+	
+	AGENTLOG.info("agent.func.check_network_qvb -  1.check network qvb level done.")
+
+def check_network_qvo(network_topo):
+	AGENTLOG.info("agent.func.check_network_qvo -  1.check network qvo level start.")
+	
+	AGENTLOG.info("agent.func.check_network_qvo -  1.check network qvo level done.")
+
+def check_network_br_int_port(network_topo):
+	AGENTLOG.info("agent.func.check_network_br_int_port -  1.check network br-int-port level start.")
+	
+	AGENTLOG.info("agent.func.check_network_br_int_port -  1.check network br-int-port level done.")
+
+def check_network_br_int(network_topo):
+	AGENTLOG.info("agent.func.check_network_br_int -  1.check network br-int level start.")
+	
+	AGENTLOG.info("agent.func.check_network_br_int -  1.check network br-int level done.")
+
+def check_network_ovs_provider(network_topo):
+	AGENTLOG.info("agent.func.check_network_ovs_provider -  1.check network ovs-provider level start.")
+	
+	AGENTLOG.info("agent.func.check_network_ovs_provider -  1.check network ovs-provider level done.")
+
+def check_network_nic(network_topo):
+	AGENTLOG.info("agent.func.check_network_nic -  1.check network device nic start.")
+	
+	AGENTLOG.info("agent.func.check_network_nic -  1.check network device nic done.")
+
+
+def check_network(network_topo):
+	AGENTLOG.info("agent.func.check_network -  check network start.")
+	# 1."device" 2."tap" 3."qbr" 4."qvb" 5."qvo" 6."br-int-port" 
+	# 7."br-int" 8."ovs-provider" 9."nic" 10."physical-switch"
+	check_network_device(network_topo)
+	check_network_tap(network_topo)
+	check_network_qbr(network_topo)
+	check_network_qvb(network_topo)
+	check_network_qvo(network_topo)
+	check_network_br_int_port(network_topo)
+	check_network_br_int(network_topo)
+	check_network_ovs_provider(network_topo)
+	check_network_nic(network_topo)
+	AGENTLOG.info("agent.func.check_network -  check network done.")
 
 if __name__ == '__main__':
 	# print get_vm_uuids()
