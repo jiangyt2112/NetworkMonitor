@@ -6,6 +6,7 @@ import libxml2
 import json
 from ovs.bridge import get_ovs_info
 from utils.log import AGENTLOG
+from libvirt_func import get_vm_info_in_host
 # 61205745-b2bf-4db0-ad50-e7a60bf08bd5
 # 61205745-b2bf-4db0-ad50-e7a60bf08bd5
 
@@ -62,7 +63,7 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips):
 		'addresses': {},
 		'type': "virtual host",
 		'check': {"result": None, "error_msg": ""},
-		'performance': None,
+		#'performance': {"bandwidth": None, "delay": None, "error_msg": "", "evaluation": ""},
 		'next': []
 	}
 
@@ -75,7 +76,9 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips):
 					"mac_addr": i['OS-EXT-IPS-MAC:mac_addr'],
 					"version": i['version'],
 					'addr': i['addr'],
-					'type': i['OS-EXT-IPS:type']
+					'type': i['OS-EXT-IPS:type'],
+					'check': {"result": None, "error_msg": ""},
+					'performance': {"bandwidth": None, "delay": None, "error_msg": "", "evaluation": ""}
 				}
 			)
 
@@ -497,6 +500,38 @@ def check_service(service):
 	else:
 		return True, False
 
+def check_vm(dev):
+	# id status host name created addresses type check performance next
+	# vm state/network interface
+	vm_info_in_host = get_vm_info_in_host()
+	vm_info = vm_info_in_host[dev['id']]
+	net_info = {}
+	for net in vm_info['netstats']:
+		net_info[net['mac']] = net
+
+	if dev['status'] != 'ACTIVE':
+		dev['check']['result'] = True
+	else:
+		if vm_info['state'] != 'running':
+			dev['check']['result'] = False
+			dev['check']['error_msg'] = "vm not running,state:%s" %(vm_info['state'])
+		else:
+			for addr in vm_info['addresses']:
+				nets = vm_info['addresses'][addr]
+				for i in nets:
+					if i['type'] == 'fixed':
+						if i['mac_addr'] in net_info:
+							i['check'] = True
+			dev['check']['result'] = True
+			dev['performance'][]
+	pass
+
+def check_dhcp(dev):
+	pass
+
+def check_router(dev):
+	pass
+
 def check_network_device(network_topo):
 	AGENTLOG.info("agent.func.check_network_device -  1.check network device level start.")
 	AGENTLOG.info("agent.func.check_network_device -  device num:%d." %(network_topo['device']))
@@ -504,13 +539,15 @@ def check_network_device(network_topo):
 	for dev in network_topo['device']:
 		AGENTLOG.info("agent.func.check_network_device - check device %s.%s ." %(dev['type'], dev['name']))
 		if dev['type'] == 'virtual host':
-			pass
+			check_vm(dev)
 		elif dev['type'] == 'dhcp':
-			pass
+			check_dhcp(dev)
 		elif dev['type'] == 'router':
-			pass
+			check_router(dev)
 		else:
 			AGENTLOG.error("agent.func.check_network_device -  unknown device type:%s." %(dev['type']))
+			dev['result'] = False
+			dev['error_msg'] = "unknown device type"
 
 	AGENTLOG.info("agent.func.check_network_device -  1.check network device level done.")
 
