@@ -511,23 +511,53 @@ def check_vm(dev):
 
 	if dev['status'] != 'ACTIVE':
 		dev['check']['result'] = True
+		dev['staus'] = 'unactive'
 	else:
 		if vm_info['state'] != 'running':
+			dev['status'] = 'unactive'
 			dev['check']['result'] = False
 			dev['check']['error_msg'] = "vm not running,state:%s" %(vm_info['state'])
 		else:
+			dev['status'] = 'active'
+			dev['check']['result'] = True
 			for addr in vm_info['addresses']:
 				nets = vm_info['addresses'][addr]
 				for i in nets:
 					if i['type'] == 'fixed':
 						if i['mac_addr'] in net_info:
-							i['check'] = True
-			dev['check']['result'] = True
-			dev['performance'][]
-	pass
+							i['check']['result'] = True
+							# ping
+							# bandwidth delay
+							# add vm info
+						else:
+							i['check']['result'] = False
+							i['check']['error_msg'] = "net interface lost."
+							dev['check']['result'] = False
+							dev['check']['error_msg'] = "net interface lost."
+
+def get_all_ns():
+	ret, info = exe("ip netns show")
+	if not ret:
+		return False, "cmd:'ip netns show' return error."
+	else:
+		all_ns = set()
+		info = info.split('\n')
+		for i in info:
+			all_ns.add(i.split(' ')[0])
+		return True, all_ns
+		
+def check_ns_exist(ns):
+	all_ns = get_all_ns()
+	if ns in all_ns:
+		return True
+	return False
 
 def check_dhcp(dev):
-	pass
+	if check_ns_exist(dev['netns']) == False:
+		dev['check']['result'] = False
+		dev['check']['error_msg'] = "netns-%s not exist." %(dev['netns'])
+	else:
+		pass
 
 def check_router(dev):
 	pass
