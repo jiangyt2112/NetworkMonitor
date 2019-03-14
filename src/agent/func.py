@@ -583,7 +583,7 @@ def process_tap_info(info):
 	state = state.split(" ")
 	tap_info['name'] = state[1][:-1]
 	tap_info['status'] = "active"
-	if "UP" not in state[2][1:len(state[2]) - 1].split(',')
+	if "UP" not in ((state[2][1:len(state[2]) - 1]).split(','))
 		tap_info['status'] = "unactive"
 	for i in range(len(state)):
 		if state[i] == "state":
