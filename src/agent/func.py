@@ -177,6 +177,7 @@ def get_network_topo(networks_info, topo, touch_ips):
 			for i in port['fixed_ips']:
 			 	tap_info['addresses'].append(i)
 			tap_info['type'] = "tap device"
+			tap_info['netns'] = dhcp_info['netns']
 			tap_info['check'] = {"result": None, "error_msg": ""}
 			tap_info['next'] = len(topo['qbr'])
 			topo['tap'].append(tap_info)
@@ -238,6 +239,7 @@ def get_network_topo(networks_info, topo, touch_ips):
 					q_info['name'] = "qg" + port['id'][:11]
 				q_info['mac_address'] = port['mac_address']
 				q_info['status'] = port['status']
+				q_info['netns'] = router_info['namespaces']
 				q_info['addresses'] = []
 				for i in port['fixed_ips']:
 				 	q_info['addresses'].append(i)
@@ -500,7 +502,7 @@ def check_service(service):
 	else:
 		return True, False
 
-def check_vm(dev):
+def check_vm(dev, topo):
 	# id status host name created addresses type check performance next
 	# vm state/network interface
 	vm_info_in_host = get_vm_info_in_host()
@@ -511,7 +513,7 @@ def check_vm(dev):
 
 	if dev['status'] != 'ACTIVE':
 		dev['check']['result'] = True
-		dev['staus'] = 'unactive'
+		dev['status'] = 'unactive'
 	else:
 		if vm_info['state'] != 'running':
 			dev['status'] = 'unactive'
@@ -552,15 +554,91 @@ def check_ns_exist(ns):
 		return True
 	return False
 
-def check_dhcp(dev):
+def check_dhcp(dev, topo):
 	if check_ns_exist(dev['netns']) == False:
 		dev['check']['result'] = False
 		dev['check']['error_msg'] = "netns-%s not exist." %(dev['netns'])
+		dev['status'] = "unactive"
+		return True
 	else:
-		pass
+		# pid dir and file
+		ret, info = exe("ip netns exec %s ps -aux | grep dnsmasq | grep tap" %(dev['netns']))
+		if ret == False:
+			AGENTLOG.error("agent.func.check_dhcp -  cmd:ip netns exec %s ps -aux | grep dnsmasq \
+				| grep tap return error." %(dev['netns']))
+			dev['check']['result'] = False
+			dev['check']['error_msg'] = "dnsmasq not running."
+			dev['status'] = "unactive"
+			return True
+		else:
+			# check other dncp info,such as configure
+			dev['check']['result'] = True
+			dev['check']['error_msg'] = ""
+			dev['status'] = "active"
+	return True
 
-def check_router(dev):
-	pass
+def process_tap_info(info):
+	tap_info = {}
+	state = info.split("\n")[0].strip()
+	state = state.split(" ")
+	tap_info['name'] = state[1][:-1]
+	tap_info['status'] = "active"
+	if "UP" not in state[2][1:len(state[2]) - 1].split(',')
+		tap_info['status'] = "unactive"
+	for i in range(len(state)):
+		if state[i] == "state":
+			if state[i + 1] != "UNKONWN" and state[i + 1] != "UP":
+				tap_info['status'] = "unactive"
+				break
+	tap_info['mac'] = info.split("\n")[1].strip().split(" ")[1]
+	tap_info['inets'] = []
+	inets = info.split("\n")[2:]
+	for i in inets:
+		info = i.strip().split(" ")
+		if info[0] == 'inet':
+			tap_info['inets'].append(info[1])
+	return tap_info
+
+def check_tap(dev, topo):
+	if dev['type'] == 'ovs internal':
+		# qr/ qg
+		if dev['status'] != "ACTIVE":
+			dev['check']['result'] = True
+			dev['status'] = "unactive"
+		else:
+			ret, info = exe("ip netns exec %s ip addr show %s" %(dev['netns'], dev['name']))
+			if ret == False:
+				dev['check']['result'] = False
+				dev['status'] = "unactive"
+				dev['check']['error_msg'] = "tap %s not exist." %(dev['name'])
+			else:
+				tap_info = process_tap_info(info)
+
+	elif dev['type'] == 'tap device':
+		# tap
+		pass
+	else:
+		# error
+		AGENTLOG.error("agent.func.check_tap -  unknown tap type:%s" %(dev['type']))
+
+def check_router(dev, topo):
+	if dev['status'] != "ACTIVE":
+		dev['status'] = "unactive"
+		dev['check']['result'] = True
+	else:
+		if check_ns_exist(dev['namespaces']) == False:
+			dev['check']['result'] = False
+			dev['check']['error_msg'] = "netns-%s not exist." %(dev['netns'])
+			dev['status'] = "unactive"
+		else:
+			dev['check']['result'] = True
+			dev['status'] = "active"
+
+	# check route rules
+	# check qr/qg
+	for i in dev['next']:
+		check_tap(topo['tap'][i], topo)
+
 
 def check_network_device(network_topo):
 	AGENTLOG.info("agent.func.check_network_device -  1.check network device level start.")
@@ -569,11 +647,11 @@ def check_network_device(network_topo):
 	for dev in network_topo['device']:
 		AGENTLOG.info("agent.func.check_network_device - check device %s.%s ." %(dev['type'], dev['name']))
 		if dev['type'] == 'virtual host':
-			check_vm(dev)
+			check_vm(dev, topo)
 		elif dev['type'] == 'dhcp':
-			check_dhcp(dev)
+			check_dhcp(dev, topo)
 		elif dev['type'] == 'router':
-			check_router(dev)
+			check_router(dev, topo)
 		else:
 			AGENTLOG.error("agent.func.check_network_device -  unknown device type:%s." %(dev['type']))
 			dev['result'] = False
@@ -581,30 +659,30 @@ def check_network_device(network_topo):
 
 	AGENTLOG.info("agent.func.check_network_device -  1.check network device level done.")
 
-def check_network_tap(network_topo):
-	AGENTLOG.info("agent.func.check_network_tap -  1.check network tap level start.")
+# def check_network_tap(network_topo):
+# 	AGENTLOG.info("agent.func.check_network_tap -  1.check network tap level start.")
 	
-	AGENTLOG.info("agent.func.check_network_tap -  1.check network tap level done.")
+# 	AGENTLOG.info("agent.func.check_network_tap -  1.check network tap level done.")
 
-def check_network_qbr(network_topo):
-	AGENTLOG.info("agent.func.check_network_qbr -  1.check network qbr level start.")
+# def check_network_qbr(network_topo):
+# 	AGENTLOG.info("agent.func.check_network_qbr -  1.check network qbr level start.")
 	
-	AGENTLOG.info("agent.func.check_network_qbr -  1.check network qbr level done.")
+# 	AGENTLOG.info("agent.func.check_network_qbr -  1.check network qbr level done.")
 
-def check_network_qvb(network_topo):
-	AGENTLOG.info("agent.func.check_network_qvb -  1.check network qvb level start.")
+# def check_network_qvb(network_topo):
+# 	AGENTLOG.info("agent.func.check_network_qvb -  1.check network qvb level start.")
 	
-	AGENTLOG.info("agent.func.check_network_qvb -  1.check network qvb level done.")
+# 	AGENTLOG.info("agent.func.check_network_qvb -  1.check network qvb level done.")
 
-def check_network_qvo(network_topo):
-	AGENTLOG.info("agent.func.check_network_qvo -  1.check network qvo level start.")
+# def check_network_qvo(network_topo):
+# 	AGENTLOG.info("agent.func.check_network_qvo -  1.check network qvo level start.")
 	
-	AGENTLOG.info("agent.func.check_network_qvo -  1.check network qvo level done.")
+# 	AGENTLOG.info("agent.func.check_network_qvo -  1.check network qvo level done.")
 
-def check_network_br_int_port(network_topo):
-	AGENTLOG.info("agent.func.check_network_br_int_port -  1.check network br-int-port level start.")
+# def check_network_br_int_port(network_topo):
+# 	AGENTLOG.info("agent.func.check_network_br_int_port -  1.check network br-int-port level start.")
 	
-	AGENTLOG.info("agent.func.check_network_br_int_port -  1.check network br-int-port level done.")
+# 	AGENTLOG.info("agent.func.check_network_br_int_port -  1.check network br-int-port level done.")
 
 def check_network_br_int(network_topo):
 	AGENTLOG.info("agent.func.check_network_br_int -  1.check network br-int level start.")
