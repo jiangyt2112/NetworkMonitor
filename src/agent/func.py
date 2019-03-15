@@ -861,7 +861,7 @@ def check_device_connection(dev, topo):
 	if is_connect(ip, net, tag):
 		pass
 
-def check_network_connection(topo)
+def check_network_connection(topo):
 	
 	AGENTLOG.info("agent.func.check_network_connection -  check network connection start.")
 	for dev in network_topo['device']:
