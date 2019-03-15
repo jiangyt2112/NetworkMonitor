@@ -503,8 +503,50 @@ def check_service(service):
 		return True, False
 
 
-def check_qvb():
+def check_br_int_port(dev, topo):
 	pass
+
+
+def process_tap_info(info):
+	tap_info = {}
+	state = info.split("\n")[0].strip()
+	state = state.split(" ")
+	tap_info['name'] = state[1][:-1]
+	tap_info['status'] = "active"
+	#print (state[2][1:len(state[2]) - 1]).split(',')
+	if "UP" not in ((state[2][1:len(state[2]) - 1]).split(',')):
+		tap_info['status'] = "unactive"
+
+	for i in range(len(state)):
+		if state[i] == "state":
+			if state[i + 1] != "UNKNOWN" and state[i + 1] != "UP":
+				tap_info['status'] = "unactive"
+				break
+	tap_info['mac'] = info.split("\n")[1].strip().split(" ")[1]
+	tap_info['inets'] = []
+	inets = info.split("\n")[2:]
+	for i in inets:
+		info = i.strip().split(" ")
+		if info[0] == 'inet':
+			tap_info['inets'].append(info[1])
+	return tap_info
+
+
+def check_qvo(dev, topo):
+	pass
+
+def check_qvb(dev, topo):
+	ret, info = exe("ip addr show %s" %(dev['name'].split('@')[0]))
+	if ret == False:
+		dev['check']['result'] = False
+		dev['check']['error_msg'] = "dev: not exist." %(dev['name'])
+	else:
+		if info['status'] == "unactive":
+			dev['check']['result'] = False
+			dev['check']['error_msg'] = "dev:%s down." %(dev['name'])
+		else:
+			dev['check']['result'] = True
+	process_tap_info(dev['name'].split('@')[0])
 
 def get_bridge_info(br_name):
 	br_info = {}
@@ -536,34 +578,22 @@ def check_qbr(dev, topo):
 	if dev['type'] == "placeholder":
 		dev['check']['result'] = True
 	else:
-		pass
+		ret, br_info = get_bridge_info(dev['name'])
+		if ret == False:
+			dev['check']['result'] = False
+			dev['check']['error_msg'] = br_info
+		else:
+			dev['check']['result'] = True
+			for i in dev['interfaces']:
+				if i not in br_info['interfaces']:
+					dev['check']['result'] = False
+					dev['check']['error_msg'] = "%s interface lost." %(i)
+			# secure rules check
 
-	check_qvb()
+	check_qvb(topo['qvb'][dev['next']], topo)
 
 
-def process_tap_info(info):
-	tap_info = {}
-	state = info.split("\n")[0].strip()
-	state = state.split(" ")
-	tap_info['name'] = state[1][:-1]
-	tap_info['status'] = "active"
-	#print (state[2][1:len(state[2]) - 1]).split(',')
-	if "UP" not in ((state[2][1:len(state[2]) - 1]).split(',')):
-		tap_info['status'] = "unactive"
 
-	for i in range(len(state)):
-		if state[i] == "state":
-			if state[i + 1] != "UNKNOWN" and state[i + 1] != "UP":
-				tap_info['status'] = "unactive"
-				break
-	tap_info['mac'] = info.split("\n")[1].strip().split(" ")[1]
-	tap_info['inets'] = []
-	inets = info.split("\n")[2:]
-	for i in inets:
-		info = i.strip().split(" ")
-		if info[0] == 'inet':
-			tap_info['inets'].append(info[1])
-	return tap_info
 
 
 def is_addr_match(tap_inets, dev_addrs):
@@ -689,13 +719,6 @@ def check_dhcp(dev, topo):
 			dev['status'] = "active"
 	
 	check_tap(topo['tap'][dev['next']], topo)
-
-
-
-
-
-
-
 
 def check_router(dev, topo):
 	if dev['status'] != "ACTIVE":
