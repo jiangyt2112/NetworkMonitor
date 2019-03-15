@@ -513,7 +513,9 @@ def get_bridge_info(br_name):
 		return False, "cmd:brctl show %s return error." %(br_name)
 	else:
 		info = info.split('\n')[1:]
-		records = info[0].split(" ")
+		records = info[0].split("\t")
+		records.remove('')
+		records.remove('')
 		if len(records) < 4:
 			return False, "can't get info, No such device."
 		else:
@@ -523,7 +525,7 @@ def get_bridge_info(br_name):
 			br_info['interfaces'] = []
 			br_info['interfaces'].append(records[3])
 			for i in range(len(info) - 1):
-				interface = info[i + 1].strip().split(" ")
+				interface = info[i + 1].strip().split("\t")
 				if len(interface) > 1:
 					return False, "format error."
 				else:
