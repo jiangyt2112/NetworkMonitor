@@ -234,9 +234,9 @@ def get_network_topo(networks_info, topo, touch_ips):
 				q_info = {}
 				q_info['id'] = port['id']
 				if port['device_owner'] == 'network:router_interface':
-					q_info['name'] = "qr" + port['id'][:11]
+					q_info['name'] = "qr-" + port['id'][:11]
 				else:
-					q_info['name'] = "qg" + port['id'][:11]
+					q_info['name'] = "qg-" + port['id'][:11]
 				q_info['mac_address'] = port['mac_address']
 				q_info['status'] = port['status']
 				q_info['netns'] = router_info['namespaces']
@@ -502,10 +502,6 @@ def check_service(service):
 	else:
 		return True, False
 
-
-
-
-
 def process_tap_info(info):
 	tap_info = {}
 	state = info.split("\n")[0].strip()
@@ -531,8 +527,30 @@ def process_tap_info(info):
 	return tap_info
 
 def check_br_int_port(dev, topo):
-	pass
+	ret, ovs_info = get_bridge_info()
+	if ret == False:
+		dev['check']['result'] = False
+		dev['check']['error_msg'] = "openvswitch service down."
+	else:
+		if 'br-int' not in ovs_info:
+			dev['check']['result'] = False
+			dev['check']['error_msg'] = "openvswitch not create bridge br-int."
+			return
 
+		ports = ovs_info['br-int']['Port']
+		if dev['name'] not in ports:
+			dev['check']['result'] = False
+			dev['check']['error_msg'] = "openvswitch br-int bridge lost interface %s." %(dev['name'])
+		else:
+			# check error
+			if dev['type'] == "ovs internal" and ports[dev['name']]['type'] != "internal":
+				dev['check']['result'] = False
+				dev['check']['error_msg'] = "port-%s type-%s error." %(dev['name'], ports[dev['name']]['type'])
+				return
+			# check stattus
+			# check flow rule
+			dev['check']['result'] = True
+			dev['tag'] = ports[dev['name']]['vlan']
 
 def check_qvo(dev, topo):
 	ret, info = exe("ip addr show %s" %(dev['name'].split('@')[0]))
@@ -607,10 +625,6 @@ def check_qbr(dev, topo):
 
 	check_qvb(topo['qvb'][dev['next']], topo)
 
-
-
-
-
 def is_addr_match(tap_inets, dev_addrs):
 	tap_inet_ips = set()
 	for addr in tap_inets:
@@ -620,7 +634,6 @@ def is_addr_match(tap_inets, dev_addrs):
 			return False
 
 	return True
-
 
 def check_tap(dev, topo):
 	if dev['status'] != "ACTIVE":
@@ -770,33 +783,10 @@ def check_network_device(network_topo):
 			AGENTLOG.error("agent.func.check_network_device -  unknown device type:%s." %(dev['type']))
 			dev['result'] = False
 			dev['error_msg'] = "unknown device type"
-
 	AGENTLOG.info("agent.func.check_network_device -  1.check network device level done.")
 
-# def check_network_tap(network_topo):
-# 	AGENTLOG.info("agent.func.check_network_tap -  1.check network tap level start.")
-	
-# 	AGENTLOG.info("agent.func.check_network_tap -  1.check network tap level done.")
 
-# def check_network_qbr(network_topo):
-# 	AGENTLOG.info("agent.func.check_network_qbr -  1.check network qbr level start.")
 	
-# 	AGENTLOG.info("agent.func.check_network_qbr -  1.check network qbr level done.")
-
-# def check_network_qvb(network_topo):
-# 	AGENTLOG.info("agent.func.check_network_qvb -  1.check network qvb level start.")
-	
-# 	AGENTLOG.info("agent.func.check_network_qvb -  1.check network qvb level done.")
-
-# def check_network_qvo(network_topo):
-# 	AGENTLOG.info("agent.func.check_network_qvo -  1.check network qvo level start.")
-	
-# 	AGENTLOG.info("agent.func.check_network_qvo -  1.check network qvo level done.")
-
-# def check_network_br_int_port(network_topo):
-# 	AGENTLOG.info("agent.func.check_network_br_int_port -  1.check network br-int-port level start.")
-	
-# 	AGENTLOG.info("agent.func.check_network_br_int_port -  1.check network br-int-port level done.")
 
 def check_network_br_int(network_topo):
 	AGENTLOG.info("agent.func.check_network_br_int -  1.check network br-int level start.")
@@ -814,8 +804,8 @@ def check_network_nic(network_topo):
 	AGENTLOG.info("agent.func.check_network_nic -  1.check network device nic done.")
 
 
-def check_network(network_topo):
-	AGENTLOG.info("agent.func.check_network -  check network start.")
+def check_network_config(network_topo):
+	AGENTLOG.info("agent.func.check_network_config -  check network start.")
 	# 1."device" 2."tap" 3."qbr" 4."qvb" 5."qvo" 6."br-int-port" 
 	# 7."br-int" 8."ovs-provider" 9."nic" 10."physical-switch"
 	check_network_device(network_topo)
@@ -827,7 +817,60 @@ def check_network(network_topo):
 	check_network_br_int(network_topo)
 	check_network_ovs_provider(network_topo)
 	check_network_nic(network_topo)
-	AGENTLOG.info("agent.func.check_network -  check network done.")
+	AGENTLOG.info("agent.func.check_network_config -  check network done.")
+
+def get_test_ip(ip, mask):
+	last_mask = 32 - mask
+	ip_split = ip.split('.')
+	for i in range(len(ip_split)):
+		ip_split[i] = int(ip_split[i])
+	i = len(ip_split)
+	while last_mask >= 8:
+		i -= 1
+		mask -= 8
+		ip_split[i] = 255
+
+	if last_mask > 0:
+		ip_split[i] = ip_split[i] / pow(2, last_mask) + pow(2, last_mask)
+	
+	test_ip = ""
+	for i in range(len(ip_split)):
+		if i != 0:
+			test_ip += "."
+		test_ip += str(ip_split[i])
+	return test_ip
+
+def is_connect(ip, mask, tag):
+	test_ip = ""
+	netns = "network_check_ns"
+	return True
+
+def check_device_connection(dev, topo):
+	if dev['type'] == "virtual host":
+		pass
+		# for every addr
+		# ip net tag
+		ip = "192.168.1.8"
+		net = "192.168.1.0"
+		mask = 24
+		tag = 1
+	elif dev['type'] == "dhcp":
+		pass
+	else:
+		pass
+	if is_connect(ip, net, tag):
+		pass
+
+def check_network_connection(topo)
+	
+	AGENTLOG.info("agent.func.check_network_connection -  check network connection start.")
+	for dev in network_topo['device']:
+		AGENTLOG.info("agent.func.check_network_connection - check device  %s.%s connection." 
+			%(dev['type'], dev['name']))
+		check_device_connection(dev, topo)
+	AGENTLOG.info("agent.func.check_network_connection -  2.check network connection done.")
+
+
 
 if __name__ == '__main__':
 	# print get_vm_uuids()
