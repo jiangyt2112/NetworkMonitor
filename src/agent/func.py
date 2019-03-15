@@ -514,7 +514,7 @@ def get_bridge_info(br_name):
 	else:
 		info = info.split('\n')[1:]
 		records = info[0].split(" ")
-		if len(records) > 4:
+		if len(records) < 4:
 			return False, "can't get info, No such device."
 		else:
 			br_info['name'] = records[0]
@@ -529,7 +529,7 @@ def get_bridge_info(br_name):
 				else:
 					br_info['interfaces'].append(interface[0])
 		return True, br_info
-		
+
 def check_qbr(dev, topo):
 	if dev['type'] == "placeholder":
 		dev['check']['result'] = True
