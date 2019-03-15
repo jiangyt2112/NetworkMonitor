@@ -340,7 +340,7 @@ def get_ovs_info():
     cmd = 'ovs-vsctl show'
     ret, result = exe(cmd)
     if not ret:
-        return ret, result
+        return ret, "cmd:ovs-vsctl show return error."
 
     for l in result.split('\n'):
         l = l.strip().replace('"', '')
@@ -365,6 +365,8 @@ def get_ovs_info():
                     l.replace('Interface ', '')
             elif l.startswith('type: '):
                 brs[br]['Port'][phy_port]['type'] = l.replace('type: ', '')
+            elif l.startswith('options: '):
+                brs[br]['Port'][phy_port]['options'] = l.replace('options: ', '')
     return True, brs
 
 if __name__ == '__main__':

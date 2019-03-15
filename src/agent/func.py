@@ -503,8 +503,7 @@ def check_service(service):
 		return True, False
 
 
-def check_br_int_port(dev, topo):
-	pass
+
 
 
 def process_tap_info(info):
@@ -531,9 +530,24 @@ def process_tap_info(info):
 			tap_info['inets'].append(info[1])
 	return tap_info
 
+def check_br_int_port(dev, topo):
+	pass
+
 
 def check_qvo(dev, topo):
-	pass
+	ret, info = exe("ip addr show %s" %(dev['name'].split('@')[0]))
+	if ret == False:
+		dev['check']['result'] = False
+		dev['check']['error_msg'] = "dev: not exist." %(dev['name'])
+	else:
+		qvo_info = process_tap_info(info)
+		if qvo_info['status'] == "unactive":
+			dev['check']['result'] = False
+			dev['check']['error_msg'] = "dev:%s down." %(dev['name'])
+		else:
+			dev['check']['result'] = True
+	
+	check_br_int_port(topo['br-int-port'][dev['next']], topo)
 
 def check_qvb(dev, topo):
 	ret, info = exe("ip addr show %s" %(dev['name'].split('@')[0]))
@@ -541,12 +555,13 @@ def check_qvb(dev, topo):
 		dev['check']['result'] = False
 		dev['check']['error_msg'] = "dev: not exist." %(dev['name'])
 	else:
-		if info['status'] == "unactive":
+		qvb_info = process_tap_info(info)
+		if qvb_info['status'] == "unactive":
 			dev['check']['result'] = False
 			dev['check']['error_msg'] = "dev:%s down." %(dev['name'])
 		else:
 			dev['check']['result'] = True
-	process_tap_info(dev['name'].split('@')[0])
+	check_qvo(topo['qvo'][dev['next']], topo)
 
 def get_bridge_info(br_name):
 	br_info = {}
