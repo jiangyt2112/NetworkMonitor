@@ -827,7 +827,7 @@ def get_test_ip(ip, mask):
 	i = len(ip_split)
 	while last_mask >= 8:
 		i -= 1
-		mask -= 8
+		last_mask -= 8
 		ip_split[i] = 255
 
 	if last_mask > 0:
