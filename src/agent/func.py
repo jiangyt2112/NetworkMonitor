@@ -514,8 +514,8 @@ def get_bridge_info(br_name):
 	else:
 		info = info.split('\n')[1:]
 		records = info[0].split("\t")
-		records.remove('')
-		records.remove('')
+		while '' in records:
+			records.remove('')
 		if len(records) < 4:
 			return False, "can't get info, No such device."
 		else:
