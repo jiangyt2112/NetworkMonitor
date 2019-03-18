@@ -721,7 +721,9 @@ def get_all_ns():
 		return True, all_ns
 		
 def check_ns_exist(ns):
-	all_ns = get_all_ns()
+	ret, all_ns = get_all_ns()
+	if ret == False:
+		return False
 	if ns in all_ns:
 		return True
 	return False
@@ -832,7 +834,8 @@ def get_test_ip(ip, mask):
 
 	if last_mask > 0:
 		ip_split[i] = ip_split[i] / pow(2, last_mask) + pow(2, last_mask)
-	
+	ip_split[len(ip_split) - 1] -= 1
+
 	test_ip = ""
 	for i in range(len(ip_split)):
 		if i != 0:
@@ -840,25 +843,131 @@ def get_test_ip(ip, mask):
 		test_ip += str(ip_split[i])
 	return test_ip
 
-def is_connect(ip, mask, tag):
-	test_ip = ""
-	netns = "network_check_ns"
+def create_netns(netns):
+	if check_ns_exist(netns):
+		AGENTLOG.info("agent.func.is_connect -  netns:%s exist." %(netns))
+	else:
+		AGENTLOG.info("agent.func.is_connect -  create netns:%s." %(netns))
+		ret, info = exe("ip netns add %s" %(netns))
+		if ret == False:
+			AGENTLOG.error("agent.func.is_connect -  cmd:ip netns add %s return error." %(netns))
+			return False
+		else:
+			return True
+
+def create_ovs_port(bridge, port, tag):
+	ret, info = get_ovs_info()
+	if ret == False:
+		AGENTLOG.error("agent.func.create_ovs_port -  get ovs info error.")
+		return ret
+	if bridge not in info:
+		AGENTLOG.error("agent.func.create_ovs_port -  bridge:%s not exist." %(bridge))
+		return False
+	if port in info[bridge]['Port']:
+		AGENTLOG.error("agent.func.create_ovs_port -  port:%s exist in bridge%s." %(port, bridge))
+		return False
+
+	ret, info = exe("ovs-vsctl add-port %s %s tag=%s -- set Interface %s type=internal"
+					%(bridge, port, tag, port))
+	if ret == False:
+		AGENTLOG.error("agent.func.create_ovs_port -  %s." %(info))
+		return False
 	return True
 
+def set_tap_to_netns(port, netns):
+	ret, info = exe("ip link set %s netns %s" %(port, netns))
+	if ret == False:
+		AGENTLOG.error("agent.func.set_tap_to_netns -  %s." %(info))
+		return False, info
+	return True
+
+def bond_tap_addr(port, netns, addr):
+	if netns == "":
+		ret, info = exe("ip addr add %s dev %s" %(addr, port))
+	else:
+		ret, info = exe("ip netns exec %s ip addr add %s dev %s" %(netns, addr, dev))
+	if ret == False:
+		AGENTLOG.error("agent.func.bond_tap_addr -  %s." %(info))
+		return ret, info
+
+	if netns == "":
+		ret, info = exe("ip netns exec %s ifconfig %s promisc up" %(netns, dev))
+	else:
+		ret, info = exe("ifconfig %s promisc up" %(netns, dev))
+	if ret == False:
+		AGENTLOG.error("agent.func.bond_tap_addr -  %s." %(info))
+		return ret, info 
+
+	return True, None
+
+def ping_test(ip, netns):
+	if netns == "":
+		ret, info = exe("ping %s -i 0 -c 3 -W 1 -q")
+	else:
+		ret, info = exe("ip netns exec %s ping %s -i 0 -c 3 -W 1 -q")
+
+	if ret == False:
+		AGENTLOG.error("agent.func.ping_test -  %s." %(info))
+		return False, info
+
+	statistic = info.split("\n")[3]
+	receive_count = int(statistic.split(",").strip().split(' ')[0])
+
+	if receive_count >= 1:
+		return True, None
+	else:
+		return False, "all packets lost."
+
+def is_connect(ip, mask, tag):
+	test_ip = get_test_ip(ip, mask)
+	netns = "network_check_ns"
+	# ip netns add ns1
+	# ovs-vsctl add-port br-int tap0 tag=1 -- set Interface tap0 type=internal
+	# ip a
+	# ovs-vsctl show
+	# ip link set tap0  netns ns1
+	# ip netns exec ns1 ip addr add 192.168.1.3/24 dev tap0
+	# ip netns exec ns1 ifconfig tap0 promisc up
+	# ip netns exec ns1 ip a
+	# ip netns exec ns1 ping 192.168.1.1
+	bridge = "br-int"
+	port = "tap-connection-check"
+	ret = create_netns(netns)
+	if ret == False:
+		return False, "create netns error."
+
+	ret = create_ovs_port(bridge, port, tag)
+	if ret == False:
+		return False, "create ovs port error."
+
+	ret = set_tap_to_netns(port, netns)
+	if ret == False:
+		return False, "set tap to netns error."
+
+	ret = bond_tap_addr(port, netns, addr)
+	if ret == False:
+		return False, "bond tap addr error."
+
+	ret = ping_test(ip, netns)
+	if ret == False:
+		return ret, "can't reach %s by ping." %(ip)
+
+	#clear
+
+	return True, False
 def check_device_connection(dev, topo):
 	if dev['type'] == "virtual host":
 		pass
 		# for every addr
 		# ip net tag
 		ip = "192.168.1.8"
-		net = "192.168.1.0"
 		mask = 24
 		tag = 1
 	elif dev['type'] == "dhcp":
 		pass
 	else:
 		pass
-	if is_connect(ip, net, tag):
+	if is_connect(ip, mask, tag):
 		pass
 
 def check_network_connection(topo):
