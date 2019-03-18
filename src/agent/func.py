@@ -902,9 +902,9 @@ def bond_tap_addr(port, netns, addr):
 
 def ping_test(ip, netns):
 	if netns == "":
-		ret, info = exe("ping %s -i 0 -c 3 -W 1 -q")
+		ret, info = exe("ping %s -i 0 -c 3 -W 1 -q" %(ip))
 	else:
-		ret, info = exe("ip netns exec %s ping %s -i 0 -c 3 -W 1 -q")
+		ret, info = exe("ip netns exec %s ping %s -i 0 -c 3 -W 1 -q" %(netns, ip))
 
 	if ret == False:
 		AGENTLOG.error("agent.func.ping_test -  %s." %(info))
