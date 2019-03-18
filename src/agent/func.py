@@ -911,7 +911,7 @@ def ping_test(ip, netns):
 		return False, info
 
 	statistic = info.split("\n")[3]
-	receive_count = int(statistic.split(",").strip().split(' ')[0])
+	receive_count = int(statistic.split(",")[0].strip().split(' ')[0])
 
 	if receive_count >= 1:
 		return True, None
