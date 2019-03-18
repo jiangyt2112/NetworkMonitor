@@ -788,22 +788,16 @@ def check_network_device(network_topo):
 	AGENTLOG.info("agent.func.check_network_device -  1.check network device level done.")
 
 
+def check_network_ovs(network_topo):
+	AGENTLOG.info("agent.func.check_network_ovs -  2.check network device nic start.")
 	
+	AGENTLOG.info("agent.func.check_network_ovs -  2.check network device nic done.")
 
-def check_network_br_int(network_topo):
-	AGENTLOG.info("agent.func.check_network_br_int -  1.check network br-int level start.")
-	
-	AGENTLOG.info("agent.func.check_network_br_int -  1.check network br-int level done.")
-
-def check_network_ovs_provider(network_topo):
-	AGENTLOG.info("agent.func.check_network_ovs_provider -  1.check network ovs-provider level start.")
-	
-	AGENTLOG.info("agent.func.check_network_ovs_provider -  1.check network ovs-provider level done.")
 
 def check_network_nic(network_topo):
-	AGENTLOG.info("agent.func.check_network_nic -  1.check network device nic start.")
+	AGENTLOG.info("agent.func.check_network_nic -  3.check network device nic start.")
 	
-	AGENTLOG.info("agent.func.check_network_nic -  1.check network device nic done.")
+	AGENTLOG.info("agent.func.check_network_nic -  3.check network device nic done.")
 
 
 def check_network_config(network_topo):
@@ -811,13 +805,7 @@ def check_network_config(network_topo):
 	# 1."device" 2."tap" 3."qbr" 4."qvb" 5."qvo" 6."br-int-port" 
 	# 7."br-int" 8."ovs-provider" 9."nic" 10."physical-switch"
 	check_network_device(network_topo)
-	check_network_tap(network_topo)
-	check_network_qbr(network_topo)
-	check_network_qvb(network_topo)
-	check_network_qvo(network_topo)
-	check_network_br_int_port(network_topo)
-	check_network_br_int(network_topo)
-	check_network_ovs_provider(network_topo)
+	check_network_ovs(network_topo)
 	check_network_nic(network_topo)
 	AGENTLOG.info("agent.func.check_network_config -  check network done.")
 
@@ -918,9 +906,9 @@ def ping_test(ip, netns):
 	else:
 		return False, "all packets lost."
 
-def is_connect(ip, mask, tag):
+def is_connect_internal(ip, mask, tag):
 	test_ip = get_test_ip(ip, mask)
-	netns = "network_check_ns"
+	netns = "network_check_ns_%s_%s_%s" %(ip, mask, tag)
 	# ip netns add ns1
 	# ovs-vsctl add-port br-int tap0 tag=1 -- set Interface tap0 type=internal
 	# ip a
@@ -931,7 +919,7 @@ def is_connect(ip, mask, tag):
 	# ip netns exec ns1 ip a
 	# ip netns exec ns1 ping 192.168.1.1
 	bridge = "br-int"
-	port = "tap-connection-check"
+	port = "tap-connection-check-%s-%s-%s" %(ip, mask, tag)
 	ret = create_netns(netns)
 	if ret == False:
 		return False, "create netns error."
@@ -953,32 +941,63 @@ def is_connect(ip, mask, tag):
 		return ret, "can't reach %s by ping." %(ip)
 
 	#clear
+	exe("ip netns del %s" %(netns))
+	exe("ovs-vsctl del-port %s %s" %("br-int", port))
+	return True, None
 
-	return True, False
+def is_connect_external(ip, mask, tag = None):
+	ret = ping_test(ip, netns)
+	if ret == False:
+		return ret, "can't reach %s by ping." %(ip)
+	return True, None
+
 def check_device_connection(dev, topo):
+	dest_list = []
 	if dev['type'] == "virtual host":
-		pass
+		#vm
 		# for every addr
 		# ip net tag
 		ip = "192.168.1.8"
 		mask = 24
 		tag = 1
+		# network_type: internal/external
+		dest_list.append({"ip": ip, "mask": mask, "tag": tag, "network_type": "internal"})
 	elif dev['type'] == "dhcp":
 		pass
 	else:
 		pass
-	if is_connect(ip, mask, tag):
-		pass
+	for dst in dest_list:
+		if dst['network_type'] == "internal":
+			ret, error_info = is_connect_internal(dst['ip'], dst['mask'], dst['tag']):
+			if ret == False:
+				pass
+			else:
+				pass
+		else:
+			ret, error_info = is_connect_external(dst['ip'], dst['mask'], dst['tag']):
+			if ret == False:
+				pass
+			else:
+				pass
+
+def check_nic_connection(dev, topo):
+	pass
+
+
 
 def check_network_connection(topo):
-	
 	AGENTLOG.info("agent.func.check_network_connection -  check network connection start.")
 	for dev in network_topo['device']:
 		AGENTLOG.info("agent.func.check_network_connection - check device  %s.%s connection." 
 			%(dev['type'], dev['name']))
 		check_device_connection(dev, topo)
-	AGENTLOG.info("agent.func.check_network_connection -  2.check network connection done.")
 
+	for dev in topo['nic']:
+		AGENTLOG.info("agent.func.check_network_connection - check nic  %s.%s connection." 
+			%(dev['type'], dev['name'])
+		check_nic_connection(dev, topo)
+
+	AGENTLOG.info("agent.func.check_network_connection -  check network connection done.")
 
 
 if __name__ == '__main__':
