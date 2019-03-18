@@ -33,7 +33,7 @@ def get_vm_uuids():
 def get_hostname():
 	ret, name = exe('hostname')
 	if not ret:
-		return false, name
+		return False, name
 	return True, name
 
 def get_host_ip():
@@ -51,6 +51,27 @@ def is_network_node():
 		return True, True
 	else:
 		return True, False
+
+def get_port_network_info(port, networks_info):
+	ret_info = {
+		'ip_address': port['fixed_ips'][0]['ip_address']
+		'gateway_ip': None,
+		'cidr': None,
+		'dhcp': None
+	}
+
+	subnet_id = port['fixed_ips'][0]['']
+	for subnet in networks_info['subnets']:
+		if subnet['id'] == subnet_id:
+			ret_info['gateway_ip'] = subnet['gateway_ip']
+			ret_info['cidr'] = subnet['cidr']
+
+	for port in networks_info['ports']:
+		if port['fixed_ips'][0]['subnet_id'] == subnet_id:
+			ret_info['dhcp'] = port['fixed_ips'][0]['ip_address']
+
+	return ret_info
+
 
 def get_vm_topo(vm_info, networks_info, topo, touch_ips):
 	# vm level
@@ -76,7 +97,12 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips):
 					"mac_addr": i['OS-EXT-IPS-MAC:mac_addr'],
 					"version": i['version'],
 					'addr': i['addr'],
+					'cidr': None,
+					'tag': None,
+					'gateway_ip': None,
+					'dhcp': None,
 					'type': i['OS-EXT-IPS:type'],
+					'next': None,
 					'check': {"result": None, "error_msg": ""},
 					'performance': {"bandwidth": None, "delay": None, "error_msg": "", "evaluation": ""}
 				}
@@ -85,29 +111,40 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips):
 	topo['device'].append(vm)
 
 	# tap level
-	vm_fixed_ips_set = set()
+	vm_fixed_ips = {}
 	for net_name in vm["addresses"]:
 		for ip_addr in vm["addresses"][net_name]:
 			if ip_addr['type'] == 'fixed':
 				touch_ips.add(ip_addr['addr'])
-				vm_fixed_ips_set.add(ip_addr['addr'])
+				vm_fixed_ips[ip_addr['addr']] = ip_addr
 	
 	tap_num = 0
 	tap_index = len(topo['tap'])
 	for port in networks_info["ports"]:
-		if port['fixed_ips'][0]['ip_address'] in vm_fixed_ips_set:
-			
+		port_addr = port['fixed_ips'][0]['ip_address']
+		if port_addr in vm_fixed_ips:
 			tap_info = {}
 			tap_info['id'] = port['id']
 			tap_info['name'] = "tap" + port['id'][:11]
 			tap_info['mac_address'] = port['mac_address']
 			tap_info['status'] = port['status']
-			tap_info['addresses'] = []
+			tap_info['addresses'] = [port['fixed_ips'][0]]
 			tap_info['type'] = "tap device"
 			tap_info['check'] = {"result": None, "error_msg": ""}
 			tap_info['next'] = len(topo['qbr']) + tap_num
 			topo['tap'].append(tap_info)
 			vm['next'].append(len(topo['tap']) - 1)
+			vm_fixed_ips[port_addr]['next'] = vm['next']
+			# ret_info = {
+			# 'ip_address': port['fixed_ips'][0]['ip_address']
+			# 'gateway_ip': None,
+			# 'cidr': None,
+			# 'dhcp': None
+			# }
+			port_net_info = get_port_network_info(port, networks_info)
+			vm_fixed_ips[port_addr]['gateway_ip'] = port_net_info['gateway_ip']
+			vm_fixed_ips[port_addr]['cidr'] = port_net_info['cidr']
+			vm_fixed_ips[port_addr]['dhcp'] = port_net_info['dhcp']
 			tap_num += 1
 
 
