@@ -36,6 +36,16 @@ def get_hostname():
 		return False, name
 	return True, name
 
+def check_service(service):
+	ret, result = exe("systemctl status %s" %(service))
+	if not ret:
+		return False, None
+	status = result.split("\n")[2].split()[1]
+	if status == "active":
+		return True, True
+	else:
+		return True, False
+
 def get_host_ip():
 	ret, ips = exe('ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk \'{print $2}\'|tr -d "addr:"')
 	if not ret:
@@ -203,7 +213,7 @@ def get_network_topo(networks_info, topo, touch_ips):
 			dhcp_info['netns'] = "qdhcp-" + port['network_id']
 			dhcp_info['created_at'] = port['created_at']
 			dhcp_info['type'] = "dhcp"
-			dhcp_info['status'] = None
+			dhcp_info['status'] = port['status']
 			dhcp_info['check'] = {"result": None, "error_msg": ""}
 			dhcp_info['addresses'] = []
 			addr = {
@@ -578,15 +588,7 @@ def get_topo(vms_info, networks_info):
 
 	return True, topo
 
-def check_service(service):
-	ret, result = exe("systemctl status %s" %(service))
-	if not ret:
-		return False, None
-	status = result.split("\n")[2].split()[1]
-	if status == "active":
-		return True, True
-	else:
-		return True, False
+
 
 def process_tap_info(info):
 	tap_info = {}
@@ -633,38 +635,44 @@ def check_br_int_port(dev, topo):
 				dev['check']['result'] = False
 				dev['check']['error_msg'] = "port-%s type-%s error." %(dev['name'], ports[dev['name']]['type'])
 				return
-			# check stattus
+			# check status
 			# check flow rule
 			dev['check']['result'] = True
 			dev['tag'] = ports[dev['name']]['vlan']
 
 def check_qvo(dev, topo):
-	ret, info = exe("ip addr show %s" %(dev['name'].split('@')[0]))
-	if ret == False:
-		dev['check']['result'] = False
-		dev['check']['error_msg'] = "dev: not exist." %(dev['name'])
+	if dev['type'] == "placeholder":
+		dev['check']['result'] = True
 	else:
-		qvo_info = process_tap_info(info)
-		if qvo_info['status'] == "unactive":
+		ret, info = exe("ip addr show %s" %(dev['name'].split('@')[0]))
+		if ret == False:
 			dev['check']['result'] = False
-			dev['check']['error_msg'] = "dev:%s down." %(dev['name'])
+			dev['check']['error_msg'] = "dev: not exist." %(dev['name'])
 		else:
-			dev['check']['result'] = True
+			qvo_info = process_tap_info(info)
+			if qvo_info['status'] == "unactive":
+				dev['check']['result'] = False
+				dev['check']['error_msg'] = "dev:%s down." %(dev['name'])
+			else:
+				dev['check']['result'] = True
 	
 	check_br_int_port(topo['br-int-port'][dev['next']], topo)
 
 def check_qvb(dev, topo):
-	ret, info = exe("ip addr show %s" %(dev['name'].split('@')[0]))
-	if ret == False:
-		dev['check']['result'] = False
-		dev['check']['error_msg'] = "dev: not exist." %(dev['name'])
+	if dev['type'] == "placeholder":
+		dev['check']['result'] = True	
 	else:
-		qvb_info = process_tap_info(info)
-		if qvb_info['status'] == "unactive":
+		ret, info = exe("ip addr show %s" %(dev['name'].split('@')[0]))
+		if ret == False:
 			dev['check']['result'] = False
-			dev['check']['error_msg'] = "dev:%s down." %(dev['name'])
+			dev['check']['error_msg'] = "dev: not exist." %(dev['name'])
 		else:
-			dev['check']['result'] = True
+			qvb_info = process_tap_info(info)
+			if qvb_info['status'] == "unactive":
+				dev['check']['result'] = False
+				dev['check']['error_msg'] = "dev:%s down." %(dev['name'])
+			else:
+				dev['check']['result'] = True
 	check_qvo(topo['qvo'][dev['next']], topo)
 
 def get_bridge_info(br_name):
@@ -725,36 +733,35 @@ def check_tap(dev, topo):
 	if dev['status'] != "ACTIVE":
 		dev['check']['result'] = True
 		dev['status'] = "unactive"
-		return
-
-	ret = None
-	info = None
-	if "netns" in dev:
-		ret, info = exe("ip netns exec %s ip addr show %s" %(dev['netns'], dev['name']))
 	else:
-		ret, info = exe("ip addr show %s" %(dev['name']))
-
-	if ret == False:
-		dev['check']['result'] = False
-		dev['status'] = "unactive"
-		dev['check']['error_msg'] = "tap %s not exist." %(dev['name'])
-	else:
-		tap_info = process_tap_info(info)
-		if tap_info['status'] != 'active':
-			dev['check']['result'] = False
-			dev['status'] = "unactive"
-			dev['check']['error_msg'] = "tap:%s down." %(tap_info['name'])
-		elif tap_info['mac'] != dev['mac_address']:
-			dev['check']['result'] = False
-			dev['status'] = "unactive"
-			dev['check']['error_msg'] = "tap mac not match: %s - %s" %(tap_info['mac'], dev['mac_address'])
-		elif is_addr_match(tap_info['inets'], dev['addresses']):
-			dev['check']['result'] = False
-			dev['status'] = "unactive"
-			dev['check']['error_msg'] = "tap addr lost."
+		ret = None
+		info = None
+		if "netns" in dev:
+			ret, info = exe("ip netns exec %s ip addr show %s" %(dev['netns'], dev['name']))
 		else:
-			dev['check']['result'] = True
-			dev['status'] = "active"
+			ret, info = exe("ip addr show %s" %(dev['name']))
+
+		if ret == False:
+			dev['check']['result'] = False
+			dev['status'] = "unactive"
+			dev['check']['error_msg'] = "tap %s not exist." %(dev['name'])
+		else:
+			tap_info = process_tap_info(info)
+			if tap_info['status'] != 'active':
+				dev['check']['result'] = False
+				dev['status'] = "unactive"
+				dev['check']['error_msg'] = "tap:%s down." %(tap_info['name'])
+			elif tap_info['mac'] != dev['mac_address']:
+				dev['check']['result'] = False
+				dev['status'] = "unactive"
+				dev['check']['error_msg'] = "tap mac not match: %s - %s" %(tap_info['mac'], dev['mac_address'])
+			elif is_addr_match(tap_info['inets'], dev['addresses']):
+				dev['check']['result'] = False
+				dev['status'] = "unactive"
+				dev['check']['error_msg'] = "tap addr lost."
+			else:
+				dev['check']['result'] = True
+				dev['status'] = "active"
 	check_qbr(topo['qbr'][dev['next']], topo)
 
 
@@ -815,24 +822,28 @@ def check_ns_exist(ns):
 	return False
 
 def check_dhcp(dev, topo):
-	if check_ns_exist(dev['netns']) == False:
-		dev['check']['result'] = False
-		dev['check']['error_msg'] = "netns-%s not exist." %(dev['netns'])
-		dev['status'] = "unactive"
+	if dev['status'] != 'ACTIVE':
+		dev['check']['result'] = True
+		dev['status'] = 'status'
 	else:
-		# pid dir and file
-		ret, info = exe("ip netns exec %s ps -aux | grep dnsmasq | grep tap" %(dev['netns']))
-		if ret == False:
-			AGENTLOG.error("agent.func.check_dhcp -  cmd:ip netns exec %s ps -aux | grep dnsmasq \
-				| grep tap return error." %(dev['netns']))
+		if check_ns_exist(dev['netns']) == False:
 			dev['check']['result'] = False
-			dev['check']['error_msg'] = "dnsmasq not running."
+			dev['check']['error_msg'] = "netns-%s not exist." %(dev['netns'])
 			dev['status'] = "unactive"
 		else:
-			# check other dncp info,such as configure
-			dev['check']['result'] = True
-			dev['check']['error_msg'] = ""
-			dev['status'] = "active"
+			# pid dir and file
+			ret, info = exe("ip netns exec %s ps -aux | grep dnsmasq | grep tap" %(dev['netns']))
+			if ret == False:
+				AGENTLOG.error("agent.func.check_dhcp -  cmd:ip netns exec %s ps -aux | grep dnsmasq \
+					| grep tap return error." %(dev['netns']))
+				dev['check']['result'] = False
+				dev['check']['error_msg'] = "dnsmasq not running."
+				dev['status'] = "unactive"
+			else:
+				# check other dncp info,such as configure
+				dev['check']['result'] = True
+				dev['check']['error_msg'] = ""
+				dev['status'] = "active"
 	
 	check_tap(topo['tap'][dev['next']], topo)
 
@@ -857,7 +868,7 @@ def check_router(dev, topo):
 
 def check_network_device(network_topo):
 	AGENTLOG.info("agent.func.check_network_device -  1.check network device level start.")
-	AGENTLOG.info("agent.func.check_network_device -  device num:%d." %(network_topo['device']))
+	AGENTLOG.info("agent.func.check_network_device -  device num:%d." %(len(network_topo['device'])))
 
 	for dev in network_topo['device']:
 		AGENTLOG.info("agent.func.check_network_device - check device %s.%s ." %(dev['type'], dev['name']))
@@ -873,16 +884,114 @@ def check_network_device(network_topo):
 			dev['error_msg'] = "unknown device type"
 	AGENTLOG.info("agent.func.check_network_device -  1.check network device level done.")
 
+def set_check(dev, result, msg = ""):
+	dev['check']['result'] = result
+	dev['check']['msg'] = msg
 
 def check_network_ovs(network_topo):
 	AGENTLOG.info("agent.func.check_network_ovs -  2.check network device nic start.")
 	
+	is_network = is_network_node()
+	br_int = network_topo['br-int'][0]
+	br_tun = network_topo['ovs-provider'][0]
+	set_check(br_int, True)
+	set_check(br_tun, True)
+	br_ex = None
+	if is_network:
+		br_ex = network_topo['ovs-provider'][1]
+		set_check(br_ex, True)
+
+	ret, status = check_service("openvswitch")
+	if ret == False or status == False:
+		AGENTLOG.info("agent.func.check_network_ovs check_service openvswitch return error.")
+		set_check(br_int, False, "openvswitch service down.")
+		set_check(br_tun, False, "openvswitch service down.")
+		if is_network:
+			set_check(br_ex, False, "openvswitch service down.")
+
+	if ('int-br-ex' not in br_int['info']['Port'] or br_int['info']['Port']['int-br-ex']['options']
+		!= "{peer=phy-br-ex}" or br_int['info']['Port']['int-br-ex']['type']!= 'patch'):
+		set_check(br_int, False, "interface:int-br-ex lost or config error.")
+
+	if ('patch-tun' not in br_int['info']['Port'] or br_int['info']['Port']['patch-tun']['options']
+		!= "{peer=patch-int}" or br_int['info']['patch-tun']['type']!= 'patch'):
+		set_check(br_int, False, "interface:patch-tun lost or config error.")
+
+	if ('patch-int' not in br_tun['info']['Port'] or br_tun['info']['Port']['patch-int']['type']
+		!= "patch" or br_tun['info']['Port']['patch-int']['options'] != "{peer=patch-tun}"):
+		set_check(br_tun, False, "interface:patch-int lost or config error.")
+
+	vxlan_name = None
+	for port in br_tun['info']['Port']:
+		if port.startswith("vxlan"):
+			vxlan_name = port
+
+	if vxlan_name == None or br_tun['info']['Port'][vxlan_name]['type'] != 'vxlan':
+		set_check(br_tun, False, "bridge br-tun lost vxlan interface.")
+
+	if is_network:
+		if ('phy-br-ex' not in br_ex['info']['Port'] or br_ex['info']['Port']['phy-br-ex']['type'] !=
+			"patch" or br_ex['info']['Port']['phy-br-ex']['options'] != "{peer=int-br-ex}"):
+		set_check(br_ex, False, "interface:phy-br-ex lost or config error.")
+
+		ext_nic = None
+		for port in br_ex['info']['Port']:
+			if port != 'br-ex' and port != "phy-br-ex":
+				ext_nic = port
+		if ext_nic == None:
+			set_check(br_ex, False, "interface:external interface lost.")
+		ret, info = exe("ip address show %s" %(ext_nic))
+		if ret == False:
+			set_check(br_ex, False, "external interface %s not exist." %(ext_nic))
+
+	# other check as flow
 	AGENTLOG.info("agent.func.check_network_ovs -  2.check network device nic done.")
+
+def get_nic_info(nic):
+	nic_info = {'name': "", "status": "active", "master": "", "inets": [], "mac": None}
+	ret, info = exe("ip address show %s" %(nic))
+	if ret == False:
+		AGENTLOG.error("agent.func.get_nic_info -  cmd:ip address show %s return error." %(nic))
+		AGENTLOG.error("agent.func.get_nic_info -  %s not exist." %(nic))
+		return None
+
+	state = info.split("\n")[0].strip()
+	state = state.split(" ")
+	nic_info['name'] = state[1][:-1]
+	nic_info['status'] = "active"
+	#print (state[2][1:len(state[2]) - 1]).split(',')
+	if "UP" not in ((state[2][1:len(state[2]) - 1]).split(',')):
+		nic_info['status'] = "unactive"
+
+	for i in range(len(state)):
+		if state[i] == 'master':
+			nic_info['master'] = state[i + 1]
+
+	for i in range(len(state)):
+		if state[i] == "state":
+			if state[i + 1] != "UNKNOWN" and state[i + 1] != "UP":
+				nic_info['status'] = "unactive"
+				break
+	nic_info['mac'] = info.split("\n")[1].strip().split(" ")[1]
+	nic_info['inets'] = []
+	inets = info.split("\n")[2:]
+	for i in inets:
+		info = i.strip().split(" ")
+		if info[0] == 'inet':
+			nic_info['inets'].append(info[1])
+
+	return nic_info
 
 
 def check_network_nic(network_topo):
 	AGENTLOG.info("agent.func.check_network_nic -  3.check network device nic start.")
-	
+	is_network = is_network_node()
+	nic_tun = network_topo['nic'][0]
+	if is_network and len(network_topo['nic']) == 2:
+		nic_ext = network_topo['nic'][1]
+
+
+
 	AGENTLOG.info("agent.func.check_network_nic -  3.check network device nic done.")
 
 
