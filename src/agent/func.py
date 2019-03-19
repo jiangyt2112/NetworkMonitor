@@ -932,7 +932,7 @@ def check_network_ovs(network_topo):
 	if is_network:
 		if ('phy-br-ex' not in br_ex['info']['Port'] or br_ex['info']['Port']['phy-br-ex']['type'] !=
 			"patch" or br_ex['info']['Port']['phy-br-ex']['options'] != "{peer=int-br-ex}"):
-		set_check(br_ex, False, "interface:phy-br-ex lost or config error.")
+			set_check(br_ex, False, "interface:phy-br-ex lost or config error.")
 
 		ext_nic = None
 		for port in br_ex['info']['Port']:
