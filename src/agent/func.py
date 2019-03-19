@@ -986,10 +986,39 @@ def check_network_nic(network_topo):
 	AGENTLOG.info("agent.func.check_network_nic -  3.check network device nic start.")
 	is_network = is_network_node()
 	nic_tun = network_topo['nic'][0]
+	nic_ext = None
 	if is_network and len(network_topo['nic']) == 2:
 		nic_ext = network_topo['nic'][1]
 
+	info = get_nic_info(nic_tun['name'])
+	if info == None or info['status'] == "unactive":
+		set_check(nic_tun, False, "nic:%s down." %(nic_tun['name']))
+	else:
+		find_addr = False
+		for inet in info['inets']:
+			if inet == nic_tun['ip_address']:
+				find_addr = True
+		if find_addr == False:
+			set_check(nic_tun, False, "nic:%s not has ip:%s" %(nic_tun['name'], nic_tun['ip_address']))
 
+	if nic_ext != None:
+		info = get_nic_info(nic_ext['device'])
+		if info == None or info['status'] == 'unactive':
+			set_check(nic_ext, False, "nic:%s down." %(nic_ext['name']))
+		else:
+			find_addr = False
+			for inet in info['inets']:
+				if inet == nic_ext['ip_address']:
+					find_addr = True
+			if find_addr == False:
+				set_check(nic_ext, False, "nic:%s not has ip:%s" %(nic_ext['name'], nic_ext['ip_address']))
+
+		info = get_nic_info(nic_ext['physical_device'])
+		if info == None or info['status'] == 'unactive':
+			set_check(nic_ext, False, "physical nic:%s down." %(nic_ext['physical_device']))
+		elif info['master'] != 'ovs-system':
+			set_check(nic_ext, False, "physical nic:%s master error(%s)." %(nic_ext['physical_device'],
+				info['master']))
 
 	AGENTLOG.info("agent.func.check_network_nic -  3.check network device nic done.")
 
