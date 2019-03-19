@@ -1162,13 +1162,13 @@ def check_device_connection(dev, topo):
 		pass
 	for dst in dest_list:
 		if dst['network_type'] == "internal":
-			ret, error_info = is_connect_internal(dst['ip'], dst['mask'], dst['tag']):
+			ret, error_info = is_connect_internal(dst['ip'], dst['mask'], dst['tag'])
 			if ret == False:
 				pass
 			else:
 				pass
 		else:
-			ret, error_info = is_connect_external(dst['ip'], dst['mask'], dst['tag']):
+			ret, error_info = is_connect_external(dst['ip'], dst['mask'], dst['tag'])
 			if ret == False:
 				pass
 			else:
