@@ -64,7 +64,7 @@ def is_network_node():
 
 def get_port_network_info(port, networks_info):
 	ret_info = {
-		'ip_address': port['fixed_ips'][0]['ip_address']
+		'ip_address': port['fixed_ips'][0]['ip_address'],
 		'gateway_ip': None,
 		'cidr': None,
 		'dhcp': None
@@ -981,7 +981,6 @@ def get_nic_info(nic):
 			nic_info['inets'].append(info[1])
 
 	return nic_info
-
 
 def check_network_nic(network_topo):
 	AGENTLOG.info("agent.func.check_network_nic -  3.check network device nic start.")
