@@ -1188,7 +1188,7 @@ def check_network_connection(topo):
 
 	for dev in topo['nic']:
 		AGENTLOG.info("agent.func.check_network_connection - check nic  %s.%s connection." 
-			%(dev['type'], dev['name'])
+			%(dev['type'], dev['name']))
 		check_nic_connection(dev, topo)
 
 	AGENTLOG.info("agent.func.check_network_connection -  check network connection done.")
