@@ -80,7 +80,7 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips):
 		'status': vm_info['status'],
 		'host': vm_info['OS-EXT-SRV-ATTR:host'],
 		'name': vm_info['name'],
-		'created': vm_info['created'],
+		'created_at': vm_info['created'],
 		'addresses': {},
 		'type': "virtual host",
 		'check': {"result": None, "error_msg": ""},
@@ -129,6 +129,7 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips):
 			tap_info['mac_address'] = port['mac_address']
 			tap_info['status'] = port['status']
 			tap_info['addresses'] = [port['fixed_ips'][0]]
+			tap_info['netns'] = None
 			tap_info['type'] = "tap device"
 			tap_info['check'] = {"result": None, "error_msg": ""}
 			tap_info['next'] = len(topo['qbr']) + tap_num
@@ -196,13 +197,31 @@ def get_network_topo(networks_info, topo, touch_ips):
 	for port in networks_info["ports"]:
 		if port['device_owner'] == 'network:dhcp':
 			dhcp_info = {}
-			#dhcp_info['id'] = port['id']
+			dhcp_info['id'] = port['id']
+			dhcp_info['host'] = get_hostname()
+			dhcp_info['name'] = port['name']
 			dhcp_info['netns'] = "qdhcp-" + port['network_id']
 			dhcp_info['created_at'] = port['created_at']
 			dhcp_info['type'] = "dhcp"
 			dhcp_info['status'] = None
 			dhcp_info['check'] = {"result": None, "error_msg": ""}
+			dhcp_info['addresses'] = []
+			addr = {
+					"mac_addr": port['mac_address'],
+					"version": 4,
+					'addr': port['ip_address'],
+					'cidr': None,
+					'tag': None,
+					'gateway_ip': None,
+					'dhcp': None,
+					'type': 'fixed',
+					'next': None,
+					'check': {"result": None, "error_msg": ""},
+					'performance': {"bandwidth": None, "delay": None, "error_msg": "", "evaluation": ""}
+			}
+			dhcp_info['addresses'].append(addr)
 			dhcp_info['next'] = len(topo['tap'])
+			dhcp_info['addresses'][0]['next'] = len(topo['tap'])
 			topo['device'].append(dhcp_info)
 
 			tap_info = {}
@@ -216,6 +235,12 @@ def get_network_topo(networks_info, topo, touch_ips):
 			tap_info['type'] = "tap device"
 			tap_info['netns'] = dhcp_info['netns']
 			tap_info['check'] = {"result": None, "error_msg": ""}
+			port_net_info = get_port_network_info(port, networks_info)
+			dhcp_info['addresses'][0]['gateway_ip'] = port_net_info['gateway_ip']
+			dhcp_info['addresses'][0]['cidr'] = port_net_info['cidr']
+			dhcp_info['addresses'][0]['dhcp'] = port_net_info['dhcp']
+			#dhcp_info['addresses'][0]['next'] = 
+
 			tap_info['next'] = len(topo['qbr'])
 			topo['tap'].append(tap_info)
 
@@ -257,8 +282,11 @@ def get_network_topo(networks_info, topo, touch_ips):
 		router_info = {}
 		router_info['id'] = r['id']
 		router_info['name'] = r['name']
+		router_info['host'] = get_hostname()
+		router_info['created_at'] = r['created_at']
 		router_info['type'] = "router"
-		router_info['namespaces'] = "qrouter-" + r['id']
+		router_info['netns'] = "qrouter-" + r['id']
+		router_info['addresses'] = []
 		router_info['status'] = r['status']
 		router_info['check'] = {"result": None, "error_msg": ""}
 		router_info['next'] = []
@@ -283,6 +311,24 @@ def get_network_topo(networks_info, topo, touch_ips):
 				q_info['type'] = "ovs internal"
 				q_info['check'] = {"result": None, "error_msg": ""}
 				q_info['next'] = len(topo['qbr'])
+				addr = {
+					"mac_addr": q_info['mac_address'],
+					"version": 4,
+					'addr': q_info[0]['ip_address'],
+					'cidr': None,
+					'tag': None,
+					'gateway_ip': None,
+					'dhcp': None,
+					'type': 'fixed',
+					'next': None,
+					'check': {"result": None, "error_msg": ""},
+					'performance': {"bandwidth": None, "delay": None, "error_msg": "", "evaluation": ""}
+					}
+				port_net_info = get_port_network_info(port, networks_info)
+				addr['gateway_ip'] = port_net_info['gateway_ip']
+				addr['cidr'] = port_net_info['cidr']
+				addr['dhcp'] = port_net_info['dhcp']
+				addr['next'] = len(topo['tap'])
 				router_info['next'].append(len(topo['tap']))
 				topo['tap'].append(q_info)
 
@@ -377,6 +423,8 @@ def get_nic_ex_info(nic_ex_info):
 	for pd in br_info['br-ex']['Port']:
 		if pd != "br-ex" and pd != "phy-br-ex":
 			nic_ex_info['physical_device'] = pd
+	nic_ex_info['device'] = 'br-ex'
+	nic_ex_info['name'] = 'br-ex'
 	return True, None
 
 def get_nic_tun_ip():
@@ -440,39 +488,21 @@ def get_topo(vms_info, networks_info):
 	
 	AGENTLOG.info("agent.func.get_topo -  get ovs info done.")
 
-
-	br_int_info = br_info['br-int']
+	br_int_info = {}
+	br_int_info['info'] = br_info['br-int']
+	br_int_info['name'] = 'br-int'
 	br_int_info['type'] = "ovs bridge"
 	br_int_info['check'] = {"result": None, "error_msg": ""}
 	br_int_info['next'] = [0]
 	topo['br-int'].append(br_int_info)
-	br_tun_info = br_info['br-tun']
+
+	br_tun_info = {}
+	br_tun_info['info'] = br_info['br-tun']
+	br_tun_info['name'] = 'br-tun'
 	br_tun_info['type'] = "ovs bridge"
 	br_tun_info['check'] = {"result": None, "error_msg": ""}
 	br_tun_info['next'] = [0]
 	topo['ovs-provider'].append(br_tun_info)
-	if 'br-ex' in br_info:
-		br_int_info['next'].append(1)
-		br_ex_info = br_info['br-ex']
-		br_ex_info['type'] = "ovs bridge"
-		br_ex_info['check'] = {"result": None, "error_msg": ""}
-		br_ex_info['next'] = [1]
-		topo['ovs-provider'].append(br_ex_info)
-
-	nic_ex_info = {}
-	nic_ex_info['name'] = ""
-	nic_ex_info['device'] = ""
-	nic_ex_info['physical_device'] = ""
-	nic_ex_info['ip_address'] = ""
-	nic_ex_info['type'] = "ovs bridge"
-	nic_ex_info['check'] = {"result": None, "error_msg": ""}
-	nic_ex_info['next'] = [1]
-
-	AGENTLOG.info("agent.func.get_topo -  get_nic_ex_info start.")
-	ret, error_msg = get_nic_ex_info(nic_ex_info)
-	if ret == False:
-		return ret, error_msg
-	AGENTLOG.info("agent.func.get_topo -  get_nic_ex_info done.")
 
 	AGENTLOG.info("agent.func.get_topo -  get_nic_tun_ip start.")
 	ret, nic_tun_ip = get_nic_tun_ip()
@@ -480,53 +510,72 @@ def get_topo(vms_info, networks_info):
 		return ret, nic_tun_ip
 	AGENTLOG.info("agent.func.get_topo -  get_nic_tun_ip done.")
 
-	if nic_tun_ip == nic_ex_info['ip_address']:
-		topo['nic'].append(nic_ex_info)
-		nic_ex_info['next'] = 0
-		if 'br-ex' in br:
-			br_ex_info['next'] = 0
-		physical_switch_info = {}
-		physical_switch_info['type'] = 'physical switch'
-		physical_switch_info['network'] = get_network_from_ip(nic_ex_info['ip_address'])
-		physical_switch_info['name'] = "physical switch " + physical_switch_info['network']
-		physical_switch_info['check'] = {"result": None, "error_msg": ""}
-		physical_switch_info['next'] = None
-		topo['physical-switch'].append(physical_switch_info)
-	else:
-		nic_tun_info = {}
-		nic_tun_info['name'] = ""
-		nic_tun_info['device'] = ""
-		nic_tun_info['physical_device'] = ""
-		nic_tun_info['ip_address'] = nic_tun_ip
-		nic_tun_info['type'] = "interface"
-		nic_tun_info['check'] = {"result": None, "error_msg": ""}
-		nic_tun_info['next'] = [0]
+	nic_tun_info = {}
+	nic_tun_info['name'] = ""
+	nic_tun_info['device'] = ""
+	nic_tun_info['physical_device'] = ""
+	nic_tun_info['ip_address'] = nic_tun_ip
+	nic_tun_info['type'] = "nic"
+	nic_tun_info['check'] = {"result": None, "error_msg": ""}
+	nic_tun_info['next'] = [0]
 
-		AGENTLOG.info("agent.func.get_topo -  get_nic_tun_info start.")
-		ret, result = get_nic_tun_info(nic_tun_info)
-		if ret == False:
-			return ret, result
-		AGENTLOG.info("agent.func.get_topo -  get_nic_tun_info done.")
+	AGENTLOG.info("agent.func.get_topo -  get_nic_tun_info start.")
+	ret, result = get_nic_tun_info(nic_tun_info)
+	if ret == False:
+		return ret, result
+	AGENTLOG.info("agent.func.get_topo -  get_nic_tun_info done.")
+	topo['nic'].append(nic_tun_info)
 
-		topo['nic'].append(nic_tun_info)
-		topo['nic'].append(nic_ex_info)
+	physical_switch_info = {}
+	physical_switch_info['type'] = 'physical switch'
+	physical_switch_info['network'] = get_network_from_ip(nic_tun_info['ip_address'])
+	physical_switch_info['name'] = "physical switch " + physical_switch_info['network']
+	physical_switch_info['check'] = {"result": None, "error_msg": ""}
+	physical_switch_info['next'] = None
+	topo['physical-switch'].append(physical_switch_info)
 
-		physical_switch_tun_info = {}
-		physical_switch_tun_info['type'] = 'physical switch'
-		physical_switch_tun_info['network'] = get_network_from_ip(nic_tun_info['ip_address'])
-		physical_switch_tun_info['name'] = "physical switch " + physical_switch_tun_info['network']
-		physical_switch_tun_info['check'] = {"result": None, "error_msg": ""}
-		physical_switch_tun_info['next'] = None
-		topo['physical-switch'].append(physical_switch_tun_info)
+	if is_network_node():
+		# network node
+		br_ex_info = {}
+		br_ex_info['name'] = 'br-ex'
+		br_ex_info['type'] = "ovs bridge"
+		br_ex_info['check'] = {"result": None, "error_msg": ""}
+		br_ex_info['next'] = [1]
+		if 'br-ex' not in br_info:
+			br_ex_info['info'] = None
+			br_ex_info['check']['result'] = None
+			br_ex_info['check']['error_msg'] = "can not get br-ex info."
+		else:
+			br_ex_info['info'] = br_info['br-ex']
+		topo['ovs-provider'].append(br_ex_info)
+		topo['br-int'][0]['next'].append(1)
 
-		physical_switch_ex_info = {}
-		physical_switch_ex_info['type'] = 'physical switch'
-		physical_switch_ex_info['network'] = get_network_from_ip(nic_ex_info['ip_address'])
-		physical_switch_ex_info['name'] = "physical switch " + physical_switch_ex_info['network']
-		physical_switch_ex_info['check'] = {"result": None, "error_msg": ""}
-		physical_switch_ex_info['next'] = None
-		topo['physical-switch'].append(physical_switch_ex_info)
-		
+		if nic_tun_ip == nic_ex_info['ip_address']:
+			# tunnel network and extnet network use same nic 
+			br_ex_info['next'] = [0]
+		else:
+			nic_ex_info = {}
+			nic_ex_info['name'] = ""
+			nic_ex_info['device'] = ""
+			nic_ex_info['physical_device'] = ""
+			nic_ex_info['ip_address'] = ""
+			nic_ex_info['type'] = "nic"
+			nic_ex_info['check'] = {"result": None, "error_msg": ""}
+			nic_ex_info['next'] = [1]
+			AGENTLOG.info("agent.func.get_topo -  get_nic_ex_info start.")
+			ret, error_msg = get_nic_ex_info(nic_ex_info)
+			if ret == False:
+				return ret, error_msg
+			AGENTLOG.info("agent.func.get_topo -  get_nic_ex_info done.")
+	
+			physical_switch_info = {}
+			physical_switch_info['type'] = 'physical switch'
+			physical_switch_info['network'] = get_network_from_ip(nic_ex_info['ip_address'])
+			physical_switch_info['name'] = "physical switch " + physical_switch_info['network']
+			physical_switch_info['check'] = {"result": None, "error_msg": ""}
+			physical_switch_info['next'] = None
+			topo['physical-switch'].append(physical_switch_info)
+
 	return True, topo
 
 def check_service(service):

@@ -35,7 +35,6 @@
 	'created': '2018-10-26T09:36:38Z', 
 	'tenant_id': 'a95424bbdca6410092073d564f1f4012', 
 }
-
 # ip netns add ns1
 # ovs-vsctl add-port br-int tap0 tag=1 -- set Interface tap0 type=internal
 # ip a
@@ -45,3 +44,16 @@
 # ip netns exec ns1 ifconfig tap0 promisc up
 # ip netns exec ns1 ip a
 # ip netns exec ns1 ping 192.168.1.1
+
+# ip netns add ns1
+# ip netns show
+# ip netns exec ns1 ip a
+# ip netns exec ns1 ip tuntap add tap0 mode tap
+# ip netns exec ns1 ip a
+# ip netns exec ns1 ip aadr add 192.168.1.3/24 dev tap0
+# ip netns exec ns1 ip addr add 192.168.1.3/24 dev tap0
+# ip netns exec ns1 ip a
+# ip netns exec ns1 ip set tap0 up
+# ip netns exec ns1 ip link set tap0 up
+
+
