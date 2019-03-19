@@ -14,3 +14,4 @@ from func import get_nic_info
 # print ping_test("192.168.166.1", "")
 # print ping_test("192.168.166.2", "")
 print get_nic_info("br-ex")
+print get_nic_info("ens5")
