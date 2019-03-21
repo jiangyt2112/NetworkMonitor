@@ -4,6 +4,7 @@ import libvirt
 import libxml2
 import json
 import time
+import psutil
 
 def get_val_by_path(ctx, path):
     res = ctx.xpathEval(path)
