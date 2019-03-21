@@ -367,15 +367,72 @@ def get_ovs_info():
                 brs[br]['Port'][phy_port]['type'] = l.replace('type: ', '')
             elif l.startswith('options: '):
                 brs[br]['Port'][phy_port]['options'] = l.replace('options: ', '')
+    get_ovs_port_netstat(brs)
     return True, brs
 
-def get_ovs_port_netstas(port_name):
-    ret = {
+def get_port_netstats(port):
+    netstats = {
         "rx": {"packets": 0, "bytes": 0, "drop": 0},
         "tx": {"packets": 0, "bytes": 0, "drop": 0}
     }
-    return ret
+    ret, info = exe("ovs-vsctl list interface %s" %(port))
+    if ret == False:
+        return netstats
 
+    info = info.split("\n")
+    stats = None
+    for i in info:
+        if i.startswith("statistics"):
+            stats = i
+    if stats == None:
+        return netstats
+
+    stats = stats.split(":")[1].strip()
+    stats = stats[1: -1]
+    stats = stats.split(",")
+    for i in range(len(stats)):
+        stats[i] = stats[i].strip()
+
+    s = {}
+    for i in stats:
+        s[i.split('=')[0]] = int(i.split('=')[1])
+
+    netstats['rx']['packets'] = s['rx_packets']
+    netstats['rx']['bytes'] = s['rx_bytes']
+    netstats['rx']['drop'] = s['rx_dropped']
+    netstats['tx']['packets'] = s['tx_packets']
+    netstats['tx']['bytes'] = s['tx_bytes']
+    netstats['tx']['drop'] = s['tx_dropped']
+
+    return netstats
+
+def get_ovs_port_netstat(brs):
+    interfaces = {}
+    for bridge in brs:
+        for port in brs[bridge]['Port']:
+            interfaces[port] = brs[bridge]['Port'][port]
+
+    old_stats = {}
+    for port in interfaces:
+        old_stats[port] = get_port_netstats(port)
+    
+    time.sleep(1)
+
+    new_stats = {}
+    for port in interfaces:
+        new_stats[port] = get_port_netstats(port)
+
+    for port in interfaces:
+        interfaces[port]['bandwidth'] = {
+            "rx": {"packets": new_stats['port']["rx"]['packets'] - old_stats['port']["rx"]['packets'], 
+                    "bytes": new_stats['port']["rx"]['bytes'] - old_stats['port']["rx"]['bytes'], 
+                    "drop": new_stats['port']["rx"]['drop'] - old_stats['port']["rx"]['drop']
+                    },
+            "tx": {"packets": new_stats['port']["tx"]['packets'] - old_stats['port']["tx"]['packets'], 
+                    "bytes": new_stats['port']["tx"]['bytes'] - old_stats['port']["tx"]['bytes'], 
+                    "drop": new_stats['port']["tx"]['drop'] - old_stats['port']["tx"]['drop']
+                }
+        }
 
 
 if __name__ == '__main__':

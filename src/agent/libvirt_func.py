@@ -3,6 +3,7 @@ import __init__
 import libvirt
 import libxml2
 import json
+import time
 
 def get_val_by_path(ctx, path):
     res = ctx.xpathEval(path)
@@ -34,7 +35,8 @@ def get_val_by_path(ctx, path):
             'mac': 'fa:16:3e:5d:9e:22', 
             'wr_drop': '0', 
             'wr_bytes': '20728'}], 
-    'maxmem': '524288'}
+    'maxmem': '524288'
+}
 
 def get_vm_info_in_host():
     odic = {}
@@ -140,7 +142,65 @@ def get_vm_info_in_host():
             vm_info[vm['uuid']] = vm
     return vm_info
 
-def get_vm_port_netstats(mac):
+
+def get_vm_port_netinfo():
+    netinfo = {}
+    conn = libvirt.openReadOnly(None)
+    if conn is None:
+        return netinfo
+    else:
+
+        doms = conn.listAllDomains()
+        for dom in doms:
+            state, maxmem, usedmem, vcpus, cputime  = dom.info()
+            state_str = ""
+            if state == 0:
+                state_str = 'nostate'
+            elif state == 1:
+                state_str = 'running'
+            elif state == 2:
+                state_str = 'blocked'
+            elif state == 3:
+                state_str = 'paused'
+            elif state == 4:
+                state_str = 'shutdown'
+            elif state == 5:
+                state_str = 'shutoff'
+            elif state == 6:
+                state_str = 'crashed'
+            elif state == 7:
+                state_str = 'pmsuspended'
+
+            if True:#state_str == 'running':
+                xmldesc = dom.XMLDesc(0)
+                doc = libxml2.parseDoc(xmldesc)
+                ctx = doc.xpathNewContext()
+                devs = ctx.xpathEval("/domain/devices/*")
+                
+                for d in devs:
+                    ctx.setContextNode(d)
+                    devcata = d.get_name()
+                    dev = get_val_by_path(ctx, "target/@dev")
+                    if devcata == 'interface':
+                        stats = dom.interfaceStats(dev)
+                        
+                        mac = get_val_by_path(ctx, "mac/@address")
+                        netinfo[mac] = {}
+                        netinfo[mac]['rd_bytes'] = str(stats[0])
+                        netinfo[mac]['rd_pkts'] = str(stats[1])
+                        netinfo[mac]['rd_drop'] = str(stats[3])
+
+                        netinfo[mac]['wr_bytes'] = str(stats[4])
+                        netinfo[mac]['wr_pkts'] = str(stats[5])
+                        netinfo[mac]['wr_drop'] = str(stats[7])
+                        
+
+    return netinfo
+
+
+
+
+def get_vm_port_netstats():
     ret = {
         "rx": {"packets": 0, "bytes": 0, "drop": 0},
         "tx": {"packets": 0, "bytes": 0, "drop": 0}
@@ -148,10 +208,40 @@ def get_vm_port_netstats(mac):
     return ret
     
 
+def get_nic_netinfo():
+    nics_info = psutil.net_io_counters(pernic=True)
+    nics_name = nics_info.keys()
+    # keys = ["bytes_sent", "bytes_recv", "packets_sent", "packets_recv", "dropin", "dropout"]
+    ret = {}
+    for nic in nics_name:
+        nic_info = nics_info[nic]
+        ret[nic] = {
+            "rx": {"packets": nics_info.packets_recv, 
+                    "bytes": nics_info.bytes_recv, 
+                    "drop": nics_info.dropin
+                    },
+            "tx": {"packets": nics_info.packets_sent, 
+                    "bytes": nics_info.bytes_sent, 
+                    "drop": nics_info.dropout
+                    }
+            }
+    return ret
 
-def get_nic_netstats(nic_name):
-    ret = {
-        "rx": {"packets": 0, "bytes": 0, "drop": 0},
-        "tx": {"packets": 0, "bytes": 0, "drop": 0}
-    }
+def get_nic_netstats():
+    old_info = get_nic_netinfo()
+    time.sleep(1)
+    new_info = get_nic_netinfo()
+
+    nics_name = psutil.net_io_counters(pernic=True).keys()
+    ret = {}
+    for nic in nics_name:
+        ret[nic] = {
+            "rx": {"packets": new_info[nic]["rx"]['packets'] - old_info[nic]["rx"]['packets'], 
+                    "bytes": new_info[nic]["rx"]['bytes'] - old_info[nic]["rx"]['bytes'], 
+                    "drop": new_info[nic]["rx"]['drop'] - old_info[nic]["rx"]['drop']
+                    },
+            "tx": {"packets": new_info[nic]["tx"]['packets'] - old_info[nic]["tx"]['packets'], 
+                    "bytes": new_info[nic]["tx"]['bytes'] - old_info[nic]["tx"]['bytes'], 
+                    "drop": new_info[nic]["tx"]['drop'] - old_info[nic]["tx"]['drop']}
+            }
     return ret
