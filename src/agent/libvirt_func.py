@@ -186,25 +186,40 @@ def get_vm_port_netinfo():
                         
                         mac = get_val_by_path(ctx, "mac/@address")
                         netinfo[mac] = {}
-                        netinfo[mac]['rd_bytes'] = str(stats[0])
-                        netinfo[mac]['rd_pkts'] = str(stats[1])
-                        netinfo[mac]['rd_drop'] = str(stats[3])
+                        netinfo[mac]['rd_bytes'] = stats[0]
+                        netinfo[mac]['rd_pkts'] = stats[1]
+                        netinfo[mac]['rd_drop'] = stats[3]
 
-                        netinfo[mac]['wr_bytes'] = str(stats[4])
-                        netinfo[mac]['wr_pkts'] = str(stats[5])
-                        netinfo[mac]['wr_drop'] = str(stats[7])
-                        
-
+                        netinfo[mac]['wr_bytes'] = stats[4]
+                        netinfo[mac]['wr_pkts'] = stats[5]
+                        netinfo[mac]['wr_drop'] = stats[7]
     return netinfo
 
 
 def get_vm_port_netstats():
-    ret = {
+    old_netinfo = get_vm_port_netinfo()
+    time.sleep(1)
+    new_netinfo = get_vm_port_netinfo()
+
+    netstats = {}
+    for mac in old_netinfo:
+        netstats[mac] = {
+            "rx": {"packets": new_netinfo[mac]['rd_pkts'] - old_netinfo[mac]['rd_pkts'], 
+                    "bytes": new_netinfo[mac]['rd_bytes'] - old_netinfo[mac]['rd_bytes'], 
+                    "drop": new_netinfo[mac]['rd_drop'] - old_netinfo[mac]['rd_drop']
+                    },
+            "tx": {"packets": new_netinfo[mac]['wr_pkts'] - old_netinfo[mac]['wr_pkts'], 
+                    "bytes": new_netinfo[mac]['wr_bytes'] - old_netinfo[mac]['wr_bytes'], 
+                    "drop": new_netinfo[mac]['wr_drop'] - old_netinfo[mac]['wr_drop']
+                    }
+                }
+    return netstats
+    
+def get_vm_port_netstat_down():
+    return {
         "rx": {"packets": 0, "bytes": 0, "drop": 0},
         "tx": {"packets": 0, "bytes": 0, "drop": 0}
     }
-    return ret
-    
 
 def get_nic_netinfo():
     nics_info = psutil.net_io_counters(pernic=True)

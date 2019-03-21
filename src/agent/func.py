@@ -7,6 +7,9 @@ import json
 from ovs.bridge import get_ovs_info
 from utils.log import AGENTLOG
 from libvirt_func import get_vm_info_in_host
+from libvirt_func import get_vm_port_netstat_down
+from libvirt_func import get_nic_netstats
+from libvirt_func import get_vm_port_netstats
 # 61205745-b2bf-4db0-ad50-e7a60bf08bd5
 # 61205745-b2bf-4db0-ad50-e7a60bf08bd5
 
@@ -83,7 +86,7 @@ def get_port_network_info(port, networks_info):
 	return ret_info
 
 
-def get_vm_topo(vm_info, networks_info, topo, touch_ips):
+def get_vm_topo(vm_info, networks_info, topo, touch_ips, vm_port_netstats):
 	# vm level
 	vm = {
 		'id': vm_info['id'],
@@ -102,8 +105,7 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips):
 		nets = vm_info["addresses"][addr]
 		vm["addresses"][addr] = []
 		for i in nets:
-			vm["addresses"][addr].append(
-				{
+			a_addr = {
 					"mac_addr": i['OS-EXT-IPS-MAC:mac_addr'],
 					"version": i['version'],
 					'addr': i['addr'],
@@ -116,7 +118,11 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips):
 					'check': {"result": None, "error_msg": ""},
 					'performance': {"bandwidth": None, "delay": None, "error_msg": "", "evaluation": ""}
 				}
-			)
+			if a_addr['mac_addr'] in vm_port_netstats:
+				a_addr['performance']['bandwidth'] = vm_port_netstats[a_addr['mac_addr']]
+			else:
+				a_addr['performance']['bandwidth'] = get_vm_port_netstat_down()
+			vm["addresses"][addr].append(a_addr)
 
 	topo['device'].append(vm)
 
@@ -503,9 +509,12 @@ def get_topo(vms_info, networks_info):
 		}
 	touch_ips = set()
 
+	vm_port_netstats = get_vm_port_netstats()
+
+
 	AGENTLOG.info("agent.func.get_topo -  get vm topo start.")
 	for vm in vms_info:
-		get_vm_topo(vm, networks_info, topo, touch_ips)
+		get_vm_topo(vm, networks_info, topo, touch_ips, vm_port_netstats)
 	AGENTLOG.info("agent.func.get_topo -  get vm topo done.")
 
 

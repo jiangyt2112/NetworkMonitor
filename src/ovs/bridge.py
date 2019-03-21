@@ -367,7 +367,7 @@ def get_ovs_info():
                 brs[br]['Port'][phy_port]['type'] = l.replace('type: ', '')
             elif l.startswith('options: '):
                 brs[br]['Port'][phy_port]['options'] = l.replace('options: ', '')
-    get_ovs_port_netstat(brs)
+    get_ovs_port_netstats(brs)
     return True, brs
 
 def get_port_netstats(port):
@@ -406,7 +406,7 @@ def get_port_netstats(port):
 
     return netstats
 
-def get_ovs_port_netstat(brs):
+def get_ovs_port_netstats(brs):
     interfaces = {}
     for bridge in brs:
         for port in brs[bridge]['Port']:
