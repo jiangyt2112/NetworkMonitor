@@ -230,13 +230,13 @@ def get_nic_netinfo():
     for nic in nics_name:
         nic_info = nics_info[nic]
         ret[nic] = {
-            "rx": {"packets": nics_info.packets_recv, 
-                    "bytes": nics_info.bytes_recv, 
-                    "drop": nics_info.dropin
+            "rx": {"packets": nic_info.packets_recv, 
+                    "bytes": nic_info.bytes_recv, 
+                    "drop": nic_info.dropin
                     },
-            "tx": {"packets": nics_info.packets_sent, 
-                    "bytes": nics_info.bytes_sent, 
-                    "drop": nics_info.dropout
+            "tx": {"packets": nic_info.packets_sent, 
+                    "bytes": nic_info.bytes_sent, 
+                    "drop": nic_info.dropout
                     }
             }
     return ret
