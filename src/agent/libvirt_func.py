@@ -171,7 +171,7 @@ def get_vm_port_netinfo():
             elif state == 7:
                 state_str = 'pmsuspended'
 
-            if True:#state_str == 'running':
+            if state_str == 'running':
                 xmldesc = dom.XMLDesc(0)
                 doc = libxml2.parseDoc(xmldesc)
                 ctx = doc.xpathNewContext()
@@ -196,8 +196,6 @@ def get_vm_port_netinfo():
                         
 
     return netinfo
-
-
 
 
 def get_vm_port_netstats():
