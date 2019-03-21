@@ -139,3 +139,19 @@ def get_vm_info_in_host():
         for vm in odic['alldomains']:
             vm_info[vm['uuid']] = vm
     return vm_info
+
+def get_vm_port_netstats(mac):
+    ret = {
+        "rx": {"packets": 0, "bytes": 0, "drop": 0},
+        "tx": {"packets": 0, "bytes": 0, "drop": 0}
+    }
+    return ret
+    
+
+
+def get_nic_netstats(nic_name):
+    ret = {
+        "rx": {"packets": 0, "bytes": 0, "drop": 0},
+        "tx": {"packets": 0, "bytes": 0, "drop": 0}
+    }
+    return ret

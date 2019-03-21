@@ -316,29 +316,35 @@ def get_network_topo(networks_info, topo, touch_ips):
 				q_info['status'] = port['status']
 				q_info['netns'] = router_info['namespaces']
 				q_info['addresses'] = []
-				for i in port['fixed_ips']:
-				 	q_info['addresses'].append(i)
-				q_info['type'] = "ovs internal"
-				q_info['check'] = {"result": None, "error_msg": ""}
-				q_info['next'] = len(topo['qbr'])
-				addr = {
-					"mac_addr": q_info['mac_address'],
-					"version": 4,
-					'addr': q_info[0]['ip_address'],
-					'cidr': None,
-					'tag': None,
-					'gateway_ip': None,
-					'dhcp': None,
-					'type': 'fixed',
-					'next': None,
-					'check': {"result": None, "error_msg": ""},
-					'performance': {"bandwidth": None, "delay": None, "error_msg": "", "evaluation": ""}
-					}
+
+			 	# 
+			 	addr = {
+				"mac_addr": q_info['mac_address'],
+				"version": 4,
+				'addr': q_info[0]['ip_address'],
+				'cidr': None,
+				'tag': None,
+				'gateway_ip': None,
+				'dhcp': None,
+				'type': 'fixed',
+				'next': None,
+				'check': {"result": None, "error_msg": ""},
+				'performance': {"bandwidth": None, "delay": None, "error_msg": "", "evaluation": ""}
+				}
+				if port['device_owner'] != 'network:router_interface':
+					addr['type'] = 'floating'
+
 				port_net_info = get_port_network_info(port, networks_info)
 				addr['gateway_ip'] = port_net_info['gateway_ip']
 				addr['cidr'] = port_net_info['cidr']
 				addr['dhcp'] = port_net_info['dhcp']
 				addr['next'] = len(topo['tap'])
+				q_info['addresses'].append(addr)
+
+				q_info['type'] = "ovs internal"
+				q_info['check'] = {"result": None, "error_msg": ""}
+				q_info['next'] = len(topo['qbr'])
+
 				router_info['next'].append(len(topo['tap']))
 				topo['tap'].append(q_info)
 
@@ -465,6 +471,23 @@ def get_nic_tun_info(nic_tun_info):
 	nic_tun_info['physical_device'] = nic_tun_info['name']
 	return True, nic_tun_info
 
+def get_tunnel_remote(br_tun):
+	remote = []
+	for port in br_tun['Port']:
+		if port.startswith("vxlan"):
+			options = br_tun['Port'][port][options]
+	options = options[1:-1]
+	options = options.replace("\"", '')
+	records = options.split(' ')
+	for rec in records:
+		if rec.startswith("remote_ip"):
+			remote = rec.split('=')[1].split(',')		
+	return remote
+
+def get_extnet_gateway(networks_info):
+	return ['192.168.166.1']
+
+
 def get_topo(vms_info, networks_info):
 	topo = {
 		"device": [],
@@ -512,6 +535,7 @@ def get_topo(vms_info, networks_info):
 	br_tun_info['type'] = "ovs bridge"
 	br_tun_info['check'] = {"result": None, "error_msg": ""}
 	br_tun_info['next'] = [0]
+	remote = get_tunnel_remote(br_tun_info['info'])
 	topo['ovs-provider'].append(br_tun_info)
 
 	AGENTLOG.info("agent.func.get_topo -  get_nic_tun_ip start.")
@@ -526,6 +550,7 @@ def get_topo(vms_info, networks_info):
 	nic_tun_info['physical_device'] = ""
 	nic_tun_info['ip_address'] = nic_tun_ip
 	nic_tun_info['type'] = "nic"
+	nic_tun_info['remote'] = remote
 	nic_tun_info['check'] = {"result": None, "error_msg": ""}
 	nic_tun_info['next'] = [0]
 
@@ -571,11 +596,13 @@ def get_topo(vms_info, networks_info):
 			nic_ex_info['ip_address'] = ""
 			nic_ex_info['type'] = "nic"
 			nic_ex_info['check'] = {"result": None, "error_msg": ""}
+			
 			nic_ex_info['next'] = [1]
 			AGENTLOG.info("agent.func.get_topo -  get_nic_ex_info start.")
 			ret, error_msg = get_nic_ex_info(nic_ex_info)
 			if ret == False:
 				return ret, error_msg
+			nic_ex_info['remote'] = get_extnet_gateway(nic_ex_info['ip_address'], networks_info)
 			AGENTLOG.info("agent.func.get_topo -  get_nic_ex_info done.")
 	
 			physical_switch_info = {}
@@ -1180,33 +1207,37 @@ def check_device_connection(dev, topo):
 		#vm
 		# for every addr
 		# ip net tag
-		ip = "192.168.1.8"
-		mask = 24
-		tag = 1
-		# network_type: internal/external
-		dest_list.append({"ip": ip, "mask": mask, "tag": tag, "network_type": "internal"})
-	elif dev['type'] == "dhcp":
-		pass
+		for net in dev['addresses']:
+			for addr in dev['addresses'][net]:
+				if addr['type'] == 'fixed':
+					ip = addr['addr']
+					tag = addr['tag']
+					mask = addr['cidr'].split('/')[1]
+					dest_list.append({"ip": ip, "mask": mask, "tag": tag, 'addr': addr})
+	elif dev['type'] == "dhcp" or dev['type'] == 'router':
+		for addr in dev['addresses']:
+			if addr['type'] == 'fixed':
+				ip = addr['addr']
+				tag = addr['tag']
+				mask = addr['cidr'].split('/')[1]
+				dest_list.append({"ip": ip, "mask": mask, "tag": tag, 'addr': addr})
 	else:
-		pass
+		AGENTLOG.error("agent.func.check_device_connection -  unknown device type:%s." %(dev['type']))
+	
 	for dst in dest_list:
-		if dst['network_type'] == "internal":
 			ret, error_info = is_connect_internal(dst['ip'], dst['mask'], dst['tag'])
 			if ret == False:
-				pass
+				set_check(dst['addr'], False, "dev:%s addr:%s can't reach openvswitch." 
+					%(dev['name'], dst['addr']['addr']))
 			else:
-				pass
-		else:
-			ret, error_info = is_connect_external(dst['ip'], dst['mask'], dst['tag'])
-			if ret == False:
-				pass
-			else:
-				pass
+				set_check(dst['addr'], True)
 
 def check_nic_connection(dev, topo):
-	pass
-
-
+	set_check(dev, True)
+	for ip in dev['remote']:
+		ret, info = ping_test(ip, "")
+		if ret == False:
+			set_check(dev, False, "can't reach %s, %s" %(ip, info))                                      
 
 def check_network_connection(topo):
 	AGENTLOG.info("agent.func.check_network_connection -  check network connection start.")

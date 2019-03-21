@@ -57,3 +57,7 @@
 # ip netns exec ns1 ip link set tap0 up
 
 
+# ovs-ofctl dump-ports br-int qvo3ef787ad-67
+# ovs-vsctl list interface br-ex
+
+

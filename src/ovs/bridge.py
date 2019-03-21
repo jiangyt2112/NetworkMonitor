@@ -369,6 +369,15 @@ def get_ovs_info():
                 brs[br]['Port'][phy_port]['options'] = l.replace('options: ', '')
     return True, brs
 
+def get_ovs_port_netstas(port_name):
+    ret = {
+        "rx": {"packets": 0, "bytes": 0, "drop": 0},
+        "tx": {"packets": 0, "bytes": 0, "drop": 0}
+    }
+    return ret
+
+
+
 if __name__ == '__main__':
     print get_ovs_info()
     
