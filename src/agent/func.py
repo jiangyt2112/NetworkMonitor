@@ -70,19 +70,22 @@ def get_port_network_info(port, networks_info):
 		'ip_address': port['fixed_ips'][0]['ip_address'],
 		'gateway_ip': None,
 		'cidr': None,
-		'dhcp': None
+		'dhcp': None,
+		'dhcp_netns': None
 	}
 
-	subnet_id = port['fixed_ips'][0]['']
+	subnet_id = port['fixed_ips'][0]['subnet_id']
+	# port['fixed_ips'][0]['']
 	for subnet in networks_info['subnets']:
 		if subnet['id'] == subnet_id:
 			ret_info['gateway_ip'] = subnet['gateway_ip']
 			ret_info['cidr'] = subnet['cidr']
+			
 
 	for port in networks_info['ports']:
-		if port['fixed_ips'][0]['subnet_id'] == subnet_id:
+		if port['fixed_ips'][0]['subnet_id'] == subnet_id and port['device_owner'] == 'network:dhcp':
 			ret_info['dhcp'] = port['fixed_ips'][0]['ip_address']
-
+			ret_info['dhcp_netns'] = "qdhcp-" + port['network_id']
 	return ret_info
 
 
@@ -113,6 +116,7 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips, vm_port_netstats):
 					'tag': None,
 					'gateway_ip': None,
 					'dhcp': None,
+					'dhcp_netns': None,
 					'type': i['OS-EXT-IPS:type'],
 					'next': None,
 					'check': {"result": None, "error_msg": ""},
@@ -162,6 +166,7 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips, vm_port_netstats):
 			vm_fixed_ips[port_addr]['gateway_ip'] = port_net_info['gateway_ip']
 			vm_fixed_ips[port_addr]['cidr'] = port_net_info['cidr']
 			vm_fixed_ips[port_addr]['dhcp'] = port_net_info['dhcp']
+			vm_fixed_ips[port_addr]['dhcp_netns'] = port_net_info['dhcp_netns']
 			tap_num += 1
 
 
@@ -230,6 +235,7 @@ def get_network_topo(networks_info, topo, touch_ips):
 					'tag': None,
 					'gateway_ip': None,
 					'dhcp': None,
+					'dhcp_netns': None,
 					'type': 'fixed',
 					'next': None,
 					'check': {"result": None, "error_msg": ""},
@@ -255,6 +261,7 @@ def get_network_topo(networks_info, topo, touch_ips):
 			dhcp_info['addresses'][0]['gateway_ip'] = port_net_info['gateway_ip']
 			dhcp_info['addresses'][0]['cidr'] = port_net_info['cidr']
 			dhcp_info['addresses'][0]['dhcp'] = port_net_info['dhcp']
+			dhcp_info['addresses'][0]['dhcp_netns'] = port_net_info['dhcp_netns']
 			#dhcp_info['addresses'][0]['next'] = 
 
 			tap_info['next'] = len(topo['qbr'])
@@ -332,6 +339,7 @@ def get_network_topo(networks_info, topo, touch_ips):
 				'tag': None,
 				'gateway_ip': None,
 				'dhcp': None,
+				'dhcp_netns': None,
 				'type': 'fixed',
 				'next': None,
 				'check': {"result": None, "error_msg": ""},
@@ -344,6 +352,7 @@ def get_network_topo(networks_info, topo, touch_ips):
 				addr['gateway_ip'] = port_net_info['gateway_ip']
 				addr['cidr'] = port_net_info['cidr']
 				addr['dhcp'] = port_net_info['dhcp']
+				addr['dhcp_netns'] = port_net_info['dhcp_netns']
 				addr['next'] = len(topo['tap'])
 				q_info['addresses'].append(addr)
 
@@ -560,8 +569,12 @@ def get_topo(vms_info, networks_info):
 	nic_tun_info['ip_address'] = nic_tun_ip
 	nic_tun_info['type'] = "nic"
 	nic_tun_info['remote'] = remote
+	nic_tun_info['performance'] = {"bandwidth": None, "delay": None, "error_msg": "", "evaluation": ""}
 	nic_tun_info['check'] = {"result": None, "error_msg": ""}
 	nic_tun_info['next'] = [0]
+
+	nic_stats = get_nic_netstats()
+	nic_tun_info['performance']['bandwidth'] = nic_stats[nic_tun_info['name']]
 
 	AGENTLOG.info("agent.func.get_topo -  get_nic_tun_info start.")
 	ret, result = get_nic_tun_info(nic_tun_info)
@@ -605,7 +618,10 @@ def get_topo(vms_info, networks_info):
 			nic_ex_info['ip_address'] = ""
 			nic_ex_info['type'] = "nic"
 			nic_ex_info['check'] = {"result": None, "error_msg": ""}
+			nic_ex_info['performance'] = {"bandwidth": None, "delay": None, "error_msg": "", "evaluation": ""}
 			
+			nic_ex_info['performance']['bandwidth'] = nic_stats[nic_ex_info['name']]
+
 			nic_ex_info['next'] = [1]
 			AGENTLOG.info("agent.func.get_topo -  get_nic_ex_info start.")
 			ret, error_msg = get_nic_ex_info(nic_ex_info)
