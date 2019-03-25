@@ -13,6 +13,7 @@ from Queue import Queue as Q
 from comm.client import server_to_agent_msg
 from openstackapi.nova import get_project_server_info
 from openstackapi.neutron import get_project_network_info
+from func import check_delay
 
 class Task:
     def __init__(self, msg):
@@ -151,17 +152,10 @@ class Task:
     def process_items(self, items):
         # process items into result
         # to do
-        # item_info struct
-        # item_info = {
-        #     'id': 0,
-        #     'task_id': 1,
-        #     'receive_time': 2,
-        #     'info': 3
-        # }
         # items struct
-        # result = { 
-        #         'item_num': item_num,
-        #         'item_info': []
+        # { 
+        #     'item_num': item_num,
+        #     'item_info': [info]
         # }
         # info struct
         # {
@@ -180,6 +174,7 @@ class Task:
         for i in items["item_info"]:
             info.append(json.loads(i))
         result["info"] = info
+        check_delay(result)
         return json.dumps(result)
 
     def process_item(self, item):
