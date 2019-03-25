@@ -71,10 +71,11 @@ topo = {
 		"physical-switch":[]
 		}
 touch_ips = set()
-from func import get_vm_topo
-for vm in vm_info:
-	get_vm_topo(vm, network_info, topo, touch_ips, vm_port_netstats)
+# from func import get_vm_topo
+# for vm in vm_info:
+# 	get_vm_topo(vm, network_info, topo, touch_ips, vm_port_netstats)
 
-print topo
-print topo['device']
+# print topo
+# print topo['device']
 
+get_network_topo(network_info, topo, touch_ips)

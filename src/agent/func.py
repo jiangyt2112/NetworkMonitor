@@ -107,7 +107,6 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips, vm_port_netstats):
 		'addresses': {},
 		'type': "virtual host",
 		'check': {"result": None, "error_msg": ""},
-		#'performance': {"bandwidth": None, "delay": None, "error_msg": "", "evaluation": ""},
 		'next': []
 	}
 
