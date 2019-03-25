@@ -9,7 +9,7 @@ from libvirt_func import get_vm_port_netinfo, get_nic_netstats
 
 from neutronclient.v2_0 import client
 from openstackapi.auth import get_token
-from openstackapi import get_project_network_info
+from openstackapi.neutron import get_project_network_info
 
 # info = exe("ip netns exec qrouter-d4edac45-231a-4b5e-9e95-c629d5c7fc62 ip addr show qg-b8cfeaad-ef")
 # info = info[1]
