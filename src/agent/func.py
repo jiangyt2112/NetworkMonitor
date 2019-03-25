@@ -347,7 +347,7 @@ def get_network_topo(networks_info, topo, touch_ips):
 					q_info['name'] = "qg-" + port['id'][:11]
 				q_info['mac_address'] = port['mac_address']
 				q_info['status'] = port['status']
-				q_info['netns'] = router_info['namespaces']
+				q_info['netns'] = router_info['netns']
 				q_info['addresses'] = []
 
 			 	# 
