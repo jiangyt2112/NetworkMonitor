@@ -77,5 +77,5 @@ touch_ips = set()
 
 # print topo
 # print topo['device']
-
+from func import get_network_topo
 get_network_topo(network_info, topo, touch_ips)
