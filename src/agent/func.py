@@ -98,6 +98,7 @@ def get_port_network_info(port, networks_info):
 def get_tap_addr(addr, networks_info):
 	ret = {
 		"ip_address": addr['ip_address'],
+		'subnet_id': addr['subnet_id'],
 		"cidr": None,
 		"gateway_ip": None
 	}
