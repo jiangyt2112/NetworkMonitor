@@ -86,6 +86,6 @@ from func import get_nic_ex_info, get_nic_tun_ip, get_nic_tun_info
 # info = {}
 # get_nic_ex_info(info)
 # print info
-# print get_nic_tun_ip()
-info = {}
+ip = get_nic_tun_ip()
+info = {'ip_address': ip}
 print get_nic_tun_info(info)
