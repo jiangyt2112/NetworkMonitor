@@ -597,14 +597,13 @@ def get_topo(vms_info, networks_info):
 	nic_tun_info['check'] = {"result": None, "error_msg": ""}
 	nic_tun_info['next'] = [0]
 
-	nic_stats = get_nic_netstats()
-	nic_tun_info['performance']['bandwidth'] = nic_stats[nic_tun_info['name']]
-
 	AGENTLOG.info("agent.func.get_topo -  get_nic_tun_info start.")
 	ret, result = get_nic_tun_info(nic_tun_info)
 	if ret == False:
 		return ret, result
 	AGENTLOG.info("agent.func.get_topo -  get_nic_tun_info done.")
+	nic_stats = get_nic_netstats()
+	nic_tun_info['performance']['bandwidth'] = nic_stats[nic_tun_info['name']]
 	topo['nic'].append(nic_tun_info)
 
 	physical_switch_info = {}
