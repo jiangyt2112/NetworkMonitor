@@ -639,6 +639,7 @@ def get_topo(vms_info, networks_info):
 			nic_ex_info['name'] = ""
 			nic_ex_info['device'] = ""
 			nic_ex_info['physical_device'] = ""
+			# cidr
 			nic_ex_info['ip_address'] = ""
 			nic_ex_info['type'] = "nic"
 			nic_ex_info['check'] = {"result": None, "error_msg": ""}
@@ -1143,7 +1144,7 @@ def create_netns(netns):
 			return True
 
 def create_ovs_port(bridge, port, tag):
-	ret, info = get_ovs_info()
+	ret, info = get_ovs_info(False)
 	if ret == False:
 		AGENTLOG.error("agent.func.create_ovs_port -  get ovs info error.")
 		return ret
