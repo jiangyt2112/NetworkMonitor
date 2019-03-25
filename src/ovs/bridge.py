@@ -411,7 +411,7 @@ def get_port_netstats(port):
     if 'tx_dropped' in s:
         netstats['tx']['drop'] = s['tx_dropped']
     else:
-        netstats['tx']['drop'] = s['tx_dropped']
+        netstats['tx']['drop'] = 0
     return netstats
 
 def get_ovs_port_netstats(brs):
