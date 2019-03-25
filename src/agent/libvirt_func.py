@@ -187,13 +187,13 @@ def get_vm_port_netinfo():
                         
                         mac = get_val_by_path(ctx, "mac/@address")
                         netinfo[mac] = {}
-                        netinfo[mac]['rd_bytes'] = stats[0]
-                        netinfo[mac]['rd_pkts'] = stats[1]
-                        netinfo[mac]['rd_drop'] = stats[3]
+                        netinfo[mac]['rd_bytes'] = int(stats[0])
+                        netinfo[mac]['rd_pkts'] = int(stats[1])
+                        netinfo[mac]['rd_drop'] = int(stats[3])
 
-                        netinfo[mac]['wr_bytes'] = stats[4]
-                        netinfo[mac]['wr_pkts'] = stats[5]
-                        netinfo[mac]['wr_drop'] = stats[7]
+                        netinfo[mac]['wr_bytes'] = int(stats[4])
+                        netinfo[mac]['wr_pkts'] = int(stats[5])
+                        netinfo[mac]['wr_drop'] = int(stats[7])
     return netinfo
 
 
