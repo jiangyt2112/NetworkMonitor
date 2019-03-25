@@ -43,5 +43,6 @@ from openstackapi.neutron import get_project_network_info
 # 	exit(0)
 # network_info = get_project_network_info(auth_token, auth_url, endpoint_url)
 # print get_port_network_info(network_info['ports'][0], network_info)
-from libvirt_func import get_vm_port_netinfo
-print get_vm_port_netinfo()
+from libvirt_func import get_vm_port_netinfo, get_vm_port_netstats
+# print get_vm_port_netinfo()
+print get_vm_port_netstats()
