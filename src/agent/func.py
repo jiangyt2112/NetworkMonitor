@@ -674,8 +674,6 @@ def get_topo(vms_info, networks_info):
 
 	return True, topo
 
-
-
 def process_tap_info(info):
 	tap_info = {}
 	state = info.split("\n")[0].strip()
