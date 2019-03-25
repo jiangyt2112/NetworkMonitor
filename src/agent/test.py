@@ -97,7 +97,7 @@ from func import get_nic_ex_info, get_nic_tun_ip, get_nic_tun_info, get_tunnel_r
 # print topo
 from func import process_tap_info
 from func import exe
-ret, info = exe("ip addr show %s" ("tap879f22e7-61"))
+ret, info = exe("ip addr show %s" %("tap879f22e7-61"))
 print process_tap_info(info)
-ret, info = exe("ip addr show %s" ("br-ex"))
+ret, info = exe("ip addr show %s" %("br-ex"))
 print process_tap_info(info)
