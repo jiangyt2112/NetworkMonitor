@@ -95,6 +95,17 @@ def get_port_network_info(port, networks_info):
 			ret_info['dhcp_netns'] = "qdhcp-" + port['network_id']
 	return ret_info
 
+def get_tap_addr(addr, networks_info):
+	ret = {
+		"ip_address": addr['ip_address'],
+		"cidr": None,
+		"gateway_ip": None
+	}
+	for sub in networks_info['subnets']:
+		if sub['id'] == addr['subnet_id']:
+			ret['cidr'] = sub['cidr']
+			ret['gateway_ip'] = sub['gateway_ip']
+	return ret
 
 def get_vm_topo(vm_info, networks_info, topo, touch_ips, vm_port_netstats):
 	# vm level
@@ -154,7 +165,9 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips, vm_port_netstats):
 			tap_info['name'] = "tap" + port['id'][:11]
 			tap_info['mac_address'] = port['mac_address']
 			tap_info['status'] = port['status']
-			tap_info['addresses'] = [port['fixed_ips'][0]]
+			ret = get_tap_addr(port['fixed_ips'][0], networks_info)
+			ret['type'] = 'fixed'
+			tap_info['addresses'] = [ret]
 			tap_info['netns'] = None
 			tap_info['type'] = "tap device"
 			tap_info['check'] = {"result": None, "error_msg": ""}
@@ -218,7 +231,6 @@ def is_same_net(qg_info, port):
 			return True
 	return False
 
-
 def get_network_topo(networks_info, topo, touch_ips):
 	# dhcp
 	for port in networks_info["ports"]:
@@ -236,7 +248,7 @@ def get_network_topo(networks_info, topo, touch_ips):
 			addr = {
 					"mac_addr": port['mac_address'],
 					"version": 4,
-					'addr': port['ip_address'],
+					'addr': port['fixed_ips'][0]['ip_address'],
 					'cidr': None,
 					'tag': None,
 					'gateway_ip': None,
@@ -259,7 +271,9 @@ def get_network_topo(networks_info, topo, touch_ips):
 			tap_info['status'] = port['status']
 			tap_info['addresses'] = []
 			for i in port['fixed_ips']:
-			 	tap_info['addresses'].append(i)
+				ret = get_tap_addr(i, networks_info)
+				ret['type'] = 'fixed'
+			 	tap_info['addresses'].append(ret)
 			tap_info['type'] = "tap device"
 			tap_info['netns'] = dhcp_info['netns']
 			tap_info['check'] = {"result": None, "error_msg": ""}
@@ -338,20 +352,22 @@ def get_network_topo(networks_info, topo, touch_ips):
 
 			 	# 
 			 	addr = {
-				"mac_addr": q_info['mac_address'],
-				"version": 4,
-				'addr': q_info[0]['ip_address'],
-				'cidr': None,
-				'tag': None,
-				'gateway_ip': None,
-				'dhcp': None,
-				'dhcp_netns': None,
-				'type': 'fixed',
-				'next': None,
-				'check': {"result": None, "error_msg": ""},
-				'performance': {"bandwidth": None, "delay": None, "error_msg": "", "evaluation": ""}
+					"mac_addr": q_info['mac_address'],
+					"version": 4,
+					'addr': port['fixed_ips'][0]['ip_address'],
+					'cidr': None,
+					'tag': None,
+					'gateway_ip': None,
+					'dhcp': None,
+					'dhcp_netns': None,
+					'type': 'fixed',
+					'next': None,
+					'check': {"result": None, "error_msg": ""},
+					'performance': {"bandwidth": None, "delay": None, "error_msg": "", "evaluation": ""}
 				}
+				router_info['addresses'].append(addr)
 				if port['device_owner'] != 'network:router_interface':
+					# external network
 					addr['type'] = 'floating'
 
 				port_net_info = get_port_network_info(port, networks_info)
@@ -360,7 +376,9 @@ def get_network_topo(networks_info, topo, touch_ips):
 				addr['dhcp'] = port_net_info['dhcp']
 				addr['dhcp_netns'] = port_net_info['dhcp_netns']
 				addr['next'] = len(topo['tap'])
-				q_info['addresses'].append(addr)
+				ret = get_tap_addr(port['fixed_ips'][0], networks_info)
+				ret['type'] = 'fixed'
+				q_info['addresses'].append(ret)
 
 				q_info['type'] = "ovs internal"
 				q_info['check'] = {"result": None, "error_msg": ""}
@@ -408,11 +426,9 @@ def get_network_topo(networks_info, topo, touch_ips):
 		if port['device_owner'] == 'network:floatingip':
 			for t in topo['tap']:
 				if t['type'] == "ovs internal" and is_same_net(t, port):
-					t['addresses'].append(
-						{'subnet_id': port['fixed_ips'][0]['subnet_id'],
-						'ip_address': port['fixed_ips'][0]['ip_address'],
-						'type': 'floatingip'
-						})
+					ret = get_tap_addr(port['fixed_ips'][0], networks_info)
+					ret['type'] = 'floating'
+					t['addresses'].append(ret)
 
 
 def get_network_from_ip(ip):
