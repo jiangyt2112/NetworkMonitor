@@ -396,6 +396,7 @@ def get_port_netstats(port):
     s = {}
     for i in stats:
         s[i.split('=')[0]] = int(i.split('=')[1])
+    print port
     print s
 
     netstats['rx']['packets'] = s['rx_packets']
