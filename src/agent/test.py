@@ -93,4 +93,5 @@ from func import get_nic_ex_info, get_nic_tun_ip, get_nic_tun_info, get_tunnel_r
 # ret, br_info = get_ovs_info()
 # print get_tunnel_remote(br_info['br-tun'])
 from func import get_topo
-get_topo(vms_info, networks_info)
+topo = get_topo(vms_info, networks_info)
+print topo
