@@ -34,36 +34,44 @@ def get_vm_uuids():
 	    return True, uuids
 
 def get_hostname():
-	ret, name = exe('hostname')
+	cmd = 'hostname'
+	ret, name = exe(cmd)
 	if not ret:
-		return False, name
-	return True, name
+		AGENTLOG.info("func.get_hostname - cmd:%s return error, %s" %(cmd, name))
+		return ""
+	return name
 
 def check_service(service):
-	ret, result = exe("systemctl status %s" %(service))
+	cmd = "systemctl status %s" %(service)
+	ret, result = exe(cmd)
 	if not ret:
-		return False, None
+		AGENTLOG.info("func.check_service - cmd:%s return error, %s" %(cmd, result))
+		return False
 	status = result.split("\n")[2].split()[1]
 	if status == "active":
-		return True, True
+		return True
 	else:
-		return True, False
+		return False
 
 def get_host_ip():
-	ret, ips = exe('ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk \'{print $2}\'|tr -d "addr:"')
+	cmd = 'ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk \'{print $2}\'|tr -d "addr:"'
+	ret, info = exe(cmd)
 	if not ret:
-		return False, ips
-	return True, ips.split()
+		AGENTLOG.info("func.get_host_ip - cmd:%s return error, %s" %(cmd, info))
+		return []
+	return info.split()
 
 def is_network_node():
-	ret, info = exe('systemctl status neutron-server.service')
+	cmd = 'systemctl status neutron-server.service'
+	ret, info = exe(cmd)
 	if not ret:
-		return False, 'is_network_node test error.'
+		AGENTLOG.info("func.is_network_node - cmd:%s return error, %s" %(cmd, info))
+		return False
 
 	if info.split("\n")[2].strip().split(' ')[1] == 'active':
-		return True, True
+		return True
 	else:
-		return True, False
+		return False
 
 def get_port_network_info(port, networks_info):
 	ret_info = {
@@ -953,8 +961,8 @@ def check_network_ovs(network_topo):
 		br_ex = network_topo['ovs-provider'][1]
 		set_check(br_ex, True)
 
-	ret, status = check_service("openvswitch")
-	if ret == False or status == False:
+	status = check_service("openvswitch")
+	if status == False:
 		AGENTLOG.info("agent.func.check_network_ovs check_service openvswitch return error.")
 		set_check(br_int, False, "openvswitch service down.")
 		set_check(br_tun, False, "openvswitch service down.")
