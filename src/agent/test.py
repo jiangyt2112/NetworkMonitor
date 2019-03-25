@@ -49,7 +49,7 @@ vm_port_netstats = get_vm_port_netstats()
 # get_nic_netstats()
 
 from novaclient import client as nvclient
-from auth import get_token
+from openstackapi.auth import get_token
 auth_url = 'http://192.168.122.9:5000/v3'
 username = 'admin'
 password = 'e60ed34c828d44b9'
