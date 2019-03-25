@@ -513,7 +513,7 @@ def get_tunnel_remote(br_tun):
 	remote = []
 	for port in br_tun['Port']:
 		if port.startswith("vxlan"):
-			options = br_tun['Port'][port][options]
+			options = br_tun['Port'][port]['options']
 	options = options[1:-1]
 	options = options.replace("\"", '')
 	records = options.split(' ')
