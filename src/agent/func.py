@@ -699,7 +699,7 @@ def process_tap_info(info):
 	return tap_info
 
 def check_br_int_port(dev, topo):
-	ret, ovs_info = get_bridge_info()
+	ret, ovs_info = get_ovs_info(False)
 	if ret == False:
 		dev['check']['result'] = False
 		dev['check']['error_msg'] = "openvswitch service down."
