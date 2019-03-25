@@ -55,7 +55,7 @@ username = 'admin'
 password = 'e60ed34c828d44b9'
 project_name = 'admin'
 auth_token = get_token(username, password, auth_url, project_name)
-from openstackapi.neutron import get_project_server_info
+from openstackapi.nova import get_project_server_info
 vm_info = get_project_server_info(auth_token, auth_url, project_name)
 
 topo = {
