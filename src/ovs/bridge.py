@@ -401,11 +401,17 @@ def get_port_netstats(port):
 
     netstats['rx']['packets'] = s['rx_packets']
     netstats['rx']['bytes'] = s['rx_bytes']
-    netstats['rx']['drop'] = s['rx_dropped']
+    if 'rx_dropped' in s:
+        netstats['rx']['drop'] = s['rx_dropped']
+    else:
+        netstats['rx']['drop'] = 0
     netstats['tx']['packets'] = s['tx_packets']
     netstats['tx']['bytes'] = s['tx_bytes']
     netstats['tx']['drop'] = s['tx_dropped']
-
+    if 'tx_dropped' in s:
+        netstats['tx']['drop'] = s['tx_dropped']
+    else:
+        netstats['tx']['drop'] = s['tx_dropped']
     return netstats
 
 def get_ovs_port_netstats(brs):
