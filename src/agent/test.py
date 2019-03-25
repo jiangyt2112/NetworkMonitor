@@ -74,3 +74,5 @@ touch_ips = set()
 from func import get_vm_topo
 for vm in vm_info:
 	get_vm_topo(vm, network_info, topo, touch_ips, vm_port_netstats)
+
+print topo
