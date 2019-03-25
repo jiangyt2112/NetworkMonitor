@@ -4,7 +4,7 @@ from func import exe
 from func import get_bridge_info
 from func import ping_test
 from func import get_nic_info
-from func import get_vm_uuids, get_hostname, check_service, get_host_ip
+from func import get_vm_uuids, get_hostname, check_service, get_host_ip, is_network_node
 from libvirt_func import get_vm_port_netinfo, get_nic_netstats
 # info = exe("ip netns exec qrouter-d4edac45-231a-4b5e-9e95-c629d5c7fc62 ip addr show qg-b8cfeaad-ef")
 # info = info[1]
