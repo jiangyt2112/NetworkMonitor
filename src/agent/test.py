@@ -41,7 +41,7 @@ auth_token = get_token(username, password, auth_url, project_name)
 if auth_token == None:
 	print 'auth fail.'
 	exit(0)
-network_info = get_project_network_info(auth_token, auth_url, endpoint_url)
+networks_info = get_project_network_info(auth_token, auth_url, endpoint_url)
 # # print get_port_network_info(network_info['ports'][0], network_info)
 # from libvirt_func import get_vm_port_netinfo, get_vm_port_netstats, get_nic_netstats
 # # print get_vm_port_netinfo()
@@ -56,7 +56,7 @@ password = 'e60ed34c828d44b9'
 project_name = 'admin'
 auth_token = get_token(username, password, auth_url, project_name)
 from openstackapi.nova import get_project_server_info
-vm_info = get_project_server_info(auth_token, auth_url, project_name)
+vms_info = get_project_server_info(auth_token, auth_url, project_name)
 
 # topo = {
 # 		"device": [],
