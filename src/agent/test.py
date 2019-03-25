@@ -31,7 +31,7 @@ from openstackapi.neutron import get_project_network_info
 # print get_host_ip()
 # print is_network_node()
 
-
+from func import get_port_network_info
 auth_url = 'http://192.168.122.9:5000/v3'
 endpoint_url = 'http://192.168.122.9:9696'
 username = 'admin'
@@ -41,4 +41,5 @@ auth_token = get_token(username, password, auth_url, project_name)
 if auth_token == None:
 	print 'auth fail.'
 	exit(0)
-get_project_network_info(auth_token, auth_url, endpoint_url)
+network_info = get_project_network_info(auth_token, auth_url, endpoint_url)
+print get_port_network_info(network_info['ports'][0], network_info)
