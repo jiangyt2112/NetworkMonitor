@@ -86,6 +86,9 @@ from func import get_nic_ex_info, get_nic_tun_ip, get_nic_tun_info
 # info = {}
 # get_nic_ex_info(info)
 # print info
-ip = get_nic_tun_ip()
-info = {'ip_address': ip[1]}
-print get_nic_tun_info(info)
+# ip = get_nic_tun_ip()
+# info = {'ip_address': ip[1]}
+# print get_nic_tun_info(info)
+from ovs.bridge import get_ovs_info
+ret, br_info = get_ovs_info()
+print get_tunnel_remote(br_info['br-tun'])
