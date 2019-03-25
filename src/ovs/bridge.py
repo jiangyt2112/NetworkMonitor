@@ -407,7 +407,6 @@ def get_port_netstats(port):
         netstats['rx']['drop'] = 0
     netstats['tx']['packets'] = s['tx_packets']
     netstats['tx']['bytes'] = s['tx_bytes']
-    netstats['tx']['drop'] = s['tx_dropped']
     if 'tx_dropped' in s:
         netstats['tx']['drop'] = s['tx_dropped']
     else:
