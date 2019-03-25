@@ -89,7 +89,6 @@ def get_port_network_info(port, networks_info):
 			ret_info['gateway_ip'] = subnet['gateway_ip']
 			ret_info['cidr'] = subnet['cidr']
 			
-
 	for port in networks_info['ports']:
 		if port['fixed_ips'][0]['subnet_id'] == subnet_id and port['device_owner'] == 'network:dhcp':
 			ret_info['dhcp'] = port['fixed_ips'][0]['ip_address']
