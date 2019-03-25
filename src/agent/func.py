@@ -529,7 +529,7 @@ def get_tunnel_remote(br_tun):
 			remote = rec.split('=')[1].split(',')		
 	return remote
 
-def get_extnet_gateway(networks_info):
+def get_extnet_gateway(ip_addr, networks_info):
 	return ['192.168.166.1']
 
 
