@@ -76,3 +76,5 @@ for vm in vm_info:
 	get_vm_topo(vm, network_info, topo, touch_ips, vm_port_netstats)
 
 print topo
+print topo['device']
+
