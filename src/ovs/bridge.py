@@ -431,13 +431,13 @@ def get_ovs_port_netstats(brs):
 
     for port in interfaces:
         interfaces[port]['bandwidth'] = {
-            "rx": {"packets": new_stats['port']["rx"]['packets'] - old_stats['port']["rx"]['packets'], 
-                    "bytes": new_stats['port']["rx"]['bytes'] - old_stats['port']["rx"]['bytes'], 
-                    "drop": new_stats['port']["rx"]['drop'] - old_stats['port']["rx"]['drop']
+            "rx": {"packets": new_stats[port]["rx"]['packets'] - old_stats[port]["rx"]['packets'], 
+                    "bytes": new_stats[port]["rx"]['bytes'] - old_stats[port]["rx"]['bytes'], 
+                    "drop": new_stats[port]["rx"]['drop'] - old_stats[port]["rx"]['drop']
                     },
-            "tx": {"packets": new_stats['port']["tx"]['packets'] - old_stats['port']["tx"]['packets'], 
-                    "bytes": new_stats['port']["tx"]['bytes'] - old_stats['port']["tx"]['bytes'], 
-                    "drop": new_stats['port']["tx"]['drop'] - old_stats['port']["tx"]['drop']
+            "tx": {"packets": new_stats[port]["tx"]['packets'] - old_stats[port]["tx"]['packets'], 
+                    "bytes": new_stats[port]["tx"]['bytes'] - old_stats[port]["tx"]['bytes'], 
+                    "drop": new_stats[port]["tx"]['drop'] - old_stats[port]["tx"]['drop']
                 }
         }
 
