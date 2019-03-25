@@ -589,6 +589,7 @@ def get_topo(vms_info, networks_info):
 	nic_tun_info['name'] = ""
 	nic_tun_info['device'] = ""
 	nic_tun_info['physical_device'] = ""
+	# cidr
 	nic_tun_info['ip_address'] = nic_tun_ip
 	nic_tun_info['type'] = "nic"
 	nic_tun_info['remote'] = remote
