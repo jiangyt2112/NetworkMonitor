@@ -335,7 +335,7 @@ def exe(cmd):
     else:
         return False, result
 
-def get_ovs_info():
+def get_ovs_info(net_flag = True):
     brs, br = {}, ''
     cmd = 'ovs-vsctl show'
     ret, result = exe(cmd)
@@ -367,7 +367,8 @@ def get_ovs_info():
                 brs[br]['Port'][phy_port]['type'] = l.replace('type: ', '')
             elif l.startswith('options: '):
                 brs[br]['Port'][phy_port]['options'] = l.replace('options: ', '')
-    get_ovs_port_netstats(brs)
+    if net_flag:
+        get_ovs_port_netstats(brs)
     return True, brs
 
 def get_port_netstats(port):

@@ -80,5 +80,9 @@ touch_ips = set()
 # from func import get_network_topo
 # get_network_topo(network_info, topo, touch_ips)
 # print topo
-from func import get_network_from_ip
-print get_network_from_ip("192.168.122.1/24")
+# from func import get_network_from_ip
+# print get_network_from_ip("192.168.122.1/24")
+from func import get_nic_ex_info
+info = {}
+get_nic_ex_info(info)
+print info

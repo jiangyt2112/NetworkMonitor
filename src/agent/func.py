@@ -470,7 +470,7 @@ def get_nic_ex_info(nic_ex_info):
 		return ret, result
 	nic_ex_info['ip_address'] = result.split('\n')[1].split()[1]
 	
-	ret, br_info = get_ovs_info()
+	ret, br_info = get_ovs_info(False)
 	if ret == False:
 		return ret, br_info
 
@@ -608,6 +608,7 @@ def get_topo(vms_info, networks_info):
 
 	physical_switch_info = {}
 	physical_switch_info['type'] = 'physical switch'
+	# cidr
 	physical_switch_info['network'] = get_network_from_ip(nic_tun_info['ip_address'])
 	physical_switch_info['name'] = "physical switch " + physical_switch_info['network']
 	physical_switch_info['check'] = {"result": None, "error_msg": ""}
