@@ -457,6 +457,13 @@ def get_network_from_ip(ip):
 	ret_ip += "/" + str(temp_mask)
 	return ret_ip
 
+def get_nic_ex_ip():
+	ret, result = exe("ip address | grep br-ex")
+	if ret == False:
+		return ret, result
+	ip = result.split('\n')[1].split()[1]
+	return True, ip
+
 def get_nic_ex_info(nic_ex_info):
 	# nic_ex_info = {}
 	# nic_ex_info['name'] = ""
@@ -631,7 +638,10 @@ def get_topo(vms_info, networks_info):
 		topo['ovs-provider'].append(br_ex_info)
 		topo['br-int'][0]['next'].append(1)
 
-		if nic_tun_ip == nic_ex_info['ip_address']:
+		ret, nic_ex_ip = get_nic_ex_ip()
+		if ret == False:
+			return ret, nic_ex_ip
+		if nic_tun_ip == nic_ex_ip:
 			# tunnel network and extnet network use same nic 
 			br_ex_info['next'] = [0]
 		else:
@@ -644,14 +654,13 @@ def get_topo(vms_info, networks_info):
 			nic_ex_info['type'] = "nic"
 			nic_ex_info['check'] = {"result": None, "error_msg": ""}
 			nic_ex_info['performance'] = {"bandwidth": None, "delay": None, "error_msg": "", "evaluation": ""}
-			
-			nic_ex_info['performance']['bandwidth'] = nic_stats[nic_ex_info['name']]
 
 			nic_ex_info['next'] = [1]
 			AGENTLOG.info("agent.func.get_topo -  get_nic_ex_info start.")
 			ret, error_msg = get_nic_ex_info(nic_ex_info)
 			if ret == False:
 				return ret, error_msg
+			nic_ex_info['performance']['bandwidth'] = nic_stats[nic_ex_info['name']]
 			nic_ex_info['remote'] = get_extnet_gateway(nic_ex_info['ip_address'], networks_info)
 			AGENTLOG.info("agent.func.get_topo -  get_nic_ex_info done.")
 	
