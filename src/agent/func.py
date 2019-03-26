@@ -334,6 +334,7 @@ def get_network_topo(networks_info, topo, touch_ips):
 		router_info['status'] = r['status']
 		router_info['check'] = {"result": None, "error_msg": ""}
 		router_info['next'] = []
+		topo['device'].append(router_info)
 		# qr qg
 		
 		for port in networks_info['ports']:
