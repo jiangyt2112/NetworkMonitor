@@ -1221,7 +1221,8 @@ def ping_test(ip, netns):
 
 def is_connect_internal(ip, mask, tag):
 	test_ip = get_test_ip(ip, mask)
-	netns = "network_check_ns_%s_%s_%s" %(ip, mask, tag)
+	format_ip = "-".join(ip.split('.'))
+	netns = "network_check_ns_%s_%s_%s" %(format_ip, mask, tag)
 	# ip netns add ns1
 	# ovs-vsctl add-port br-int tap0 tag=1 -- set Interface tap0 type=internal
 	# ip a
@@ -1232,7 +1233,7 @@ def is_connect_internal(ip, mask, tag):
 	# ip netns exec ns1 ip a
 	# ip netns exec ns1 ping 192.168.1.1
 	bridge = "br-int"
-	port = "tap-connection-check-%s-%s-%s" %(ip, mask, tag)
+	port = "tap-connection-check-%s-%s-%s" %(format_ip, mask, tag)
 	ret = create_netns(netns)
 	if ret == False:
 		return False, "create netns error."
