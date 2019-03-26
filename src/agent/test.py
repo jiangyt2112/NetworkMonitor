@@ -92,7 +92,8 @@ from func import get_nic_ex_info, get_nic_tun_ip, get_nic_tun_info, get_tunnel_r
 # from ovs.bridge import get_ovs_info
 # ret, br_info = get_ovs_info()
 # print get_tunnel_remote(br_info['br-tun'])
-from func import get_topo, get_vm_in_host
+from func import get_topo
+from libvirt_func import get_vm_info_in_host
 vm_info_in_host = get_vm_info_in_host()
 vm_info = []
 for vm in vms_info:
