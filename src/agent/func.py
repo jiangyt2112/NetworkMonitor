@@ -940,7 +940,7 @@ def check_router(dev, topo):
 		dev['status'] = "unactive"
 		dev['check']['result'] = True
 	else:
-		if check_ns_exist(dev['namespaces']) == False:
+		if check_ns_exist(dev['netns']) == False:
 			dev['check']['result'] = False
 			dev['check']['error_msg'] = "netns-%s not exist." %(dev['netns'])
 			dev['status'] = "unactive"
