@@ -1219,6 +1219,10 @@ def ping_test(ip, netns):
 	else:
 		return False, "all packets lost."
 
+def clear_netns_and_port(netns, port):
+	exe("ip netns del %s" %(netns))
+	exe("ovs-vsctl del-port %s %s" %("br-int", port))
+
 def is_connect_internal(vm_id, ip, mask, tag):
 	test_ip = get_test_ip(ip, mask)
 	format_ip = "-".join(ip.split('.'))
@@ -1236,27 +1240,31 @@ def is_connect_internal(vm_id, ip, mask, tag):
 	port = "vm-%s" %(vm_id[:11])
 	ret = create_netns(netns)
 	if ret == False:
+		clear_netns_and_port(netns, port)
 		return False, "create netns error."
 
 	ret = create_ovs_port(bridge, port, tag)
 	if ret == False:
+		clear_netns_and_port(netns, port)
 		return False, "create ovs port error."
 
 	ret = set_tap_to_netns(port, netns)
 	if ret == False:
+		clear_netns_and_port(netns, port)
 		return False, "set tap to netns error."
 
 	ret = bond_tap_addr(port, netns, test_ip)
 	if ret == False:
+		clear_netns_and_port(netns, port)
 		return False, "bond tap addr error."
 
 	ret, msg = ping_test(ip, netns)
 	if ret == False:
+		clear_netns_and_port(netns, port)
 		return ret, "can't reach %s by ping, %s." %(ip, msg)
 
 	#clear
-	exe("ip netns del %s" %(netns))
-	exe("ovs-vsctl del-port %s %s" %("br-int", port))
+	clear_netns_and_port()
 	return True, None
 
 def is_connect_external(ip, mask, tag = None):
