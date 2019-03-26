@@ -92,14 +92,14 @@ from func import get_nic_ex_info, get_nic_tun_ip, get_nic_tun_info, get_tunnel_r
 # from ovs.bridge import get_ovs_info
 # ret, br_info = get_ovs_info()
 # print get_tunnel_remote(br_info['br-tun'])
-# from func import get_topo
-# from libvirt_func import get_vm_info_in_host
-# #vm_info_in_host = get_vm_info_in_host()
-# vm_info = []
-# for vm in vms_info:
-# 	if vm['id'] in vm_info_in_host:
-# 		vm_info.append(vm)
-#ret, topo = get_topo(vm_info, networks_info)
+from func import get_topo
+from libvirt_func import get_vm_info_in_host
+vm_info_in_host = get_vm_info_in_host()
+vm_info = []
+for vm in vms_info:
+	if vm['id'] in vm_info_in_host:
+		vm_info.append(vm)
+ret, topo = get_topo(vm_info, networks_info)
 # print topo
 # from func import process_tap_info
 # from func import exe
@@ -122,7 +122,7 @@ from func import check_br_int_port, get_bridge_info, get_all_ns, check_ns_exist,
 # check_network_ovs(topo)
 # check_network_nic(topo)
 
-# check_network_config(topo)
+check_network_config(topo)
 
 # print get_test_ip("192.168.122.3", 24)
 from func import create_netns, create_ovs_port, set_tap_to_netns
@@ -133,5 +133,6 @@ from func import bond_tap_addr, ping_test
 # print bond_tap_addr('test', 'test', '192.168.1.10/24')
 # print ping_test('192.168.1.8', 'test')
 
-from func import is_connect_internal
-print is_connect_internal('1234567890123','192.168.1.8', '24', '1')
+from func import is_connect_internal, check_device_connection
+# print is_connect_internal('1234567890123','192.168.1.8', '24', '1')
+check_device_connection(topo['device'][0], topo)

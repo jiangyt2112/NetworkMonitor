@@ -1225,7 +1225,7 @@ def clear_netns_and_port(netns, port):
 	exe("ovs-vsctl del-port %s %s" %("br-int", port))
 
 def is_connect_internal(vm_id, ip, mask, tag):
-	print mask
+	# print mask
 	test_ip = get_test_ip(ip, mask)
 	format_ip = "-".join(ip.split('.'))
 	netns = "%s_%s" %(vm_id[:11], format_ip)
