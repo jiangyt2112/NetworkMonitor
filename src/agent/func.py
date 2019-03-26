@@ -1181,13 +1181,14 @@ def set_tap_to_netns(port, netns):
 	return True
 
 def bond_tap_addr(port, netns, addr):
+	# addr cidr
 	if netns == "":
 		ret, info = exe("ip addr add %s dev %s" %(addr, port))
 	else:
 		ret, info = exe("ip netns exec %s ip addr add %s dev %s" %(netns, addr, dev))
 	if ret == False:
 		AGENTLOG.error("agent.func.bond_tap_addr -  %s." %(info))
-		return ret, info
+		return ret
 
 	if netns == "":
 		ret, info = exe("ip netns exec %s ifconfig %s promisc up" %(netns, dev))
@@ -1195,9 +1196,9 @@ def bond_tap_addr(port, netns, addr):
 		ret, info = exe("ifconfig %s promisc up" %(netns, dev))
 	if ret == False:
 		AGENTLOG.error("agent.func.bond_tap_addr -  %s." %(info))
-		return ret, info 
+		return ret
 
-	return True, None
+	return True
 
 def ping_test(ip, netns):
 	if netns == "":
