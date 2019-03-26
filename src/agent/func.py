@@ -1177,7 +1177,7 @@ def set_tap_to_netns(port, netns):
 	ret, info = exe("ip link set %s netns %s" %(port, netns))
 	if ret == False:
 		AGENTLOG.error("agent.func.set_tap_to_netns -  %s." %(info))
-		return False, info
+		return False
 	return True
 
 def bond_tap_addr(port, netns, addr):

@@ -125,6 +125,7 @@ from func import check_network_nic, check_network_config, get_test_ip
 # check_network_config(topo)
 
 # print get_test_ip("192.168.122.3", 24)
-from func import create_netns, create_ovs_port
+from func import create_netns, create_ovs_port, set_tap_to_netns
 # print create_netns("test")
-create_ovs_port('br-int', 'test', '1')
+# create_ovs_port('br-int', 'test', '1')
+set_tap_to_netns('test', 'test')
