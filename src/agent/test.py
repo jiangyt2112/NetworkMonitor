@@ -113,4 +113,5 @@ from func import check_br_int_port, get_bridge_info, get_all_ns, check_ns_exist,
 # print get_all_ns()
 #print check_ns_exist('qrouter-92e27a1f-2330-4444-a2bd-2fdab1d18504')
 #print check_ns_exist('qrouter-92e27a1f-2330-4444-a2bd-2fdab1d1851')
+print len(topo['device'])
 check_network_device(topo)
