@@ -1141,6 +1141,7 @@ def get_test_ip(ip, mask):
 		if i != 0:
 			test_ip += "."
 		test_ip += str(ip_split[i])
+	test_ip += "/" + str(mask)
 	return test_ip
 
 def create_netns(netns):
@@ -1224,6 +1225,7 @@ def clear_netns_and_port(netns, port):
 	exe("ovs-vsctl del-port %s %s" %("br-int", port))
 
 def is_connect_internal(vm_id, ip, mask, tag):
+	print mask
 	test_ip = get_test_ip(ip, mask)
 	format_ip = "-".join(ip.split('.'))
 	netns = "%s_%s" %(vm_id[:11], format_ip)
