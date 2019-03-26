@@ -1002,7 +1002,7 @@ def check_network_ovs(network_topo):
 		set_check(br_int, False, "interface:int-br-ex lost or config error.")
 
 	if ('patch-tun' not in br_int['info']['Port'] or br_int['info']['Port']['patch-tun']['options']
-		!= "{peer=patch-int}" or br_int['info']['patch-tun']['type']!= 'patch'):
+		!= "{peer=patch-int}" or br_int['info']['Port']['patch-tun']['type']!= 'patch'):
 		set_check(br_int, False, "interface:patch-tun lost or config error.")
 
 	if ('patch-int' not in br_tun['info']['Port'] or br_tun['info']['Port']['patch-int']['type']
