@@ -1262,11 +1262,11 @@ def is_connect_internal(vm_id, ip, mask, tag):
 
 	ret, msg = ping_test(ip, netns)
 	if ret == False:
-		#clear_netns_and_port(netns, port)
+		clear_netns_and_port(netns, port)
 		return ret, "can't reach %s by ping, %s." %(ip, msg)
 
 	#clear
-	clear_netns_and_port()
+	clear_netns_and_port(netns, port)
 	return True, None
 
 def is_connect_external(ip, mask, tag = None):
