@@ -105,5 +105,5 @@ from func import check_br_int_port, get_bridge_info, get_all_ns, check_ns_exist
 # check_br_int_port(topo['br-int-port'][0], topo)
 # print get_bridge_info('qbr3ef787ad-67')
 # print get_all_ns()
-print check_ns_exist('qrouter-92e27a1f-2330-4444-a2bd-2fdab1d1850')
+print check_ns_exist('qrouter-92e27a1f-2330-4444-a2bd-2fdab1d18504')
 print check_ns_exist('qrouter-92e27a1f-2330-4444-a2bd-2fdab1d1851')
