@@ -1121,6 +1121,7 @@ def check_network_config(network_topo):
 	AGENTLOG.info("agent.func.check_network_config -  check network done.")
 
 def get_test_ip(ip, mask):
+	mask = int(mask)
 	last_mask = 32 - mask
 	ip_split = ip.split('.')
 	for i in range(len(ip_split)):
