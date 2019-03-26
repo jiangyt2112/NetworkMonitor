@@ -874,8 +874,8 @@ def check_vm(dev, topo):
 		else:
 			dev['status'] = 'active'
 			dev['check']['result'] = True
-			for addr in vm_info['addresses']:
-				nets = vm_info['addresses'][addr]
+			for addr in dev['addresses']:
+				nets = dev['addresses'][addr]
 				for i in nets:
 					if i['type'] == 'fixed':
 						if i['mac_addr'] in net_info:
