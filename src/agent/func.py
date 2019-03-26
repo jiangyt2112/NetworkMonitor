@@ -1219,10 +1219,10 @@ def ping_test(ip, netns):
 	else:
 		return False, "all packets lost."
 
-def is_connect_internal(ip, mask, tag):
+def is_connect_internal(vm_id, ip, mask, tag):
 	test_ip = get_test_ip(ip, mask)
 	format_ip = "-".join(ip.split('.'))
-	netns = "network_check_ns_%s_%s_%s" %(format_ip, mask, tag)
+	netns = "%s_%s" %(vm_id[:11], format_ip)
 	# ip netns add ns1
 	# ovs-vsctl add-port br-int tap0 tag=1 -- set Interface tap0 type=internal
 	# ip a
@@ -1233,7 +1233,7 @@ def is_connect_internal(ip, mask, tag):
 	# ip netns exec ns1 ip a
 	# ip netns exec ns1 ping 192.168.1.1
 	bridge = "br-int"
-	port = "tap-connection-check-%s-%s-%s" %(format_ip, mask, tag)
+	port = "vm-%s" %(vm_id[:11])
 	ret = create_netns(netns)
 	if ret == False:
 		return False, "create netns error."
@@ -1300,7 +1300,7 @@ def check_device_connection(dev, topo):
 					ip = addr['addr']
 					tag = addr['tag']
 					mask = addr['cidr'].split('/')[1]
-					dest_list.append({"ip": ip, "mask": mask, "tag": tag, 'addr': addr})
+					dest_list.append({"id": dev['id'], "ip": ip, "mask": mask, "tag": tag, 'addr': addr})
 	elif dev['type'] == "dhcp" or dev['type'] == 'router':
 		get_device_other_tag(dev, topo)
 		for addr in dev['addresses']:
@@ -1308,12 +1308,12 @@ def check_device_connection(dev, topo):
 				ip = addr['addr']
 				tag = addr['tag']
 				mask = addr['cidr'].split('/')[1]
-				dest_list.append({"ip": ip, "mask": mask, "tag": tag, 'addr': addr})
+				dest_list.append({"id": dev['id'], "ip": ip, "mask": mask, "tag": tag, 'addr': addr})
 	else:
 		AGENTLOG.error("agent.func.check_device_connection -  unknown device type:%s." %(dev['type']))
 	
 	for dst in dest_list:
-			ret, error_info = is_connect_internal(dst['ip'], dst['mask'], dst['tag'])
+			ret, error_info = is_connect_internal(dst['id'], dst['ip'], dst['mask'], dst['tag'])
 			if ret == False:
 				set_check(dst['addr'], False, "dev:%s addr:%s can't reach openvswitch." 
 					%(dev['name'], dst['addr']['addr']))
