@@ -119,5 +119,5 @@ for i in topo['device']:
 from func import check_network_ovs
 from func import check_network_nic
 check_network_device(topo)
-check_network_ovs(network_topo)
-check_network_nic(network_topo)
+check_network_ovs(topo)
+check_network_nic(topo)
