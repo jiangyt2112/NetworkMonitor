@@ -1185,15 +1185,15 @@ def bond_tap_addr(port, netns, addr):
 	if netns == "":
 		ret, info = exe("ip addr add %s dev %s" %(addr, port))
 	else:
-		ret, info = exe("ip netns exec %s ip addr add %s dev %s" %(netns, addr, dev))
+		ret, info = exe("ip netns exec %s ip addr add %s dev %s" %(netns, addr, port))
 	if ret == False:
 		AGENTLOG.error("agent.func.bond_tap_addr -  %s." %(info))
 		return ret
 
 	if netns == "":
-		ret, info = exe("ip netns exec %s ifconfig %s promisc up" %(netns, dev))
+		ret, info = exe("ip netns exec %s ifconfig %s promisc up" %(netns, port))
 	else:
-		ret, info = exe("ifconfig %s promisc up" %(netns, dev))
+		ret, info = exe("ifconfig %s promisc up" %(netns, port))
 	if ret == False:
 		AGENTLOG.error("agent.func.bond_tap_addr -  %s." %(info))
 		return ret
