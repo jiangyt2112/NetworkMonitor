@@ -129,5 +129,6 @@ from func import create_netns, create_ovs_port, set_tap_to_netns
 # print create_netns("test")
 # create_ovs_port('br-int', 'test', '1')
 # set_tap_to_netns('test', 'test')
-from func import bond_tap_addr
-print bond_tap_addr('test', 'test', '192.168.1.10/24')
+from func import bond_tap_addr, ping_test
+# print bond_tap_addr('test', 'test', '192.168.1.10/24')
+ping_test('192.168.1.8', 'test')

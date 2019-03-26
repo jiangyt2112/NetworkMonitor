@@ -1191,9 +1191,9 @@ def bond_tap_addr(port, netns, addr):
 		return ret
 
 	if netns == "":
-		ret, info = exe("ip netns exec %s ifconfig %s promisc up" %(netns, port))
-	else:
 		ret, info = exe("ifconfig %s promisc up" %(port))
+	else:
+		ret, info = exe("ip netns exec %s ifconfig %s promisc up" %(netns, port))
 	if ret == False:
 		AGENTLOG.error("agent.func.bond_tap_addr -  %s." %(info))
 		return ret
@@ -1248,9 +1248,9 @@ def is_connect_internal(ip, mask, tag):
 	if ret == False:
 		return False, "bond tap addr error."
 
-	ret = ping_test(ip, netns)
+	ret, msg = ping_test(ip, netns)
 	if ret == False:
-		return ret, "can't reach %s by ping." %(ip)
+		return ret, "can't reach %s by ping, %s." %(ip, msg)
 
 	#clear
 	exe("ip netns del %s" %(netns))
@@ -1259,9 +1259,9 @@ def is_connect_internal(ip, mask, tag):
 
 def is_connect_external(ip, mask, tag = None):
 	netns = None
-	ret = ping_test(ip, netns)
+	ret, msg = ping_test(ip, netns)
 	if ret == False:
-		return ret, "can't reach %s by ping." %(ip)
+		return ret, "can't reach %s by ping, %s." %(ip, msg)
 	return True, None
 
 def get_device_vm_tag(dev, topo):
