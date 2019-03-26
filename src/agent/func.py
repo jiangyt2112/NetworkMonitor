@@ -856,6 +856,8 @@ def check_vm(dev, topo):
 	# id status host name created addresses type check performance next
 	# vm state/network interface
 	vm_info_in_host = get_vm_info_in_host()
+	print vm_info_in_host
+	print dev['id']
 	vm_info = vm_info_in_host[dev['id']]
 	net_info = {}
 	for net in vm_info['netstats']:
