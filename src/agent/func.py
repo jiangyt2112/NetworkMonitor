@@ -1246,7 +1246,7 @@ def is_connect_internal(vm_id, ip, mask, tag):
 	if ret == False:
 		return False, "set tap to netns error."
 
-	ret = bond_tap_addr(port, netns, addr)
+	ret = bond_tap_addr(port, netns, test_ip)
 	if ret == False:
 		return False, "bond tap addr error."
 
