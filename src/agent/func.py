@@ -175,7 +175,7 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips, vm_port_netstats):
 			tap_info['next'] = len(topo['qbr']) + tap_num
 			topo['tap'].append(tap_info)
 			vm['next'].append(len(topo['tap']) - 1)
-			vm_fixed_ips[port_addr]['next'] = vm['next']
+			vm_fixed_ips[port_addr]['next'] = len(topo['tap']) - 1
 			# ret_info = {
 			# 'ip_address': port['fixed_ips'][0]['ip_address']
 			# 'gateway_ip': None,
