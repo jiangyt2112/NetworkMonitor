@@ -1335,7 +1335,8 @@ def check_nic_connection(dev, topo):
 	for ip in dev['remote']:
 		ret, info = ping_test(ip, "")
 		if ret == False:
-			set_check(dev, False, "can't reach %s, %s" %(ip, info))                                      
+			set_check(dev, False, "can't reach %s, %s" %(ip, info))
+			return                                    
 
 def check_network_connection(topo):
 	AGENTLOG.info("agent.func.check_network_connection -  check network connection start.")
