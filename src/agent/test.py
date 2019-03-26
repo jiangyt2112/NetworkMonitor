@@ -92,8 +92,13 @@ from func import get_nic_ex_info, get_nic_tun_ip, get_nic_tun_info, get_tunnel_r
 # from ovs.bridge import get_ovs_info
 # ret, br_info = get_ovs_info()
 # print get_tunnel_remote(br_info['br-tun'])
-from func import get_topo
-ret, topo = get_topo(vms_info, networks_info)
+from func import get_topo, get_vm_in_host
+vm_info_in_host = get_vm_info_in_host()
+vm_info = []
+for vm in vms_info:
+	if vm['id'] in vm_info_in_host:
+		vm_info.append(vm)
+ret, topo = get_topo(vm_info, networks_info)
 # print topo
 # from func import process_tap_info
 # from func import exe
