@@ -101,5 +101,6 @@ ret, topo = get_topo(vms_info, networks_info)
 # print process_tap_info(info)
 # ret, info = exe("ip addr show %s" %("br-ex"))
 # print process_tap_info(info)
-from func import check_br_int_port
-check_br_int_port(topo['br-int-port'][0], topo)
+from func import check_br_int_port, get_bridge_info
+# check_br_int_port(topo['br-int-port'][0], topo)
+print get_bridge_info('br-ex')
