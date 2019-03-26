@@ -124,4 +124,6 @@ from func import check_network_nic, check_network_config, get_test_ip
 
 # check_network_config(topo)
 
-print get_test_ip("192.168.122.3", 24)
+# print get_test_ip("192.168.122.3", 24)
+from func import create_netns
+print create_netns("test")
