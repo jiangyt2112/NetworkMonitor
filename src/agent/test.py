@@ -132,3 +132,6 @@ from func import create_netns, create_ovs_port, set_tap_to_netns
 from func import bond_tap_addr, ping_test
 # print bond_tap_addr('test', 'test', '192.168.1.10/24')
 print ping_test('192.168.1.8', 'test')
+
+from func import is_connect_internal
+print is_connect_internal('192.168.1.8', '24', '1')
