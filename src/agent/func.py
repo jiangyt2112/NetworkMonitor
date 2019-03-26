@@ -1193,7 +1193,7 @@ def bond_tap_addr(port, netns, addr):
 	if netns == "":
 		ret, info = exe("ip netns exec %s ifconfig %s promisc up" %(netns, port))
 	else:
-		ret, info = exe("ifconfig %s promisc up" %(netns, port))
+		ret, info = exe("ifconfig %s promisc up" %(port))
 	if ret == False:
 		AGENTLOG.error("agent.func.bond_tap_addr -  %s." %(info))
 		return ret
