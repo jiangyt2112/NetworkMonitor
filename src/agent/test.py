@@ -117,9 +117,11 @@ print len(topo['device'])
 for i in topo['device']:
 	print i['name']
 from func import check_network_ovs
-from func import check_network_nic, check_network_config
+from func import check_network_nic, check_network_config, get_test_ip
 # check_network_device(topo)
 # check_network_ovs(topo)
 # check_network_nic(topo)
 
-check_network_config(topo)
+# check_network_config(topo)
+
+print get_test_ip("192.168.122.3", 24)
