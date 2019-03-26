@@ -1257,14 +1257,37 @@ def is_connect_internal(ip, mask, tag):
 	return True, None
 
 def is_connect_external(ip, mask, tag = None):
+	netns = None
 	ret = ping_test(ip, netns)
 	if ret == False:
 		return ret, "can't reach %s by ping." %(ip)
 	return True, None
 
+def get_device_vm_tag(dev, topo):
+	for net in dev['addresses']:
+		for addr in dev['addresses'][net]:
+			if addr['type'] == 'fixed':
+				next_ = topo['tap'][addr['next']]['next']
+				next_ = topo['qbr'][next_]['next']
+				next_ = topo['qvb'][next_]['next']
+				next_ = topo['qvo'][next_]['next']
+				tag = topo['br-int-port'][next_]['tag']
+				addr['tag'] = tag
+
+def get_device_other_tag(dev, topo):
+	for addr in dev['addresses']:
+		if addr['type'] == 'fixed':
+			next_ = topo['tap'][addr['next']]['next']
+			next_ = topo['qbr'][next_]['next']
+			next_ = topo['qvb'][next_]['next']
+			next_ = topo['qvo'][next_]['next']
+			tag = topo['br-int-port'][next_]['tag']
+			addr['tag'] = tag
+
 def check_device_connection(dev, topo):
 	dest_list = []
 	if dev['type'] == "virtual host":
+		get_device_vm_tag(dev, topo)
 		#vm
 		# for every addr
 		# ip net tag
@@ -1276,6 +1299,7 @@ def check_device_connection(dev, topo):
 					mask = addr['cidr'].split('/')[1]
 					dest_list.append({"ip": ip, "mask": mask, "tag": tag, 'addr': addr})
 	elif dev['type'] == "dhcp" or dev['type'] == 'router':
+		get_device_other_tag(dev, topo)
 		for addr in dev['addresses']:
 			if addr['type'] == 'fixed':
 				ip = addr['addr']
