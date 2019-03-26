@@ -135,5 +135,6 @@ from func import bond_tap_addr, ping_test
 
 from func import is_connect_internal, check_device_connection, check_nic_connection
 # print is_connect_internal('1234567890123','192.168.1.8', '24', '1')
-check_device_connection(topo['device'][0], topo)
-check_nic_connection(topo['nic'][0], topo)
+# check_device_connection(topo['device'][0], topo)
+# check_nic_connection(topo['nic'][0], topo)
+check_network_connection(topo)
