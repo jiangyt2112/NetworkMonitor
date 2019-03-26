@@ -117,7 +117,7 @@ from func import check_br_int_port, get_bridge_info, get_all_ns, check_ns_exist,
 # for i in topo['device']:
 # 	print i['name']
 # from func import check_network_ovs
-# from func import check_network_nic, check_network_config, get_test_ip
+from func import check_network_nic, check_network_config, get_test_ip
 # check_network_device(topo)
 # check_network_ovs(topo)
 # check_network_nic(topo)
@@ -135,5 +135,5 @@ from func import bond_tap_addr, ping_test
 
 from func import is_connect_internal, check_device_connection, check_nic_connection
 # print is_connect_internal('1234567890123','192.168.1.8', '24', '1')
-# check_device_connection(topo['device'][0], topo)
+check_device_connection(topo['device'][0], topo)
 check_nic_connection(topo['nic'][0], topo)
