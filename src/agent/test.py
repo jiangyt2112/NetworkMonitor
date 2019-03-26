@@ -93,7 +93,7 @@ from func import get_nic_ex_info, get_nic_tun_ip, get_nic_tun_info, get_tunnel_r
 # ret, br_info = get_ovs_info()
 # print get_tunnel_remote(br_info['br-tun'])
 from func import get_topo
-ret, topo = get_topo(vms_info, networks_info)
+# ret, topo = get_topo(vms_info, networks_info)
 # print topo
 # from func import process_tap_info
 # from func import exe
@@ -101,6 +101,7 @@ ret, topo = get_topo(vms_info, networks_info)
 # print process_tap_info(info)
 # ret, info = exe("ip addr show %s" %("br-ex"))
 # print process_tap_info(info)
-from func import check_br_int_port, get_bridge_info
+from func import check_br_int_port, get_bridge_info, get_all_ns
 # check_br_int_port(topo['br-int-port'][0], topo)
-print get_bridge_info('qbr3ef787ad-67')
+# print get_bridge_info('qbr3ef787ad-67')
+print get_all_ns()

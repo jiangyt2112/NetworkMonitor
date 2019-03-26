@@ -695,6 +695,7 @@ def process_tap_info(info):
 	for i in inets:
 		info = i.strip().split(" ")
 		if info[0] == 'inet':
+			# cidr
 			tap_info['inets'].append(info[1])
 	return tap_info
 
@@ -804,6 +805,8 @@ def check_qbr(dev, topo):
 	check_qvb(topo['qvb'][dev['next']], topo)
 
 def is_addr_match(tap_inets, dev_addrs):
+	# tap_inets cide
+	# dev_addrs {ip_address cidr}
 	tap_inet_ips = set()
 	for addr in tap_inets:
 		tap_inet_ips.add(addr.split("/")[0])
@@ -875,8 +878,6 @@ def check_vm(dev, topo):
 					if i['type'] == 'fixed':
 						if i['mac_addr'] in net_info:
 							i['check']['result'] = True
-							# ping
-							# bandwidth delay
 							# add vm info
 						else:
 							i['check']['result'] = False
