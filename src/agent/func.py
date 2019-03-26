@@ -958,9 +958,9 @@ def check_network_device(network_topo):
 	for dev in network_topo['device']:
 		AGENTLOG.info("agent.func.check_network_device - check device %s.%s ." %(dev['type'], dev['name']))
 		if dev['type'] == 'virtual host':
-			check_vm(dev, network_toponetwork_toponetwork_topo)
+			check_vm(dev, network_topo)
 		elif dev['type'] == 'dhcp':
-			check_dhcp(dev, network_toponetwork_topo)
+			check_dhcp(dev, network_topo)
 		elif dev['type'] == 'router':
 			check_router(dev, network_topo)
 		else:
