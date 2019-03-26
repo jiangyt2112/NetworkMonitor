@@ -134,4 +134,4 @@ from func import bond_tap_addr, ping_test
 # print ping_test('192.168.1.8', 'test')
 
 from func import is_connect_internal
-print is_connect_internal('192.168.1.8', '24', '1')
+print is_connect_internal('1234567890123','192.168.1.8', '24', '1')
