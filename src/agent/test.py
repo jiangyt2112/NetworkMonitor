@@ -117,3 +117,5 @@ print len(topo['device'])
 for i in topo['device']:
 	print i['name']
 check_network_device(topo)
+check_network_ovs(network_topo)
+check_network_nic(network_topo)
