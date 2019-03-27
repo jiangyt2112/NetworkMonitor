@@ -25,11 +25,11 @@ def addr_delay(addr):
 		SERVERLOG.info("server.func.addr_delay - cmd:%s return error, %s." %(cmd, info))
 		addr['performance']['error_msg'] = "can't get delay info."
 	else:
-		ret = ret[1: -1].split(',')
-		ret[0] = int(ret[0])
-		ret[1] = float(ret[1])
-		ret[2] = float(ret[2])
-		addr['performance']['delay'] = ret
+		info = info[1: -1].split(',')
+		info[0] = int(info[0])
+		info[1] = float(info[1])
+		info[2] = float(info[2])
+		addr['performance']['delay'] = info
 
 def check_delay(result):
 	#result = {
