@@ -26,10 +26,17 @@ def addr_delay(addr):
 		addr['performance']['error_msg'] = "can't get delay info."
 	else:
 		info = info[1: -1].split(',')
-		info[0] = int(info[0])
-		info[1] = float(info[1])
-		info[2] = float(info[2])
-		addr['performance']['delay'] = info
+		try:
+			info[0] = int(info[0])
+			info[1] = float(info[1])
+			info[2] = float(info[2])
+		except Exception, e:
+			print info
+			print str(e)
+			addr['performance']['error_msg'] = "data formate error."
+			return
+		else:
+			addr['performance']['delay'] = info
 
 def check_delay(result):
 	#result = {
