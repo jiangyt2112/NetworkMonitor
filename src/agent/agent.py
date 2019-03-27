@@ -91,7 +91,7 @@ class Task:
         # self.process
 
         msg["info"] = info
-         AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s agent_to_server_msg."
+        AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s agent_to_server_msg."
           %(self.project, self.req_id))
 
         ret, info = agent_to_server_msg(msg)
