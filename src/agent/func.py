@@ -234,6 +234,9 @@ def is_same_net(qg_info, port):
 
 def get_network_topo(networks_info, topo, touch_ips):
 	# dhcp
+	if not is_network_node():
+		return
+
 	for port in networks_info["ports"]:
 		if port['device_owner'] == 'network:dhcp':
 			dhcp_info = {}
@@ -566,7 +569,8 @@ def get_topo(vms_info, networks_info):
 
 
 	AGENTLOG.info("agent.func.get_topo -  get network topo start.")
-	get_network_topo(networks_info, topo, touch_ips)
+	if is_network_node():
+		get_network_topo(networks_info, topo, touch_ips)
 	AGENTLOG.info("agent.func.get_topo -  get network topo done.")
 
 	AGENTLOG.info("agent.func.get_topo -  get ovs info start.")
@@ -1004,10 +1008,6 @@ def check_network_ovs(network_topo):
 		if is_network:
 			set_check(br_ex, False, "openvswitch service down.")
 
-	if ('int-br-ex' not in br_int['info']['Port'] or br_int['info']['Port']['int-br-ex']['options']
-		!= "{peer=phy-br-ex}" or br_int['info']['Port']['int-br-ex']['type']!= 'patch'):
-		set_check(br_int, False, "interface:int-br-ex lost or config error.")
-
 	if ('patch-tun' not in br_int['info']['Port'] or br_int['info']['Port']['patch-tun']['options']
 		!= "{peer=patch-int}" or br_int['info']['Port']['patch-tun']['type']!= 'patch'):
 		set_check(br_int, False, "interface:patch-tun lost or config error.")
@@ -1025,6 +1025,10 @@ def check_network_ovs(network_topo):
 		set_check(br_tun, False, "bridge br-tun lost vxlan interface.")
 
 	if is_network:
+		if ('int-br-ex' not in br_int['info']['Port'] or br_int['info']['Port']['int-br-ex']['options']
+			!= "{peer=phy-br-ex}" or br_int['info']['Port']['int-br-ex']['type']!= 'patch'):
+			set_check(br_int, False, "interface:int-br-ex lost or config error.")
+
 		if ('phy-br-ex' not in br_ex['info']['Port'] or br_ex['info']['Port']['phy-br-ex']['type'] !=
 			"patch" or br_ex['info']['Port']['phy-br-ex']['options'] != "{peer=int-br-ex}"):
 			set_check(br_ex, False, "interface:phy-br-ex lost or config error.")

@@ -66,7 +66,7 @@ class Task:
             }
         AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s check_service start." 
                 %(self.project, self.req_id))
-        ret, info = self.check_service()
+        ret, info = check_service()
         AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s check_service done." 
                 %(self.project, self.req_id))
         if ret == False:
