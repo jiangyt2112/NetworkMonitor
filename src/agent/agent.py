@@ -61,7 +61,7 @@ class Task:
                 'type': 'item', 
                 'project': self.project, 
                 'req_id': self.req_id, 
-                'check': {"service": None, "error_msg": ""}
+                'check': {"service": None, "error_msg": ""},
                 'info': None
             }
         AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s check_service start." 
