@@ -31,7 +31,7 @@ def addr_delay(addr):
 			info[1] = float(info[1])
 			info[2] = float(info[2])
 		except Exception, e:
-			print "ERROR: "info
+			print "ERROR: " + info
 			print str(e)
 			addr['performance']['error_msg'] = "data formate error."
 			return
