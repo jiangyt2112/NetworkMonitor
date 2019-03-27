@@ -66,12 +66,12 @@ def is_network_node():
 	ret, info = exe(cmd)
 	if not ret:
 		AGENTLOG.info("func.is_network_node - cmd:%s return error, %s" %(cmd, info))
-		return False, info
+		return False
 
 	if info.split("\n")[2].strip().split(' ')[1] == 'active':
-		return True, True
+		return True
 	else:
-		return True, False
+		return False
 
 def get_port_network_info(port, networks_info):
 	ret_info = {

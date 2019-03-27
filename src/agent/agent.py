@@ -123,16 +123,10 @@ class Task:
 
     def get_info(self):
         # to do
-
         hostname = get_hostname()
         ips = get_host_ip()
-
-        ret, network_node_flag = is_network_node()
-        if ret == False:
-            AGENTLOG.error("agent.Task.get_info - project-%s - req_id-%s get network node flag error:%s." 
-                %(self.project, self.req_id, network_node_flag))
-            return False, network_node_flag
-
+        network_node_flag = is_network_node()
+    
         print "get topo start."
         ret, topo = get_topo(self.valid_vm_info, self.network_info)
         if ret == False:
