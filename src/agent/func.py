@@ -66,12 +66,12 @@ def is_network_node():
 	ret, info = exe(cmd)
 	if not ret:
 		AGENTLOG.info("func.is_network_node - cmd:%s return error, %s" %(cmd, info))
-		return False
+		return False, info
 
 	if info.split("\n")[2].strip().split(' ')[1] == 'active':
-		return True
+		return True, True
 	else:
-		return False
+		return True, False
 
 def get_port_network_info(port, networks_info):
 	ret_info = {
@@ -533,8 +533,11 @@ def get_tunnel_remote(br_tun):
 def get_extnet_gateway(ip_addr, networks_info):
 	return ['192.168.166.1']
 
+def check_service():
+	return True, None
 
 def get_topo(vms_info, networks_info):
+
 	topo = {
 		"device": [],
 		"tap":[],

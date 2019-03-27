@@ -17,6 +17,7 @@ from func import get_hostname
 from func import get_host_ip
 from func import is_network_node
 from func import get_topo
+from func import check_service
 #from func import get_vm_topo
 
 class Task:
@@ -60,10 +61,25 @@ class Task:
                 'type': 'item', 
                 'project': self.project, 
                 'req_id': self.req_id, 
+                'check': {"service": None, "error_msg": ""}
                 'info': None
             }
+        AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s check_service start." 
+                %(self.project, self.req_id))
+        ret, info = self.check_service()
+        AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s check_service done." 
+                %(self.project, self.req_id))
+        if ret == False:
+            self.status = "ERROR"
+            AGENTLOG.error("agent.Task.start_task - project-%s - req_id-%s check_service return error:%s" 
+                %(self.project, self.req_id, info))
+            return False
+        msg['check']['service'] = True
 
+        AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s get_info start." %(self.project, self.req_id))
         ret, info = self.get_info()
+        AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s get_info done." %(self.project, self.req_id))
+
         if ret == False:
             self.status = "ERROR"
             AGENTLOG.error("agent.Task.start_task - project-%s - req_id-%s get_info return error:%s" 
@@ -75,6 +91,9 @@ class Task:
         # self.process
 
         msg["info"] = info
+         AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s agent_to_server_msg."
+          %(self.project, self.req_id))
+
         ret, info = agent_to_server_msg(msg)
         
         if ret == False:
@@ -102,32 +121,30 @@ class Task:
 
     def get_info(self):
         # to do
-        ret, hostname = get_hostname()
-        if ret == False:
-            AGENTLOG.error("agent.Task.get_info - project-%s - req_id-%s get hostname error:%s." 
-                %(self.project, self.req_id, hostname))
-            return False, hostname
 
-        ret, ips = get_host_ip()
-        if ret == False:
-            AGENTLOG.error("agent.Task.get_info - project-%s - req_id-%s get host ip error:%s." 
-                %(self.project, self.req_id, ips))
-            return False, ips
+        hostname = get_hostname()
+        ips = get_host_ip()
 
         ret, network_node_flag = is_network_node()
         if ret == False:
             AGENTLOG.error("agent.Task.get_info - project-%s - req_id-%s get network node flag error:%s." 
                 %(self.project, self.req_id, network_node_flag))
             return False, network_node_flag
-            
+
         print "get topo start."
         ret, topo = get_topo(self.valid_vm_info, self.network_info)
-        print "get topo done."
         if ret == False:
             AGENTLOG.error("agent.Task.get_info - project-%s - req_id-%s get topo error:%s." 
                 %(self.project, self.req_id, topo))
             return False, topo
-
+        print "get topo done."
+        print "check network config start"
+        check_network_config(topo)
+        print "check network config done"
+        print "check network connection"
+        check_network_connection(topo)
+        print "check network connection"
+        
         if network_node_flag:
             node_type = "network"
         else:
