@@ -53,5 +53,10 @@ def check_delay(result):
 
 	for node in result['info']:
 		for dev in node['topo']['device']:
-			for addr in dev['addresses']:
-				addr_delay(addr)
+			if dev['type'] == "virtual host":
+				for net in dev['addresses']:
+					for addr in dev['addresses'][net]:
+						addr_delay(addr)
+			else:
+				for addr in dev['addresses']:
+					addr_delay(addr)
