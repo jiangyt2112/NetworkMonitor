@@ -45,6 +45,10 @@ def check_delay(result):
 	#     "is_network_node": False,
 	#     "topo": "topo_struct"
 	# }
+	node = result['info'][0]
+	for key in node:
+		print key + " "
+	
 	for node in result['info']:
 		for dev in node['topo']['device']:
 			for addr in dev['addresses']:

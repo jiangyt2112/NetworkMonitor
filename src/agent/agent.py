@@ -134,12 +134,12 @@ class Task:
                 %(self.project, self.req_id, topo))
             return False, topo
         print "get topo done."
-        print "check network config start"
+        print "check network config start."
         check_network_config(topo)
-        print "check network config done"
-        print "check network connection"
+        print "check network config done."
+        print "check network connection start."
         check_network_connection(topo)
-        print "check network connection"
+        print "check network connection done."
         
         if network_node_flag:
             node_type = "network"
