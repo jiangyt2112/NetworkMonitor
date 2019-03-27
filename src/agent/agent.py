@@ -17,7 +17,7 @@ from func import get_hostname
 from func import get_host_ip
 from func import is_network_node
 from func import get_topo
-from func import check_service
+from func import check_service_status
 #from func import get_vm_topo
 
 class Task:
@@ -66,7 +66,7 @@ class Task:
             }
         AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s check_service start." 
                 %(self.project, self.req_id))
-        ret, info = check_service()
+        ret, info = check_service_status()
         AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s check_service done." 
                 %(self.project, self.req_id))
         if ret == False:

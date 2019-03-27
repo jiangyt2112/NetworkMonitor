@@ -536,7 +536,7 @@ def get_tunnel_remote(br_tun):
 def get_extnet_gateway(ip_addr, networks_info):
 	return ['192.168.166.1']
 
-def check_service():
+def check_service_status():
     # qemu
     # libvirt
     # openvswitch
