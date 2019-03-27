@@ -534,6 +534,10 @@ def get_extnet_gateway(ip_addr, networks_info):
 	return ['192.168.166.1']
 
 def check_service():
+    # qemu
+    # libvirt
+    # openvswitch
+    # other service
 	return True, None
 
 def get_topo(vms_info, networks_info):
