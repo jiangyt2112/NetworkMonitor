@@ -18,6 +18,8 @@ from func import get_host_ip
 from func import is_network_node
 from func import get_topo
 from func import check_service_status
+from func import check_network_config
+from func import check_network_connection
 #from func import get_vm_topo
 
 class Task:
