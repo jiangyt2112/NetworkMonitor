@@ -21,6 +21,10 @@ from func import check_service_status
 from func import check_network_config
 from func import check_network_connection
 #from func import get_vm_topo
+health_flag = True
+function_fault = []
+performance_fault = []
+
 
 class Task:
     def __init__(self, msg):
@@ -62,22 +66,10 @@ class Task:
         msg = {
                 'type': 'item', 
                 'project': self.project, 
-                'req_id': self.req_id, 
-                'check': {"service": None, "error_msg": ""},
-                'info': None
+                'req_id': self.req_id,
+                'info': None 
             }
-        AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s check_service start." 
-                %(self.project, self.req_id))
-        ret, info = check_service_status()
-        AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s check_service done." 
-                %(self.project, self.req_id))
-        if ret == False:
-            self.status = "ERROR"
-            AGENTLOG.error("agent.Task.start_task - project-%s - req_id-%s check_service return error:%s" 
-                %(self.project, self.req_id, info))
-            return False
-        msg['check']['service'] = True
-
+        
         AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s get_info start." %(self.project, self.req_id))
         ret, info = self.get_info()
         AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s get_info done." %(self.project, self.req_id))
@@ -93,11 +85,13 @@ class Task:
         # self.process
 
         msg["info"] = info
-        AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s agent_to_server_msg."
+
+        AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s agent_to_server_msg start."
+          %(self.project, self.req_id))
+        ret, info = agent_to_server_msg(msg)
+        AGENTLOG.info("agent.Task.start_task - project-%s - req_id-%s agent_to_server_msg done."
           %(self.project, self.req_id))
 
-        ret, info = agent_to_server_msg(msg)
-        
         if ret == False:
             self.status = "ERROR"
             AGENTLOG.error("agent.Task.start_task - project-%s - req_id-%s agent_to_server_msg return error:%s" 
@@ -127,19 +121,33 @@ class Task:
         ips = get_host_ip()
         network_node_flag = is_network_node()
     
-        print "get topo start."
+        AGENTLOG.info("agent.Task.get_info - project-%s - req_id-%s check_service start." 
+        %(self.project, self.req_id))
+        ret, service_status = check_service_status()
+        AGENTLOG.info("agent.Task.get_info - project-%s - req_id-%s check_service done." 
+                %(self.project, self.req_id))
+
+
+        AGENTLOG.info("agent.Task.get_info - project-%s - req_id-%s get topo start." 
+                %(self.project, self.req_id))
         ret, topo = get_topo(self.valid_vm_info, self.network_info)
         if ret == False:
             AGENTLOG.error("agent.Task.get_info - project-%s - req_id-%s get topo error:%s." 
                 %(self.project, self.req_id, topo))
             return False, topo
-        print "get topo done."
-        print "check network config start."
+        AGENTLOG.info("agent.Task.get_info - project-%s - req_id-%s get topo done." 
+                %(self.project, self.req_id))
+
+        AGENTLOG.info("agent.Task.get_info - project-%s - req_id-%s check_network_config start." 
+                %(self.project, self.req_id))
         check_network_config(topo)
-        print "check network config done."
-        print "check network connection start."
+        AGENTLOG.info("agent.Task.get_info - project-%s - req_id-%s gcheck_network_config done." 
+                %(self.project, self.req_id))
+        AGENTLOG.info("agent.Task.get_info - project-%s - req_id-%s check_network_connection start." 
+                %(self.project, self.req_id))
         check_network_connection(topo)
-        print "check network connection done."
+        AGENTLOG.info("agent.Task.get_info - project-%s - req_id-%s check_network_connection done." 
+                %(self.project, self.req_id))
         
         if network_node_flag:
             node_type = "network"
@@ -152,7 +160,9 @@ class Task:
             'host': ips,
             'node_type': node_type,
             'topo': topo,
-            'other': None
+            'check': {"service": service_status, "error_msg": ""},
+            'summary':{'health_flag': health_flag, 'function_fault': function_fault, 
+                'performance_fault': performance_fault}
         }
         return True, info
 
@@ -240,7 +250,7 @@ class Server(Base_Server):
         else:
             AGENTLOG.error("agent.Server.callback - receive server to agent msg: invalid msg type:%s." %(msg['type']))
 
-        print(" [x] %r:%r" % (method.routing_key, body))
+        print(" [x] %r:%s - %s" % (method.routing_key, msg['type'], msg['project']))
 
 if __name__ == "__main__":
 	#ser = Server()

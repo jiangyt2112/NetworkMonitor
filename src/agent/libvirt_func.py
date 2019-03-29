@@ -141,7 +141,7 @@ def get_vm_info_in_host():
     else:
         for vm in odic['alldomains']:
             vm_info[vm['uuid']] = vm
-    return vm_info
+    return True, vm_info
 
 
 def get_vm_port_netinfo():
@@ -202,6 +202,8 @@ def get_vm_port_netstats():
     time.sleep(1)
     new_netinfo = get_vm_port_netinfo()
 
+    if old_netinfo == None or new_netinfo == None:
+        return None
     netstats = {}
     for mac in old_netinfo:
         netstats[mac] = {

@@ -1,5 +1,5 @@
 # check
-curl http://127.0.0.1:8003/network_monitor/check/admin -X POST -H "Content-type:application/json" -d '{"token":"gAAAAABcf4oWXMTBb3uBXaPudTroezk30kTCVwUNZPw8x27m3y9yfkrPBQx-SRG47i0lb_hudK8rlu-mtRxkwYXcI5ZrM8o_1LPefKCDri-aYjQjUVHPcoMQ8o6Hf-VMIPof5BbxrG_o84vNfxboeZtdo827uqiK6v1iJqTV2RQfQ8ifp9NjcgI"}'
+curl http://127.0.0.1:8003/network_monitor/check/admin -X POST -H "Content-type:application/json" -d '{"token":"gAAAAABcmz4bOH-c8JEgSDjNzz1TNUIMtn17zbq1aKZw_w7Ivqm_Aii_2IF2x4N4EgcaDxcpL3D5PZF_6qHBxaJPnveyuMcUsW1T8-Mc8rcm5hVLTI9Dma6_s8xiYuG2gCbxjx32hPme2U0goGBJCrZgHnffK9xhg2uPVDEE2WMmC0ha1ly6wbw"}'
 
 # status
 curl http://127.0.0.1:8002/network_monitor/status/admin -X POST -H "Content-type:application/json" -d '{"token":"gAAAAABceIzLlS1NqlPOzKKSFemRFZwEO-GHujLpT7b8J1Zg6gy-1PSkdUm78L03XOLkMapQbQtJzkn1eso5Kvzgc37ME9FkQXbqmFyAYV4BWuvUgwXU_hnNryz2pYPT9-UeFhcHhOD4BylFFgGesDa6WIW2LIbJSvvwyu2fZ_SZiWTcuNx1cEQ"}'

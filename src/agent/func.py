@@ -12,6 +12,19 @@ from libvirt_func import get_nic_netstats
 from libvirt_func import get_vm_port_netstats
 # 61205745-b2bf-4db0-ad50-e7a60bf08bd5
 # 61205745-b2bf-4db0-ad50-e7a60bf08bd5
+from func import health_flag# = True
+from func import function_fault# = []
+from func import performance_fault# = []
+
+def add_function_fault(fault):
+	health_flag = False
+	if fault not in function_fault:
+		function_fault.append(fault)
+
+def add_performace_fault(fault):
+	health_flag = False
+	if fault not in performance_fault:
+		performance_fault.append(fault)
 
 def exe(cmd):
 	ret, result = commands.getstatusoutput(cmd)
@@ -26,6 +39,7 @@ def get_vm_uuids():
 	conn = libvirt.openReadOnly(None)
 
 	if conn is None:
+		add_function_fault("libvirtd.service down.")
 	    return False, 'Failed to open connection to the hypervisor'
 	else:
 	    doms = conn.listAllDomains()
@@ -37,6 +51,7 @@ def get_hostname():
 	cmd = 'hostname'
 	ret, name = exe(cmd)
 	if not ret:
+		add_function_fault("cmd:hostname return error(%s)" %(name))
 		AGENTLOG.info("func.get_hostname - cmd:%s return error, %s" %(cmd, name))
 		return ""
 	return name
@@ -58,6 +73,7 @@ def get_host_ip():
 	ret, info = exe(cmd)
 	if not ret:
 		AGENTLOG.info("func.get_host_ip - cmd:%s return error, %s" %(cmd, info))
+		add_function_fault("can't get host ip(%s)" %(info))
 		return []
 	return info.split()
 
@@ -140,13 +156,33 @@ def get_vm_topo(vm_info, networks_info, topo, touch_ips, vm_port_netstats):
 					'check': {"result": None, "error_msg": ""},
 					'performance': {"bandwidth": None, "delay": None, "error_msg": "", "evaluation": ""}
 				}
-			if a_addr['mac_addr'] in vm_port_netstats:
-				a_addr['performance']['bandwidth'] = vm_port_netstats[a_addr['mac_addr']]
-			else:
+			if vm_port_netstats == None:
 				a_addr['performance']['bandwidth'] = get_vm_port_netstat_down()
+			else:
+				if a_addr['mac_addr'] in vm_port_netstats:
+					a_addr['performance']['bandwidth'] = vm_port_netstats[a_addr['mac_addr']]
+				else:
+					a_addr['performance']['bandwidth'] = get_vm_port_netstat_down()
+					if vm['status'] == 'ACTIVE':
+						a_addr['check']['result'] = False
+						a_addr['check']['error_msg'] = "vm interface lost(%s)." %(a_addr['mac_addr'])
+						add_function_fault("vm:%s qemu-kvm interface lost(%s)." %(vm['id'], a_addr['mac_addr'])) 
 			vm["addresses"][addr].append(a_addr)
 
 	topo['device'].append(vm)
+
+	vm_floating_ips = {}
+	for net_name in vm['addresses']:
+		for ip_addr in vm['addresses'][net_name]:
+			if ip_addr['type'] != 'fixed':
+				vm_floating_ips[ip_addr['addr']] = ip_addr
+
+	for port in networks_info['ports']:
+		port_addr = port['fixed_ips'][0]['ip_address']
+		if port_addr in vm_floating_ips:
+			port_net_info = get_port_network_info(port, networks_info)
+			vm_floating_ips[port_addr]['gateway_ip'] = port_net_info['gateway_ip']
+			vm_floating_ips[port_addr]['cidr'] = port_net_info['cidr']
 
 	# tap level
 	vm_fixed_ips = {}
@@ -437,6 +473,8 @@ def get_network_topo(networks_info, topo, touch_ips):
 
 
 def get_network_from_ip(ip):
+	if ip == "":
+		return "0.0.0.0/0"
 	# 192.168.166.9/24
 	addr = ip.split('/')[0].split('.')
 	mask = int(ip.split('/')[1])
@@ -462,9 +500,15 @@ def get_network_from_ip(ip):
 	return ret_ip
 
 def get_nic_ex_ip():
+	# cidr
 	ret, result = exe("ip address | grep br-ex")
+	#if ret == False or len(result.split('\n')) < 1:
 	if ret == False:
-		return ret, result
+		add_function_fault("openvswitch bridge br-ex lost.")
+		return ret, "openvswitch bridge br-ex lost."
+	elif len(result.split('\n')) < 1:
+		add_function_fault("external ip lost.")
+		return ret, "external ip lost."
 	ip = result.split('\n')[1].split()[1]
 	return True, ip
 
@@ -476,14 +520,22 @@ def get_nic_ex_info(nic_ex_info):
 	# nic_ex_info['ip_address'] = ""
 	# nic_ex_info['type'] = "ovs bridge"
 	# nic_ex_info['check'] = {"result": None, "error_msg": ""}
-	ret, result = exe("ip address | grep br-ex")
+	ret, result = get_nic_ex_ip()
 	if ret == False:
 		return ret, result
-	nic_ex_info['ip_address'] = result.split('\n')[1].split()[1]
+	nic_ex_info['ip_address'] = result
 	
 	ret, br_info = get_ovs_info(False)
 	if ret == False:
+		add_function_fault("openvswitch service down.")
+		nic_ex_info['check']['result'] = False
+		nic_ex_info['check']['error_msg'] = "openvswitch service down."
 		return ret, br_info
+
+	if 'br-ex' not in br_info:
+		add_function_fault("openvswitch bridge br-ex lost.")
+		nic_ex_info['check']['result'] = False
+		nic_ex_info['check']['error_msg'] = "openvswitch bridge br-ex lost."
 
 	for pd in br_info['br-ex']['Port']:
 		if pd != "br-ex" and pd != "phy-br-ex":
@@ -495,7 +547,12 @@ def get_nic_ex_info(nic_ex_info):
 def get_nic_tun_ip():
 	ret, result = exe('ovs-vsctl show | grep "local_ip"')
 	if ret == False:
-		return ret, result
+		if exe('ovs-vsctl show')[0] == False:
+			add_function_fault("openvswitch service down.")
+			return ret, "openvswitch service down."
+		else:
+			add_function_fault("openvswitch bridge br-tun lost.")
+			return ret, "openvswitch bridge br-tun lost."
 
 	start = result.find("local_ip")
 	left = result.find("\"", start)
@@ -504,7 +561,8 @@ def get_nic_tun_ip():
 
 	ret, result = exe('ip a | grep ' + tun_ip)
 	if ret == False:
-		return ret, result
+		add_function_fault("tunnel ip lost.")
+		return ret, "tunnel ip lost."
 
 	return True, result.strip().split(' ')[1]
 
@@ -512,9 +570,14 @@ def get_nic_tun_ip():
 def get_nic_tun_info(nic_tun_info):
 	# nic_tun_info = {}
 	tun_ip = nic_tun_info['ip_address']
+	if tun_ip == "":
+		return False, "tunnel ip lost."
 	ret, result = exe('ip a | grep ' + tun_ip)
 	if ret == False:
-		return ret, result
+		nic_tun_info['check']['result'] = False
+		add_function_fault("tunnel ip lost.")
+		nic_tun_info['check']['error_msg'] = "tunnel ip lost."
+		return ret, "tunnel ip lost."
 	nic_tun_info['name'] = result.strip().split(' ')[-1]
 	nic_tun_info['device'] = nic_tun_info['name']
 	nic_tun_info['physical_device'] = nic_tun_info['name']
@@ -522,9 +585,12 @@ def get_nic_tun_info(nic_tun_info):
 
 def get_tunnel_remote(br_tun):
 	remote = []
+	options = None
 	for port in br_tun['Port']:
 		if port.startswith("vxlan"):
 			options = br_tun['Port'][port]['options']
+	if options == None or len(options) < 2:
+		return None
 	options = options[1:-1]
 	options = options.replace("\"", '')
 	records = options.split(' ')
@@ -534,17 +600,52 @@ def get_tunnel_remote(br_tun):
 	return remote
 
 def get_extnet_gateway(ip_addr, networks_info):
-	return ['192.168.166.1']
+	if ip_addr == "":
+		return []
+	net = get_network_from_ip(ip_addr)
+	for sub in networks_info['subnets']:
+		if sub['cidr'] == net:
+			return [sub['gateway_ip']]
+	return []
 
 def check_service_status():
-    # qemu
     # libvirt
     # openvswitch
     # other service
-	return True, None
+    all_node_service = ['libvirtd.service', 'openvswitch.service', 'rabbitmq-server.service']
+    network_node_service = ['neutron-dhcp-agent.service', 'neutron-metadata-agent.service',
+    						'neutron-server.service', 'neutron-dhcp-agent.service', 
+    						'neutron-l3-agent.service',  'neutron-openvswitch-agent.service',
+    						'openstack-nova-api.service', 'openstack-nova-scheduler.service',
+    						'openstack-nova-compute.service', 'openstack-nova-conductor.service',
+    						 'openstack-nova-novncproxy.service', 'openstack-nova-consoleauth.service',
+    						 'mariadb.service']
+    compute_node_service = ['openstack-nova-compute.service', 'neutron-openvswitch-agent.service']
+	
+	ret = {}
+	for service in all_node_service:
+		if check_service(service) == False:
+			add_function_fault("%s service down." %(service))
+			ret[service] = False
+		else:
+			ret[service] = True
+    if is_network_node():
+    	for service in network_node_service:
+    		if check_service(service) == False:
+    			add_function_fault("%s service down." %(service))
+    			ret[service] = False
+    		else:
+    			ret[service] = True
+    else:
+    	for service in compute_node_service:
+    		if check_service(service) == False:
+    			add_function_fault("%s service down." %(service))
+    			ret[service] = False
+    		else:
+    			ret[service] = True
+	return True, ret
 
 def get_topo(vms_info, networks_info):
-
 	topo = {
 		"device": [],
 		"tap":[],
@@ -560,6 +661,9 @@ def get_topo(vms_info, networks_info):
 	touch_ips = set()
 
 	vm_port_netstats = get_vm_port_netstats()
+	if vm_port_netstats == None:
+		AGENTLOG.error("agent.func.get_topo -  vm_port_netstats return none, libvirtd service down.")
+		add_function_fault("libvirtd.service service down.")
 
 
 	AGENTLOG.info("agent.func.get_topo -  get vm topo start.")
@@ -574,55 +678,92 @@ def get_topo(vms_info, networks_info):
 	AGENTLOG.info("agent.func.get_topo -  get network topo done.")
 
 	AGENTLOG.info("agent.func.get_topo -  get ovs info start.")
-
 	ret, br_info = get_ovs_info()
 	if ret == False:
-		return False, "get ovs bridge info error."
-	
+		br_info = None
+		add_function_fault("openvswitch.service service down.")
+		AGENTLOG.info("agent.func.get_topo -  openvswitch.service service down.")
 	AGENTLOG.info("agent.func.get_topo -  get ovs info done.")
 
 	br_int_info = {}
-	br_int_info['info'] = br_info['br-int']
 	br_int_info['name'] = 'br-int'
 	br_int_info['type'] = "ovs bridge"
 	br_int_info['check'] = {"result": None, "error_msg": ""}
 	br_int_info['next'] = [0]
+	if br_info != None and 'br-int' in br_info:
+		br_int_info['info'] = br_info['br-int']
+	else:
+		br_int_info['info'] = None
+		br_int_info['check']['result'] = False
+		if br_info == None:
+			br_int_info['check']['error_msg'] = "openvswitch.service service down."
+		else:
+			add_function_fault('openvswitch bridge br-int lost.')
+			br_int_info['check']['error_msg'] = "openvswitch bridge br-int lost."
+	
 	topo['br-int'].append(br_int_info)
 
 	br_tun_info = {}
-	br_tun_info['info'] = br_info['br-tun']
 	br_tun_info['name'] = 'br-tun'
+	br_tun_info['info'] = None
 	br_tun_info['type'] = "ovs bridge"
 	br_tun_info['check'] = {"result": None, "error_msg": ""}
 	br_tun_info['next'] = [0]
-	remote = get_tunnel_remote(br_tun_info['info'])
-	topo['ovs-provider'].append(br_tun_info)
+	if br_info != None and 'br-tun' in br_tun_info:
+		br_tun_info['info'] = br_info['br-tun']
+	else:
+		br_tun_info['check']['result'] = False
+		if br_info == None:
+			br_tun_info['check']['error_msg'] = "openvswitch.service service down."
+		else:
+			add_function_fault('openvswitch bridge br-tun lost.')
+			br_tun_info['check']['error_msg'] = "openvswitch bridge br-tun lost."
 
-	AGENTLOG.info("agent.func.get_topo -  get_nic_tun_ip start.")
-	ret, nic_tun_ip = get_nic_tun_ip()
-	if ret == False:
-		return ret, nic_tun_ip
-	AGENTLOG.info("agent.func.get_topo -  get_nic_tun_ip done.")
+	if br_info == None or 'br-tun' not in br_info:
+		remote = []
+	else:
+		remote = get_tunnel_remote(br_tun_info['info'])
+		if remote == None:
+			br_tun_info['check']['result'] = False
+			br_tun_info['check']['error_msg'] = "br-tun lost vxlan interface."
+			add_function_fault("br-tun lost vxlan interface.")
+	topo['ovs-provider'].append(br_tun_info)
 
 	nic_tun_info = {}
 	nic_tun_info['name'] = ""
 	nic_tun_info['device'] = ""
 	nic_tun_info['physical_device'] = ""
 	# cidr
-	nic_tun_info['ip_address'] = nic_tun_ip
+	nic_tun_info['ip_address'] = ""
 	nic_tun_info['type'] = "nic"
 	nic_tun_info['remote'] = remote
 	nic_tun_info['performance'] = {"bandwidth": None, "delay": None, "error_msg": "", "evaluation": ""}
 	nic_tun_info['check'] = {"result": None, "error_msg": ""}
 	nic_tun_info['next'] = [0]
 
+	AGENTLOG.info("agent.func.get_topo -  get_nic_tun_ip start.")
+	ret, nic_tun_ip = get_nic_tun_ip()
+	if ret == False:
+		AGENTLOG.error("agent.func.get_topo -  get_nic_tun_ip return false, %s." %(nic_tun_ip))
+		nic_tun_info['check']['result'] = False
+		nic_tun_info['check']['error_msg'] = nic_tun_ip
+	else:
+		nic_tun_info['ip_address'] = nic_tun_ip
+		#return ret, nic_tun_ip
+	AGENTLOG.info("agent.func.get_topo -  get_nic_tun_ip done.")
+
 	AGENTLOG.info("agent.func.get_topo -  get_nic_tun_info start.")
 	ret, result = get_nic_tun_info(nic_tun_info)
 	if ret == False:
-		return ret, result
+		AGENTLOG.error("agent.func.get_topo -  get_nic_tun_info return false, %s." %(result))
 	AGENTLOG.info("agent.func.get_topo -  get_nic_tun_info done.")
+
 	nic_stats = get_nic_netstats()
-	nic_tun_info['performance']['bandwidth'] = nic_stats[nic_tun_info['name']]
+	if nic_tun_info['name'] != "" and nic_tun_info['name'] in nic_stats:
+		nic_tun_info['performance']['bandwidth'] = nic_stats[nic_tun_info['name']]
+	else:
+		if nic_tun_info['name'] not in nic_stats:
+			nic_tun_info['performance']['error_msg'] = "can't get %s performance info." %(nic_tun_info['name'])
 	topo['nic'].append(nic_tun_info)
 
 	physical_switch_info = {}
@@ -631,6 +772,9 @@ def get_topo(vms_info, networks_info):
 	physical_switch_info['network'] = get_network_from_ip(nic_tun_info['ip_address'])
 	physical_switch_info['name'] = "physical switch " + physical_switch_info['network']
 	physical_switch_info['check'] = {"result": None, "error_msg": ""}
+	if physical_switch_info['network'] == '0.0.0.0/0':
+		physical_switch_info['check']['result'] = False
+		physical_switch_info['check']['error_msg'] = "nic of lost ip switch."
 	physical_switch_info['next'] = None
 	topo['physical-switch'].append(physical_switch_info)
 
@@ -638,21 +782,28 @@ def get_topo(vms_info, networks_info):
 		# network node
 		br_ex_info = {}
 		br_ex_info['name'] = 'br-ex'
+		br_ex_info['info'] = None
 		br_ex_info['type'] = "ovs bridge"
 		br_ex_info['check'] = {"result": None, "error_msg": ""}
 		br_ex_info['next'] = [1]
-		if 'br-ex' not in br_info:
-			br_ex_info['info'] = None
-			br_ex_info['check']['result'] = None
-			br_ex_info['check']['error_msg'] = "can not get br-ex info."
-		else:
+		if br_info != None and 'br-ex' in br_info:
 			br_ex_info['info'] = br_info['br-ex']
+		else:
+			br_ex_info['check']['result'] = False
+			if br_info == None:
+				br_ex_info['check']['error_msg'] = "openvswitch service down."
+				add_function_fault('openvswitch service down.')
+			else:		
+				br_ex_info['check']['error_msg'] = "openvswitch bridge br-ex lost."
+				add_function_fault('openvswitch bridge br-ex lost.')
+
 		topo['ovs-provider'].append(br_ex_info)
 		topo['br-int'][0]['next'].append(1)
 
 		ret, nic_ex_ip = get_nic_ex_ip()
 		if ret == False:
-			return ret, nic_ex_ip
+			AGENTLOG.error("agent.func.get_topo -  get_nic_ex_ip return false, %s." %(nic_ex_ip))
+			#return ret, nic_ex_ip
 		if nic_tun_ip == nic_ex_ip:
 			# tunnel network and extnet network use same nic 
 			br_ex_info['next'] = [0]
@@ -671,9 +822,17 @@ def get_topo(vms_info, networks_info):
 			AGENTLOG.info("agent.func.get_topo -  get_nic_ex_info start.")
 			ret, error_msg = get_nic_ex_info(nic_ex_info)
 			if ret == False:
-				return ret, error_msg
-			nic_ex_info['performance']['bandwidth'] = nic_stats[nic_ex_info['name']]
+				AGENTLOG.error("agent.func.get_topo -  get_nic_ex_info return error, %s." %(error_msg))
+
+			if nic_ex_info['name'] != "" and nic_ex_info['name'] in nic_stats:
+				nic_ex_info['performance']['bandwidth'] = nic_stats[nic_ex_info['name']]
+			elif nic_ex_info['name'] not in nic_stats:
+				nic_ex_info['performance']['error_msg'] = "can't get %s performance info." %(nic_ex_info['name'])
 			nic_ex_info['remote'] = get_extnet_gateway(nic_ex_info['ip_address'], networks_info)
+			if nic_ex_info['remote'] == [] and nic_ex_info['ip_address'] != "":
+				nic_ex_info['check']['result'] = False
+				nic_ex_info['check']['error_msg'] = "can't get external nic network gateway."
+				add_function_fault("can't get external nic network gateway.")
 			AGENTLOG.info("agent.func.get_topo -  get_nic_ex_info done.")
 	
 			physical_switch_info = {}
@@ -681,6 +840,9 @@ def get_topo(vms_info, networks_info):
 			physical_switch_info['network'] = get_network_from_ip(nic_ex_info['ip_address'])
 			physical_switch_info['name'] = "physical switch " + physical_switch_info['network']
 			physical_switch_info['check'] = {"result": None, "error_msg": ""}
+			if physical_switch_info['network'] == '0.0.0.0/0':
+				physical_switch_info['check']['result'] = False
+				physical_switch_info['check']['error_msg'] = "nic of lost ip switch."
 			physical_switch_info['next'] = None
 			topo['physical-switch'].append(physical_switch_info)
 
@@ -712,25 +874,31 @@ def process_tap_info(info):
 	return tap_info
 
 def check_br_int_port(dev, topo):
+	if dev['check']['result'] == False:
+		return
 	ret, ovs_info = get_ovs_info(False)
 	if ret == False:
 		dev['check']['result'] = False
 		dev['check']['error_msg'] = "openvswitch service down."
+		add_function_fault("openvswitch service down.")
 	else:
 		if 'br-int' not in ovs_info:
 			dev['check']['result'] = False
 			dev['check']['error_msg'] = "openvswitch not create bridge br-int."
+			add_function_fault("openvswitch bridge br-int lost.")
 			return
 
 		ports = ovs_info['br-int']['Port']
 		if dev['name'] not in ports:
 			dev['check']['result'] = False
-			dev['check']['error_msg'] = "openvswitch br-int bridge lost interface %s." %(dev['name'])
+			dev['check']['error_msg'] = "openvswitch bridge br-int lost interface %s." %(dev['name'])
+			add_function_fault("openvswitch bridge br-int lost interface %s." %(dev['name']))
 		else:
 			# check error
 			if dev['type'] == "ovs internal" and ports[dev['name']]['type'] != "internal":
 				dev['check']['result'] = False
 				dev['check']['error_msg'] = "port-%s type-%s error." %(dev['name'], ports[dev['name']]['type'])
+				add_function_fault("port-%s type-%s error." %(dev['name'], ports[dev['name']]['type']))
 				return
 			# check status
 			# check flow rule
@@ -738,52 +906,56 @@ def check_br_int_port(dev, topo):
 			dev['tag'] = ports[dev['name']]['vlan']
 
 def check_qvo(dev, topo):
-	if dev['type'] == "placeholder":
-		dev['check']['result'] = True
-	else:
-		ret, info = exe("ip addr show %s" %(dev['name'].split('@')[0]))
-		if ret == False:
-			dev['check']['result'] = False
-			dev['check']['error_msg'] = "dev: not exist." %(dev['name'])
+	if dev['check']['result'] != False:
+		if dev['type'] == "placeholder":
+			dev['check']['result'] = True
 		else:
-			qvo_info = process_tap_info(info)
-			if qvo_info['status'] == "unactive":
+			ret, info = exe("ip addr show %s" %(dev['name'].split('@')[0]))
+			if ret == False:
 				dev['check']['result'] = False
-				dev['check']['error_msg'] = "dev:%s down." %(dev['name'])
+				dev['check']['error_msg'] = "dev: not exist." %(dev['name'])
 			else:
-				dev['check']['result'] = True
-	
+				qvo_info = process_tap_info(info)
+				if qvo_info['status'] == "unactive":
+					dev['check']['result'] = False
+					dev['check']['error_msg'] = "dev:%s down." %(dev['name'])
+				else:
+					dev['check']['result'] = True
 	check_br_int_port(topo['br-int-port'][dev['next']], topo)
 
 def check_qvb(dev, topo):
-	if dev['type'] == "placeholder":
-		dev['check']['result'] = True	
-	else:
-		ret, info = exe("ip addr show %s" %(dev['name'].split('@')[0]))
-		if ret == False:
-			dev['check']['result'] = False
-			dev['check']['error_msg'] = "dev: not exist." %(dev['name'])
+	if dev['check']['result'] != False:
+		if dev['type'] == "placeholder":
+			dev['check']['result'] = True	
 		else:
-			qvb_info = process_tap_info(info)
-			if qvb_info['status'] == "unactive":
+			ret, info = exe("ip addr show %s" %(dev['name'].split('@')[0]))
+			if ret == False:
 				dev['check']['result'] = False
-				dev['check']['error_msg'] = "dev:%s down." %(dev['name'])
+				dev['check']['error_msg'] = "dev: not exist." %(dev['name'])
 			else:
-				dev['check']['result'] = True
+				qvb_info = process_tap_info(info)
+				if qvb_info['status'] == "unactive":
+					dev['check']['result'] = False
+					dev['check']['error_msg'] = "dev:%s down." %(dev['name'])
+				else:
+					dev['check']['result'] = True
 	check_qvo(topo['qvo'][dev['next']], topo)
 
 def get_bridge_info(br_name):
 	br_info = {}
 	ret, info = exe("brctl show %s" %(br_name))	
 	if ret == False:
+		add_function_fault("cmd:brctl show %s return error." %(br_name))
 		return False, "cmd:brctl show %s return error." %(br_name)
 	else:
+		#if len(info.split('\n'))
 		info = info.split('\n')[1:]
 		records = info[0].split("\t")
 		while '' in records:
 			records.remove('')
 		if len(records) < 4:
-			return False, "can't get info, No such device."
+			add_function_fault('linux bridge %s lost.' %(br_name))
+			return False, 'linux bridge %s lost.' %(br_name)
 		else:
 			br_info['name'] = records[0]
 			br_info['id'] = records[1]
@@ -793,25 +965,28 @@ def get_bridge_info(br_name):
 			for i in range(len(info) - 1):
 				interface = info[i + 1].strip().split("\t")
 				if len(interface) > 1:
-					return False, "format error."
+					add_function_fault('linux bridge %s info error format.' %(br_name))
+					return False, 'linux bridge %s info error format.' %(br_name)
 				else:
 					br_info['interfaces'].append(interface[0])
 		return True, br_info
 
 def check_qbr(dev, topo):
-	if dev['type'] == "placeholder":
-		dev['check']['result'] = True
-	else:
-		ret, br_info = get_bridge_info(dev['name'])
-		if ret == False:
-			dev['check']['result'] = False
-			dev['check']['error_msg'] = br_info
-		else:
+	if dev['check']['result'] != False:
+		if dev['type'] == "placeholder":
 			dev['check']['result'] = True
-			for i in dev['interfaces']:
-				if i not in br_info['interfaces']:
-					dev['check']['result'] = False
-					dev['check']['error_msg'] = "%s interface lost." %(i)
+		else:
+			ret, br_info = get_bridge_info(dev['name'])
+			if ret == False:
+				dev['check']['result'] = False
+				dev['check']['error_msg'] = br_info
+			else:
+				dev['check']['result'] = True
+				for i in dev['interfaces']:
+					if i not in br_info['interfaces']:
+						dev['check']['result'] = False
+						dev['check']['error_msg'] = "%s interface lost." %(i)
+						add_function_fault("%s interface lost." %(i))
 			# secure rules check
 
 	check_qvb(topo['qvb'][dev['next']], topo)
@@ -829,75 +1004,91 @@ def is_addr_match(tap_inets, dev_addrs):
 	return True
 
 def check_tap(dev, topo):
-	if dev['status'] != "ACTIVE":
-		dev['check']['result'] = True
-		dev['status'] = "unactive"
-	else:
-		ret = None
-		info = None
-		if "netns" in dev:
-			ret, info = exe("ip netns exec %s ip addr show %s" %(dev['netns'], dev['name']))
-		else:
-			ret, info = exe("ip addr show %s" %(dev['name']))
-
-		if ret == False:
-			dev['check']['result'] = False
+	if dev['check']['result'] != False:
+		if dev['status'] != "ACTIVE":
+			dev['check']['result'] = True
 			dev['status'] = "unactive"
-			dev['check']['error_msg'] = "tap %s not exist." %(dev['name'])
 		else:
-			tap_info = process_tap_info(info)
-			if tap_info['status'] != 'active':
-				dev['check']['result'] = False
-				dev['status'] = "unactive"
-				dev['check']['error_msg'] = "tap:%s down." %(tap_info['name'])
-			elif tap_info['mac'] != dev['mac_address']:
-				dev['check']['result'] = False
-				dev['status'] = "unactive"
-				dev['check']['error_msg'] = "tap mac not match: %s - %s" %(tap_info['mac'], dev['mac_address'])
-			elif is_addr_match(tap_info['inets'], dev['addresses']):
-				dev['check']['result'] = False
-				dev['status'] = "unactive"
-				dev['check']['error_msg'] = "tap addr lost."
+			ret = None
+			info = None
+			if "netns" in dev:
+				ret, info = exe("ip netns exec %s ip addr show %s" %(dev['netns'], dev['name']))
 			else:
-				dev['check']['result'] = True
-				dev['status'] = "active"
+				ret, info = exe("ip addr show %s" %(dev['name']))
+
+			if ret == False:
+				dev['check']['result'] = False
+				dev['status'] = "unactive"
+				dev['check']['error_msg'] = "tap %s not exist." %(dev['name'])
+				add_function_fault("tap %s not exist." %(dev['name']))
+			else:
+				tap_info = process_tap_info(info)
+				if tap_info['status'] != 'active':
+					dev['check']['result'] = False
+					dev['status'] = "unactive"
+					dev['check']['error_msg'] = "tap:%s down." %(tap_info['name'])
+					add_function_fault("tap:%s down." %(tap_info['name']))
+				elif tap_info['mac'] != dev['mac_address']:
+					dev['check']['result'] = False
+					dev['status'] = "unactive"
+					dev['check']['error_msg'] = "tap mac not match: %s - %s" %(tap_info['mac'], dev['mac_address'])
+					add_function_fault("tap mac not match: %s - %s" %(tap_info['mac'], dev['mac_address']))
+				elif is_addr_match(tap_info['inets'], dev['addresses']):
+					dev['check']['result'] = False
+					dev['status'] = "unactive"
+					dev['check']['error_msg'] = "tap %s addr lost." %(dev['name'])
+					add_function_fault("tap %s addr lost." %(dev['name']))
+				else:
+					dev['check']['result'] = True
+					dev['status'] = "active"
 	check_qbr(topo['qbr'][dev['next']], topo)
 
 
 def check_vm(dev, topo):
 	# id status host name created addresses type check performance next
 	# vm state/network interface
-	vm_info_in_host = get_vm_info_in_host()
-	print vm_info_in_host
-	print dev['id']
-	vm_info = vm_info_in_host[dev['id']]
-	net_info = {}
-	for net in vm_info['netstats']:
-		net_info[net['mac']] = net
-
-	if dev['status'] != 'ACTIVE':
-		dev['check']['result'] = True
-		dev['status'] = 'unactive'
-	else:
-		if vm_info['state'] != 'running':
-			dev['status'] = 'unactive'
+	if dev['check']['result'] != False:
+		ret, vm_info_in_host = get_vm_info_in_host()
+		if ret == False:
 			dev['check']['result'] = False
-			dev['check']['error_msg'] = "vm not running,state:%s" %(vm_info['state'])
+			dev['check']['error_msg'] = "libvirtd.service service down."
+			add_function_fault("libvirtd.service service down.")
+		elif dev['id'] not in vm_info_in_host:
+			dev['check']['result'] = False
+			dev['check']['error_msg'] = "vm %s hypervisor down." %(dev[name])
+			add_function_fault("vm %s hypervisor down." %(dev[name]))
 		else:
-			dev['status'] = 'active'
-			dev['check']['result'] = True
-			for addr in dev['addresses']:
-				nets = dev['addresses'][addr]
-				for i in nets:
-					if i['type'] == 'fixed':
-						if i['mac_addr'] in net_info:
-							i['check']['result'] = True
-							# add vm info
-						else:
-							i['check']['result'] = False
-							i['check']['error_msg'] = "net interface lost."
-							dev['check']['result'] = False
-							dev['check']['error_msg'] = "net interface lost."
+			vm_info = vm_info_in_host[dev['id']]
+			net_info = {}
+			if 'netstats' in vm_info:
+				for net in vm_info['netstats']:
+					net_info[net['mac']] = net
+
+			if dev['status'] != 'ACTIVE':
+				dev['check']['result'] = True
+				dev['status'] = 'unactive'
+			else:
+				if vm_info['state'] != 'running':
+					dev['status'] = 'unactive'
+					dev['check']['result'] = False
+					dev['check']['error_msg'] = "vm not running,state:%s" %(vm_info['state'])
+					add_function_fault("vm %s not running, state %s" %(dev['name'], vm_info['state']))
+				else:
+					dev['status'] = 'active'
+					dev['check']['result'] = True
+					for addr in dev['addresses']:
+						nets = dev['addresses'][addr]
+						for i in nets:
+							if i['type'] == 'fixed':
+								if i['mac_addr'] in net_info:
+									i['check']['result'] = True
+									# add vm info
+								else:
+									i['check']['result'] = False
+									i['check']['error_msg'] = "net interface lost."
+									dev['check']['result'] = False
+									dev['check']['error_msg'] = "net interface %s lost." %(i['mac_addr'])
+									add_function_fault("net interface %s lost." %(i['mac_addr']))
 	for i in range(len(dev['next'])):
 		check_tap(topo['tap'][dev['next'][i]], topo)
 
