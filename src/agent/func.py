@@ -268,6 +268,15 @@ def is_same_net(qg_info, port):
 			return True
 	return False
 
+def get_dhcp_name(port, networks_info):
+	if port['name'] != '':
+		return port['name']
+
+	network_id = port['network_id']
+	for net in networks_info['networks']:
+		if net['id'] == network_id:
+			return net['name'] + "-" + "dhcp"
+
 def get_network_topo(networks_info, topo, touch_ips):
 	# dhcp
 	if not is_network_node():
@@ -278,7 +287,7 @@ def get_network_topo(networks_info, topo, touch_ips):
 			dhcp_info = {}
 			dhcp_info['id'] = port['id']
 			dhcp_info['host'] = get_hostname()
-			dhcp_info['name'] = port['name']
+			dhcp_info['name'] = get_dhcp_name(port, networks_info)
 			dhcp_info['netns'] = "qdhcp-" + port['network_id']
 			dhcp_info['created_at'] = port['created_at']
 			dhcp_info['type'] = "dhcp"
@@ -1299,37 +1308,45 @@ def check_network_nic(network_topo):
 	if nic_tun['check']['result'] != False:
 		info = get_nic_info(nic_tun['name'])
 		if info == None:
-			set_check(nic_tun, False, "nic:%s lost." %(nic_tun['name']))
-
+			set_check(nic_tun, False, "tunnel nic:%s lost." %(nic_tun['name']))
+			add_function_fault("tunnel nic:%s lost." %(nic_tun['name']))
 		elif info['status'] == "unactive":
-			set_check(nic_tun, False, "nic:%s down." %(nic_tun['name']))
+			set_check(nic_tun, False, "tunnel nic:%s down." %(nic_tun['name']))
+			add_function_fault("tunnel nic:%s down." %(nic_tun['name']))
 		else:
 			find_addr = False
 			for inet in info['inets']:
 				if inet == nic_tun['ip_address']:
 					find_addr = True
 			if find_addr == False:
-				set_check(nic_tun, False, "nic:%s not has ip:%s" %(nic_tun['name'], nic_tun['ip_address']))
+				set_check(nic_tun, False, "tunnel nic:%s not has ip:%s" %(nic_tun['name'], nic_tun['ip_address']))
+				add_function_fault("tunnel nic:%s not has ip:%s" %(nic_tun['name'], nic_tun['ip_address']))
 
 	if nic_ext != None and nic_ext['check']['result'] != False:
 		info = get_nic_info(nic_ext['device'])
 		if info == None:
-			set_check(nic_ext, False, "nic:%s lost." %(nic_ext['name']))
+			set_check(nic_ext, False, "external nic:%s lost." %(nic_ext['name']))
+			add_function_fault("external nic:%s lost." %(nic_ext['name']))
 		elif info['status'] == 'unactive':
-			set_check(nic_ext, False, "nic:%s down." %(nic_ext['name']))
+			set_check(nic_ext, False, "external nic:%s down." %(nic_ext['name']))
+			add_function_fault("external nic:%s down." %(nic_ext['name']))
 		else:
 			find_addr = False
 			for inet in info['inets']:
 				if inet == nic_ext['ip_address']:
 					find_addr = True
 			if find_addr == False:
-				set_check(nic_ext, False, "nic:%s not has ip:%s" %(nic_ext['name'], nic_ext['ip_address']))
+				set_check(nic_ext, False, "external nic:%s not has ip:%s" %(nic_ext['name'], nic_ext['ip_address']))
+				add_function_fault("external nic:%s not has ip:%s" %(nic_ext['name'], nic_ext['ip_address']))
 
 		info = get_nic_info(nic_ext['physical_device'])
 		if info == None or info['status'] == 'unactive':
-			set_check(nic_ext, False, "physical nic:%s down." %(nic_ext['physical_device']))
+			set_check(nic_ext, False, "external physical nic:%s down." %(nic_ext['physical_device']))
+			add_function_fault("external physical nic:%s down." %(nic_ext['physical_device']))
 		elif info['master'] != 'ovs-system':
-			set_check(nic_ext, False, "physical nic:%s master error(%s)." %(nic_ext['physical_device'],
+			set_check(nic_ext, False, "external physical nic:%s master error(%s)." %(nic_ext['physical_device'],
+				info['master']))
+			add_function_fault("external physical nic:%s master error(%s)." %(nic_ext['physical_device'],
 				info['master']))
 
 	AGENTLOG.info("agent.func.check_network_nic -  3.check network device nic done.")
@@ -1371,6 +1388,7 @@ def get_test_ip(ip, mask):
 def create_netns(netns):
 	if check_ns_exist(netns):
 		AGENTLOG.info("agent.func.is_connect -  netns:%s exist." %(netns))
+		return True
 	else:
 		AGENTLOG.info("agent.func.is_connect -  create netns:%s." %(netns))
 		ret, info = exe("ip netns add %s" %(netns))
@@ -1523,7 +1541,7 @@ def get_device_other_tag(dev, topo):
 
 def check_device_connection(dev, topo):
 	dest_list = []
-	if dev['type'] == "virtual host":
+	if dev['type'] == "virtual host" and dev['check']['result'] == True:
 		get_device_vm_tag(dev, topo)
 		#vm
 		# for every addr
@@ -1535,7 +1553,7 @@ def check_device_connection(dev, topo):
 					tag = addr['tag']
 					mask = addr['cidr'].split('/')[1]
 					dest_list.append({"id": dev['id'], "ip": ip, "mask": mask, "tag": tag, 'addr': addr})
-	elif dev['type'] == "dhcp" or dev['type'] == 'router':
+	elif (dev['type'] == "dhcp" or dev['type'] == 'router') and dev['check']['result'] == True:
 		get_device_other_tag(dev, topo)
 		for addr in dev['addresses']:
 			if addr['type'] == 'fixed':
@@ -1545,22 +1563,30 @@ def check_device_connection(dev, topo):
 				dest_list.append({"id": dev['id'], "ip": ip, "mask": mask, "tag": tag, 'addr': addr})
 	else:
 		AGENTLOG.error("agent.func.check_device_connection -  unknown device type:%s." %(dev['type']))
+		set_check(dev, False, "unknown device type:%s." %(dev['type']))
+		add_function_fault("%s has unknown device type:%s." %(dev['name'], dev['type']))
 	
 	for dst in dest_list:
 			ret, error_info = is_connect_internal(dst['id'], dst['ip'], dst['mask'], dst['tag'])
 			if ret == False:
-				set_check(dst['addr'], False, "dev:%s addr:%s can't reach openvswitch." 
-					%(dev['name'], dst['addr']['addr']))
+				set_check(dst['addr'], False, "dev:%s addr:%s can't reach openvswitch, %s." 
+					%(dev['name'], dst['addr']['addr'], error_info))
+				set_check(dev, False, "addr:%s can't reach openvswitch, %s." 
+					%(dst['addr']['addr'], error_info))
+				add_function_fault("dev:%s addr:%s can't reach openvswitch, %s." 
+					%(dev['name'], dst['addr']['addr'], error_info))
 			else:
 				set_check(dst['addr'], True)
 
 def check_nic_connection(dev, topo):
-	set_check(dev, True)
-	for ip in dev['remote']:
-		ret, info = ping_test(ip, "")
-		if ret == False:
-			set_check(dev, False, "can't reach %s, %s" %(ip, info))
-			return                                    
+	if dev['check']['result'] != False:
+		set_check(dev, True)
+		for ip in dev['remote']:
+			ret, info = ping_test(ip, "")
+			if ret == False:
+				set_check(dev, False, "can't reach %s, %s" %(ip, info))
+				add_function_fault("dev:%s cant't reach %s, %s" %(dev['name'], ip, info))
+				return                                    
 
 def check_network_connection(topo):
 	AGENTLOG.info("agent.func.check_network_connection -  check network connection start.")
@@ -1583,7 +1609,7 @@ if __name__ == '__main__':
 	# print is_network_node()
 	# print check_service("openstack-nova-compute")
 	# print is_network_node()
-	valid_vm_info = [{u'status': u'ACTIVE', u'updated': u'2019-03-04T01:31:34Z', u'OS-EXT-STS:task_state': None, u'user_id': u'd2fcc0c45a134de28dba429dbef2c3ba', u'addresses': {u'int-net': [{u'OS-EXT-IPS-MAC:mac_addr': u'fa:16:3e:0e:ab:01', u'version': 4, u'addr': u'192.168.1.4', u'OS-EXT-IPS:type': u'fixed'}, {u'OS-EXT-IPS-MAC:mac_addr': u'fa:16:3e:0e:ab:01', u'version': 4, u'addr': u'192.168.166.26', u'OS-EXT-IPS:type': u'floating'}]}, u'created': u'2019-03-04T01:31:25Z', u'OS-SRV-USG:terminated_at': None, u'tenant_id': u'a95424bbdca6410092073d564f1f4012', u'hostId': u'1b6fa73a7ea8e40dc812954fe751d3aa812e6b52489ddb5360f5d36e', u'OS-EXT-SRV-ATTR:host': u'control-node', u'OS-EXT-STS:vm_state': u'active', u'OS-EXT-SRV-ATTR:instance_name': u'instance-00000003', u'progress': 0, u'OS-SRV-USG:launched_at': u'2019-03-04T01:31:34.000000', u'OS-EXT-SRV-ATTR:hypervisor_hostname': u'control-node', u'OS-EXT-STS:power_state': 1, u'OS-EXT-AZ:availability_zone': u'nova', u'id': u'6d4f4a19-d581-492f-92fd-88f56cc85767', u'security_groups': [{u'name': u'default'}], u'name': u'test1'}, {u'status': u'ACTIVE', u'updated': u'2019-02-28T08:38:58Z', u'OS-EXT-STS:task_state': None, u'user_id': u'd2fcc0c45a134de28dba429dbef2c3ba', u'addresses': {u'int-net': [{u'OS-EXT-IPS-MAC:mac_addr': u'fa:16:3e:5d:9e:22', u'version': 4, u'addr': u'192.168.1.8', u'OS-EXT-IPS:type': u'fixed'}, {u'OS-EXT-IPS-MAC:mac_addr': u'fa:16:3e:5d:9e:22', u'version': 4, u'addr': u'192.168.166.23', u'OS-EXT-IPS:type': u'floating'}]}, u'created': u'2018-10-26T09:36:38Z', u'OS-SRV-USG:terminated_at': None, u'tenant_id': u'a95424bbdca6410092073d564f1f4012', u'hostId': u'1b6fa73a7ea8e40dc812954fe751d3aa812e6b52489ddb5360f5d36e', u'OS-EXT-SRV-ATTR:host': u'control-node', u'OS-EXT-STS:vm_state': u'active', u'OS-EXT-SRV-ATTR:instance_name': u'instance-00000002', u'progress': 0, u'OS-SRV-USG:launched_at': u'2018-10-26T09:36:46.000000', u'OS-EXT-SRV-ATTR:hypervisor_hostname': u'control-node', u'OS-EXT-STS:power_state': 1, u'OS-EXT-AZ:availability_zone': u'nova', u'id': u'61205745-b2bf-4db0-ad50-e7a60bf08bd5', u'security_groups': [{u'name': u'default'}], u'name': u'test'}]
-	networks_info = {u'ports': [{u'status': u'ACTIVE', u'binding:host_id': u'control-node', u'name': u'', u'admin_state_up': True, u'network_id': u'956df7c4-25d9-4564-8b81-843462ae707a', u'tenant_id': u'a95424bbdca6410092073d564f1f4012', u'created_at': u'2018-10-26T09:33:24Z', u'updated_at': u'2018-10-26T09:33:27Z', u'binding:vnic_type': u'normal', u'binding:vif_type': u'ovs', u'device_owner': u'network:dhcp', u'mac_address': u'fa:16:3e:d0:20:d1', u'id': u'3e25711d-884a-413a-a9e3-06b4f9225117', u'port_security_enabled': False, u'project_id': u'a95424bbdca6410092073d564f1f4012', u'fixed_ips': [{u'subnet_id': u'3761ef2d-d30c-46b4-8d03-ae38c411ab5b', u'ip_address': u'192.168.1.2'}], u'binding:vif_details': {u'port_filter': True, u'datapath_type': u'system', u'ovs_hybrid_plug': True}, u'device_id': u'dhcp280b4426-d1ca-5484-9f17-9aa7c0b012c5-956df7c4-25d9-4564-8b81-843462ae707a'}, {u'status': u'ACTIVE', u'binding:host_id': u'control-node', u'name': u'', u'admin_state_up': True, u'network_id': u'956df7c4-25d9-4564-8b81-843462ae707a', u'tenant_id': u'a95424bbdca6410092073d564f1f4012', u'created_at': u'2018-10-26T09:36:41Z', u'updated_at': u'2019-02-28T08:38:58Z', u'binding:vnic_type': u'normal', u'binding:vif_type': u'ovs', u'device_owner': u'compute:nova', u'mac_address': u'fa:16:3e:5d:9e:22', u'id': u'3ef787ad-6748-4b58-87a1-6af1441cc947', u'port_security_enabled': True, u'project_id': u'a95424bbdca6410092073d564f1f4012', u'fixed_ips': [{u'subnet_id': u'3761ef2d-d30c-46b4-8d03-ae38c411ab5b', u'ip_address': u'192.168.1.8'}], u'binding:vif_details': {u'port_filter': True, u'datapath_type': u'system', u'ovs_hybrid_plug': True}, u'device_id': u'61205745-b2bf-4db0-ad50-e7a60bf08bd5'}, {u'status': u'ACTIVE', u'binding:host_id': u'control-node', u'name': u'', u'admin_state_up': True, u'network_id': u'956df7c4-25d9-4564-8b81-843462ae707a', u'tenant_id': u'a95424bbdca6410092073d564f1f4012', u'created_at': u'2018-10-26T09:35:56Z', u'updated_at': u'2018-10-26T09:36:01Z', u'binding:vnic_type': u'normal', u'binding:vif_type': u'ovs', u'device_owner': u'network:router_interface', u'mac_address': u'fa:16:3e:84:7c:ec', u'id': u'661bb3c3-3651-40e7-9728-19c2565e2149', u'port_security_enabled': False, u'project_id': u'a95424bbdca6410092073d564f1f4012', u'fixed_ips': [{u'subnet_id': u'3761ef2d-d30c-46b4-8d03-ae38c411ab5b', u'ip_address': u'192.168.1.1'}], u'binding:vif_details': {u'port_filter': True, u'datapath_type': u'system', u'ovs_hybrid_plug': True}, u'device_id': u'd4edac45-231a-4b5e-9e95-c629d5c7fc62'}, {u'status': u'N/A', u'binding:host_id': u'', u'name': u'', u'admin_state_up': True, u'network_id': u'f89e858b-b386-47b5-b987-7a70bd72e861', u'tenant_id': u'', u'created_at': u'2019-03-04T01:33:11Z', u'updated_at': u'2019-03-04T01:33:12Z', u'binding:vnic_type': u'normal', u'binding:vif_type': u'unbound', u'device_owner': u'network:floatingip', u'mac_address': u'fa:16:3e:a0:09:9d', u'id': u'84a2548a-a8f5-4686-a55e-e591f53f170b', u'port_security_enabled': False, u'project_id': u'', u'fixed_ips': [{u'subnet_id': u'4d0f1eb6-16ef-4353-874a-0fe48b707e2a', u'ip_address': u'192.168.166.26'}], u'binding:vif_details': {}, u'device_id': u'b97a94d2-f578-4f30-befa-971513c62e93'}, {u'status': u'ACTIVE', u'binding:host_id': u'control-node', u'name': u'', u'admin_state_up': True, u'network_id': u'956df7c4-25d9-4564-8b81-843462ae707a', u'tenant_id': u'a95424bbdca6410092073d564f1f4012', u'created_at': u'2019-03-04T01:31:29Z', u'updated_at': u'2019-03-04T01:31:32Z', u'binding:vnic_type': u'normal', u'binding:vif_type': u'ovs', u'device_owner': u'compute:nova', u'mac_address': u'fa:16:3e:0e:ab:01', u'id': u'879f22e7-61d7-47da-adff-f5172f4c43af', u'port_security_enabled': True, u'project_id': u'a95424bbdca6410092073d564f1f4012', u'fixed_ips': [{u'subnet_id': u'3761ef2d-d30c-46b4-8d03-ae38c411ab5b', u'ip_address': u'192.168.1.4'}], u'binding:vif_details': {u'port_filter': True, u'datapath_type': u'system', u'ovs_hybrid_plug': True}, u'device_id': u'6d4f4a19-d581-492f-92fd-88f56cc85767'}, {u'status': u'N/A', u'binding:host_id': u'', u'name': u'', u'admin_state_up': True, u'network_id': u'f89e858b-b386-47b5-b987-7a70bd72e861', u'tenant_id': u'', u'created_at': u'2018-10-26T10:01:30Z', u'updated_at': u'2018-10-26T10:01:30Z', u'binding:vnic_type': u'normal', u'binding:vif_type': u'unbound', u'device_owner': u'network:floatingip', u'mac_address': u'fa:16:3e:c0:6c:33', u'id': u'ad4dcecc-2d8b-4021-b2f0-46cacf6917f8', u'port_security_enabled': False, u'project_id': u'', u'fixed_ips': [{u'subnet_id': u'4d0f1eb6-16ef-4353-874a-0fe48b707e2a', u'ip_address': u'192.168.166.23'}], u'binding:vif_details': {}, u'device_id': u'ff32223d-db9f-4b41-b647-5daf9aa69f82'}, {u'status': u'ACTIVE', u'binding:host_id': u'control-node', u'name': u'', u'admin_state_up': True, u'network_id': u'f89e858b-b386-47b5-b987-7a70bd72e861', u'tenant_id': u'', u'created_at': u'2018-10-26T09:35:38Z', u'updated_at': u'2018-10-26T09:35:43Z', u'binding:vnic_type': u'normal', u'binding:vif_type': u'ovs', u'device_owner': u'network:router_gateway', u'mac_address': u'fa:16:3e:4d:46:a6', u'id': u'b8cfeaad-eff1-4687-8109-3120102323c8', u'port_security_enabled': False, u'project_id': u'', u'fixed_ips': [{u'subnet_id': u'4d0f1eb6-16ef-4353-874a-0fe48b707e2a', u'ip_address': u'192.168.166.28'}], u'binding:vif_details': {u'port_filter': True, u'datapath_type': u'system', u'ovs_hybrid_plug': True}, u'device_id': u'd4edac45-231a-4b5e-9e95-c629d5c7fc62'}], u'subnets': [{u'name': u'int-sub', u'enable_dhcp': True, u'network_id': u'956df7c4-25d9-4564-8b81-843462ae707a', u'tenant_id': u'a95424bbdca6410092073d564f1f4012', u'created_at': u'2018-10-26T09:33:23Z', u'updated_at': u'2018-10-26T09:33:23Z', u'allocation_pools': [{u'start': u'192.168.1.2', u'end': u'192.168.1.254'}], u'host_routes': [], u'ip_version': 4, u'gateway_ip': u'192.168.1.1', u'cidr': u'192.168.1.0/24', u'project_id': u'a95424bbdca6410092073d564f1f4012', u'id': u'3761ef2d-d30c-46b4-8d03-ae38c411ab5b'}, {u'name': u'ext-sub', u'enable_dhcp': False, u'network_id': u'f89e858b-b386-47b5-b987-7a70bd72e861', u'tenant_id': u'a95424bbdca6410092073d564f1f4012', u'created_at': u'2018-10-26T09:35:20Z', u'updated_at': u'2018-10-26T09:35:20Z', u'allocation_pools': [{u'start': u'192.168.166.20', u'end': u'192.168.166.40'}], u'host_routes': [], u'ip_version': 4, u'gateway_ip': u'192.168.166.1', u'cidr': u'192.168.166.0/24', u'project_id': u'a95424bbdca6410092073d564f1f4012', u'id': u'4d0f1eb6-16ef-4353-874a-0fe48b707e2a'}], u'networks': [{u'status': u'ACTIVE', u'router:external': False, u'availability_zones': [u'nova'], u'name': u'int-net', u'provider:physical_network': None, u'subnets': [u'3761ef2d-d30c-46b4-8d03-ae38c411ab5b'], u'tenant_id': u'a95424bbdca6410092073d564f1f4012', u'created_at': u'2018-10-26T09:33:23Z', u'admin_state_up': True, u'updated_at': u'2018-10-26T09:33:23Z', u'provider:network_type': u'vxlan', u'project_id': u'a95424bbdca6410092073d564f1f4012', u'port_security_enabled': True, u'shared': False, u'mtu': 1450, u'id': u'956df7c4-25d9-4564-8b81-843462ae707a', u'provider:segmentation_id': 73}, {u'status': u'ACTIVE', u'router:external': True, u'availability_zones': [u'nova'], u'name': u'ext-net', u'provider:physical_network': u'extnet', u'subnets': [u'4d0f1eb6-16ef-4353-874a-0fe48b707e2a'], u'tenant_id': u'a95424bbdca6410092073d564f1f4012', u'created_at': u'2018-10-26T09:35:19Z', u'admin_state_up': True, u'updated_at': u'2018-10-26T09:35:20Z', u'provider:network_type': u'flat', u'project_id': u'a95424bbdca6410092073d564f1f4012', u'port_security_enabled': True, u'shared': True, u'mtu': 1500, u'id': u'f89e858b-b386-47b5-b987-7a70bd72e861', u'provider:segmentation_id': None}], u'routers': [{u'status': u'ACTIVE', u'external_gateway_info': {u'network_id': u'f89e858b-b386-47b5-b987-7a70bd72e861', u'enable_snat': True, u'external_fixed_ips': [{u'subnet_id': u'4d0f1eb6-16ef-4353-874a-0fe48b707e2a', u'ip_address': u'192.168.166.28'}]}, u'availability_zone_hints': [], u'availability_zones': [u'nova'], u'description': u'', u'tags': [], u'tenant_id': u'a95424bbdca6410092073d564f1f4012', u'created_at': u'2018-10-26T09:35:38Z', u'admin_state_up': True, u'distributed': False, u'updated_at': u'2018-10-26T09:35:56Z', u'project_id': u'a95424bbdca6410092073d564f1f4012', u'flavor_id': None, u'revision_number': 4, u'routes': [], u'ha': False, u'id': u'd4edac45-231a-4b5e-9e95-c629d5c7fc62', u'name': u'R'}]}
-	print get_topo(valid_vm_info, networks_info)
+
+	#print get_topo(valid_vm_info, networks_info)
+	pass
 	    
