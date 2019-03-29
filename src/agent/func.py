@@ -1095,6 +1095,7 @@ def check_vm(dev, topo):
 def get_all_ns():
 	ret, info = exe("ip netns show")
 	if not ret:
+		add_function_fault("cmd:'ip netns show' return error.")
 		return False, "cmd:'ip netns show' return error."
 	else:
 		all_ns = set()
@@ -1112,46 +1113,50 @@ def check_ns_exist(ns):
 	return False
 
 def check_dhcp(dev, topo):
-	if dev['status'] != 'ACTIVE':
-		dev['check']['result'] = True
-		dev['status'] = 'status'
-	else:
-		if check_ns_exist(dev['netns']) == False:
-			dev['check']['result'] = False
-			dev['check']['error_msg'] = "netns-%s not exist." %(dev['netns'])
-			dev['status'] = "unactive"
+	if dev['check']['result'] != False:
+		if dev['status'] != 'ACTIVE':
+			dev['check']['result'] = True
+			dev['status'] = 'status'
 		else:
-			# pid dir and file
-			ret, info = exe("ip netns exec %s ps -aux | grep dnsmasq | grep tap" %(dev['netns']))
-			if ret == False:
-				AGENTLOG.error("agent.func.check_dhcp -  cmd:ip netns exec %s ps -aux | grep dnsmasq \
-					| grep tap return error." %(dev['netns']))
+			if check_ns_exist(dev['netns']) == False:
 				dev['check']['result'] = False
-				dev['check']['error_msg'] = "dnsmasq not running."
+				dev['check']['error_msg'] = "netns-%s not exist." %(dev['netns'])
+				add_function_fault("netns-%s not exist." %(dev['netns']))
 				dev['status'] = "unactive"
 			else:
-				# check other dncp info,such as configure
-				dev['check']['result'] = True
-				dev['check']['error_msg'] = ""
-				dev['status'] = "active"
+				# pid dir and file
+				ret, info = exe("ip netns exec %s ps -aux | grep dnsmasq | grep tap" %(dev['netns']))
+				if ret == False:
+					AGENTLOG.error("agent.func.check_dhcp -  cmd:ip netns exec %s ps -aux | grep dnsmasq \
+						| grep tap return error." %(dev['netns']))
+					dev['check']['result'] = False
+					dev['check']['error_msg'] = "dnsmasq not running."
+					add_function_fault("network-%s dhcp deamon process down." %(dev['netns'].split('-')[1]))
+					dev['status'] = "unactive"
+				else:
+					# check other dncp info,such as configure
+					dev['check']['result'] = True
+					dev['check']['error_msg'] = ""
+					dev['status'] = "active"
 	
 	check_tap(topo['tap'][dev['next']], topo)
 
 def check_router(dev, topo):
-	if dev['status'] != "ACTIVE":
-		dev['status'] = "unactive"
-		dev['check']['result'] = True
-	else:
-		if check_ns_exist(dev['netns']) == False:
-			dev['check']['result'] = False
-			dev['check']['error_msg'] = "netns-%s not exist." %(dev['netns'])
+	if dev['check']['result'] != False:
+		if dev['status'] != "ACTIVE":
 			dev['status'] = "unactive"
-		else:
 			dev['check']['result'] = True
-			dev['status'] = "active"
+		else:
+			if check_ns_exist(dev['netns']) == False:
+				dev['check']['result'] = False
+				dev['check']['error_msg'] = "netns-%s not exist." %(dev['netns'])
+				add_function_fault("router %s not exist." %(dev['name']))
+				dev['status'] = "unactive"
+			else:
+				dev['check']['result'] = True
+				dev['status'] = "active"
 
 	# check route rules
-	# check qr/qg
 	for i in dev['next']:
 		check_tap(topo['tap'][i], topo)
 
@@ -1172,11 +1177,13 @@ def check_network_device(network_topo):
 			AGENTLOG.error("agent.func.check_network_device -  unknown device type:%s." %(dev['type']))
 			dev['result'] = False
 			dev['error_msg'] = "unknown device type"
+			add_function_fault("%s: unknown device type(%s)" %(dev['name'], dev['type']))
 	AGENTLOG.info("agent.func.check_network_device -  1.check network device level done.")
 
 def set_check(dev, result, msg = ""):
 	dev['check']['result'] = result
 	dev['check']['msg'] = msg
+
 
 def check_network_ovs(network_topo):
 	AGENTLOG.info("agent.func.check_network_ovs -  2.check network device nic start.")
@@ -1198,41 +1205,50 @@ def check_network_ovs(network_topo):
 		set_check(br_tun, False, "openvswitch service down.")
 		if is_network:
 			set_check(br_ex, False, "openvswitch service down.")
+	else:
+		if br_int['info'] != None:
+			if ('patch-tun' not in br_int['info']['Port'] or br_int['info']['Port']['patch-tun']['options']
+				!= "{peer=patch-int}" or br_int['info']['Port']['patch-tun']['type']!= 'patch'):
+				set_check(br_int, False, "interface:patch-tun lost or config error.")
+				add_function_fault("openvswitch bridge br-int lost interface:patch-tun or config error.")
+		if br_tun['info'] != None:
+			if ('patch-int' not in br_tun['info']['Port'] or br_tun['info']['Port']['patch-int']['type']
+				!= "patch" or br_tun['info']['Port']['patch-int']['options'] != "{peer=patch-tun}"):
+				set_check(br_tun, False, "interface:patch-int lost or config error.")
+				add_function_fault("openvswitch bridge br-tun lost interface:patch-tun or config error.")
 
-	if ('patch-tun' not in br_int['info']['Port'] or br_int['info']['Port']['patch-tun']['options']
-		!= "{peer=patch-int}" or br_int['info']['Port']['patch-tun']['type']!= 'patch'):
-		set_check(br_int, False, "interface:patch-tun lost or config error.")
+			vxlan_name = None
+			for port in br_tun['info']['Port']:
+				if port.startswith("vxlan"):
+					vxlan_name = port
 
-	if ('patch-int' not in br_tun['info']['Port'] or br_tun['info']['Port']['patch-int']['type']
-		!= "patch" or br_tun['info']['Port']['patch-int']['options'] != "{peer=patch-tun}"):
-		set_check(br_tun, False, "interface:patch-int lost or config error.")
+			if vxlan_name == None or br_tun['info']['Port'][vxlan_name]['type'] != 'vxlan':
+				set_check(br_tun, False, "bridge br-tun lost vxlan interface.")
+				add_function_fault("openvswitch bridge br-tun lost vxlan interface.")
 
-	vxlan_name = None
-	for port in br_tun['info']['Port']:
-		if port.startswith("vxlan"):
-			vxlan_name = port
+		if is_network:
+			if br_int['info'] != None:
+				if ('int-br-ex' not in br_int['info']['Port'] or br_int['info']['Port']['int-br-ex']['options']
+					!= "{peer=phy-br-ex}" or br_int['info']['Port']['int-br-ex']['type']!= 'patch'):
+					set_check(br_int, False, "interface:int-br-ex lost or config error.")
+					add_function_fault("openvswitch br_int lost int-br-ex interface.")
+			if br_ex['info'] != None:
+				if ('phy-br-ex' not in br_ex['info']['Port'] or br_ex['info']['Port']['phy-br-ex']['type'] !=
+					"patch" or br_ex['info']['Port']['phy-br-ex']['options'] != "{peer=int-br-ex}"):
+					set_check(br_ex, False, "interface:phy-br-ex lost or config error.")
+					add_function_fault("openvswitch br_ex lost phy-br-ex interface.")
 
-	if vxlan_name == None or br_tun['info']['Port'][vxlan_name]['type'] != 'vxlan':
-		set_check(br_tun, False, "bridge br-tun lost vxlan interface.")
-
-	if is_network:
-		if ('int-br-ex' not in br_int['info']['Port'] or br_int['info']['Port']['int-br-ex']['options']
-			!= "{peer=phy-br-ex}" or br_int['info']['Port']['int-br-ex']['type']!= 'patch'):
-			set_check(br_int, False, "interface:int-br-ex lost or config error.")
-
-		if ('phy-br-ex' not in br_ex['info']['Port'] or br_ex['info']['Port']['phy-br-ex']['type'] !=
-			"patch" or br_ex['info']['Port']['phy-br-ex']['options'] != "{peer=int-br-ex}"):
-			set_check(br_ex, False, "interface:phy-br-ex lost or config error.")
-
-		ext_nic = None
-		for port in br_ex['info']['Port']:
-			if port != 'br-ex' and port != "phy-br-ex":
-				ext_nic = port
-		if ext_nic == None:
-			set_check(br_ex, False, "interface:external interface lost.")
-		ret, info = exe("ip address show %s" %(ext_nic))
-		if ret == False:
-			set_check(br_ex, False, "external interface %s not exist." %(ext_nic))
+				ext_nic = None
+				for port in br_ex['info']['Port']:
+					if port != 'br-ex' and port != "phy-br-ex":
+						ext_nic = port
+				if ext_nic == None:
+					set_check(br_ex, False, "external network nic interface lost.")
+					add_function_fault("external network nic interface lost.")
+				ret, info = exe("ip address show %s" %(ext_nic))
+				if ret == False:
+					set_check(br_ex, False, "external network nic %s not exist." %(ext_nic))
+					add_function_fault("external network nic %s not exist.") %(ext_nic)
 
 	# other check as flow
 	AGENTLOG.info("agent.func.check_network_ovs -  2.check network device nic done.")
@@ -1280,20 +1296,26 @@ def check_network_nic(network_topo):
 	if is_network and len(network_topo['nic']) == 2:
 		nic_ext = network_topo['nic'][1]
 
-	info = get_nic_info(nic_tun['name'])
-	if info == None or info['status'] == "unactive":
-		set_check(nic_tun, False, "nic:%s down." %(nic_tun['name']))
-	else:
-		find_addr = False
-		for inet in info['inets']:
-			if inet == nic_tun['ip_address']:
-				find_addr = True
-		if find_addr == False:
-			set_check(nic_tun, False, "nic:%s not has ip:%s" %(nic_tun['name'], nic_tun['ip_address']))
+	if nic_tun['check']['result'] != False:
+		info = get_nic_info(nic_tun['name'])
+		if info == None:
+			set_check(nic_tun, False, "nic:%s lost." %(nic_tun['name']))
 
-	if nic_ext != None:
+		elif info['status'] == "unactive":
+			set_check(nic_tun, False, "nic:%s down." %(nic_tun['name']))
+		else:
+			find_addr = False
+			for inet in info['inets']:
+				if inet == nic_tun['ip_address']:
+					find_addr = True
+			if find_addr == False:
+				set_check(nic_tun, False, "nic:%s not has ip:%s" %(nic_tun['name'], nic_tun['ip_address']))
+
+	if nic_ext != None and nic_ext['check']['result'] != False:
 		info = get_nic_info(nic_ext['device'])
-		if info == None or info['status'] == 'unactive':
+		if info == None:
+			set_check(nic_ext, False, "nic:%s lost." %(nic_ext['name']))
+		elif info['status'] == 'unactive':
 			set_check(nic_ext, False, "nic:%s down." %(nic_ext['name']))
 		else:
 			find_addr = False
