@@ -124,7 +124,7 @@ def avg_result(result_list, times):
 def experiment(bond, times = 60):
 	start = time.time()
 	name = bond + ".txt"
-	fp = open(name, w)
+	fp = open(name, 'w')
 	fp.write("iperf test: occur %s times.\n" %(times))
 	result_list = []
 
