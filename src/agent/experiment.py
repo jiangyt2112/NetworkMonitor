@@ -130,7 +130,7 @@ def experiment(bond, times = 60):
 	result_list = []
 
 	once = experiment_once()
-	for i in range(once):
+	for i in once:
 		result_list.append(i)
 
 	for i in range(times - 1):
