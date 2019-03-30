@@ -40,12 +40,12 @@ def get_vm_uuids():
 
 	if conn is None:
 		add_function_fault("libvirtd.service down.")
-	    return False, 'Failed to open connection to the hypervisor'
+		return False, 'Failed to open connection to the hypervisor'
 	else:
-	    doms = conn.listAllDomains()
-	    for dom in doms:
-	        uuids.add(dom.UUIDString())
-	    return True, uuids
+		doms = conn.listAllDomains()
+		for dom in doms:
+			uuids.add(dom.UUIDString())
+		return True, uuids
 
 def get_hostname():
 	cmd = 'hostname'
@@ -618,19 +618,19 @@ def get_extnet_gateway(ip_addr, networks_info):
 	return []
 
 def check_service_status():
-    # libvirt
-    # openvswitch
-    # other service
-    all_node_service = ['libvirtd.service', 'openvswitch.service', 'rabbitmq-server.service']
-    network_node_service = ['neutron-dhcp-agent.service', 'neutron-metadata-agent.service',
-    						'neutron-server.service', 'neutron-dhcp-agent.service', 
-    						'neutron-l3-agent.service',  'neutron-openvswitch-agent.service',
-    						'openstack-nova-api.service', 'openstack-nova-scheduler.service',
-    						'openstack-nova-compute.service', 'openstack-nova-conductor.service',
-    						 'openstack-nova-novncproxy.service', 'openstack-nova-consoleauth.service',
-    						 'mariadb.service']
-    compute_node_service = ['openstack-nova-compute.service', 'neutron-openvswitch-agent.service']
-	
+	# libvirt
+	# openvswitch
+	# other service
+	all_node_service = ['libvirtd.service', 'openvswitch.service', 'rabbitmq-server.service']
+	network_node_service = ['neutron-dhcp-agent.service', 'neutron-metadata-agent.service',
+							'neutron-server.service', 'neutron-dhcp-agent.service', 
+							'neutron-l3-agent.service',  'neutron-openvswitch-agent.service',
+							'openstack-nova-api.service', 'openstack-nova-scheduler.service',
+							'openstack-nova-compute.service', 'openstack-nova-conductor.service',
+							 'openstack-nova-novncproxy.service', 'openstack-nova-consoleauth.service',
+							 'mariadb.service']
+	compute_node_service = ['openstack-nova-compute.service', 'neutron-openvswitch-agent.service']
+
 	ret = {}
 	for service in all_node_service:
 		if check_service(service) == False:
@@ -638,20 +638,20 @@ def check_service_status():
 			ret[service] = False
 		else:
 			ret[service] = True
-    if is_network_node():
-    	for service in network_node_service:
-    		if check_service(service) == False:
-    			add_function_fault("%s service down." %(service))
-    			ret[service] = False
-    		else:
-    			ret[service] = True
-    else:
-    	for service in compute_node_service:
-    		if check_service(service) == False:
-    			add_function_fault("%s service down." %(service))
-    			ret[service] = False
-    		else:
-    			ret[service] = True
+	if is_network_node():
+		for service in network_node_service:
+			if check_service(service) == False:
+				add_function_fault("%s service down." %(service))
+				ret[service] = False
+			else:
+				ret[service] = True
+	else:
+		for service in compute_node_service:
+			if check_service(service) == False:
+				add_function_fault("%s service down." %(service))
+				ret[service] = False
+			else:
+				ret[service] = True
 	return True, ret
 
 def get_topo(vms_info, networks_info):

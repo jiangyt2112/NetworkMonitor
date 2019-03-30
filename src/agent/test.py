@@ -138,3 +138,7 @@ from func import is_connect_internal, check_device_connection, check_nic_connect
 # check_device_connection(topo['device'][0], topo)
 # check_nic_connection(topo['nic'][0], topo)
 check_network_connection(topo)
+
+#openstack image create "centos-7"   --file CentOS-7-x86_64-Azure2.qcow2  --disk-format qcow2 --container-format bare  --public
+
+
