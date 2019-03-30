@@ -147,7 +147,7 @@ def experiment(bond, times = 1):
 	for result in result_list:
 		result_str = "%s\t%s\t\t%s\n" %(result['type'], result['name'], json.dumps(result['perf']))
 		fp.write(result_str)
-	close(fp)
+	fp.close()
 
 if __name__ == '__main__':
 	experiment("1M")
