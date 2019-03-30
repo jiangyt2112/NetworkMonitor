@@ -87,7 +87,7 @@ def experiment_once():
 		else:
 			print "error dev type: %s" %(dev['type'])
 			continue
-		result.apend(ret)
+		result.append(ret)
 	return result
 
 def add_once(result_list, once):
