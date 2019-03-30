@@ -26,7 +26,19 @@ def get_nic_port(dev, nic_port_bandwidth):
 	return dev
 
 def get_ovs_port(dev):
-	dev['perf'] = get_port_netstats(dev['name'])
+	old_stat = get_port_netstats(dev['name'])
+	time.sleep(1)
+	new_stat = get_port_netstats(dev['name'])
+	dev['perf'] = {
+            "rx": {"packets": new_stat["rx"]['packets'] - old_stat["rx"]['packets'], 
+                    "bytes": new_stat["rx"]['bytes'] - old_stat["rx"]['bytes'], 
+                    "drop": new_stat["rx"]['drop'] - old_stat["rx"]['drop']
+                    },
+            "tx": {"packets": new_stat["tx"]['packets'] - old_stat["tx"]['packets'], 
+                    "bytes": new_stat["tx"]['bytes'] - old_stat["tx"]['bytes'], 
+                    "drop": new_stat["tx"]['drop'] - old_stat["tx"]['drop']
+                }
+        	}
 	return dev
 
 def get_delay(dev):
