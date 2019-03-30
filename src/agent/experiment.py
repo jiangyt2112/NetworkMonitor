@@ -150,3 +150,6 @@ def experiment(bond, times = 60):
 
 if __name__ == '__main__':
 	experiment()
+
+# iperf -f m -i 1 -p 5001 -u -b 1M -c -t 100 (-d)
+# iperf -f m -i 1 -p 5001 -u -s -o 1m.txt 
