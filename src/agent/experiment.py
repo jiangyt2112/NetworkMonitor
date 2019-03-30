@@ -7,6 +7,7 @@ from ovs.bridge import get_port_netstats
 from func import is_network_node
 import time
 import json
+import commands
 
 def exe(cmd):
 	ret, result = commands.getstatusoutput(cmd)

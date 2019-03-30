@@ -1,5 +1,7 @@
 yum install erlang
 yum install rabbitmq-server
+pip install pika
+pip install commands
 systemctl enable rabbitmq-server.service
 systemctl start  rabbitmq-server.service
 rabbitmqctl add_user network_monitor 111111
