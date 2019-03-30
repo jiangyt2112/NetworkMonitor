@@ -24,7 +24,7 @@ def get_nic_port(dev, nic_port_bandwidth):
 	dev['perf'] = nic_port_bandwidth[dev['name']]
 	return dev
 
-def get_ovs_port(dev)
+def get_ovs_port(dev):
 	dev['perf'] = get_port_netstats(dev['name'])
 	return dev
 
