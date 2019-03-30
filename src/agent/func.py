@@ -12,9 +12,9 @@ from libvirt_func import get_nic_netstats
 from libvirt_func import get_vm_port_netstats
 # 61205745-b2bf-4db0-ad50-e7a60bf08bd5
 # 61205745-b2bf-4db0-ad50-e7a60bf08bd5
-from agent import health_flag# = True
-from agent import function_fault# = []
-from agent import performance_fault# = []
+health_flag = True
+function_fault = []
+performance_fault = []
 
 def add_function_fault(fault):
 	health_flag = False

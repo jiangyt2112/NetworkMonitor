@@ -21,9 +21,9 @@ from func import check_service_status
 from func import check_network_config
 from func import check_network_connection
 #from func import get_vm_topo
-health_flag = True
-function_fault = []
-performance_fault = []
+from func import health_flag# = True
+from func import function_fault# = []
+from func import performance_fault# = []
 
 
 class Task:
