@@ -134,7 +134,7 @@ def avg_result(result_list, times):
 			i['perf'][2] /= float(times)
 
 
-def experiment(bond, times = 1):
+def experiment(bond, times = 30):
 	start = time.time()
 	name = bond + ".txt"
 	fp = open(name, 'w')
