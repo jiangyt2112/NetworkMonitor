@@ -29,7 +29,7 @@ def get_ovs_port(dev):
 	return dev
 
 def get_delay(dev):
-	cmd = "ip netns exec %s python test_delay.py %s" %(dev['name'], addr['addr'])
+	cmd = "ip netns exec %s python test_delay.py %s" %(dev['name'], dev['addr'])
 	ret, info = exe(cmd)
 	dev['perf'] = None
 	if ret == False:
