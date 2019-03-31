@@ -166,7 +166,7 @@ def getProcess(pName):
 
 
 def experiment(bond, times = 30):
-	print "all iteration:%d\n" %(times)
+	print "all iteration:%d" %(times)
 	start = time.time()
 	ovs = getProcess("ovs-vswitchd")
 	qemu = getProcess("qemu-kvm")
@@ -184,7 +184,7 @@ def experiment(bond, times = 30):
 
 	for i in range(times - 1):
 		if (i + 1) % 10 == 0:
-			print "%d iteration\n" %(i + 1)
+			print "%d iteration" %(i + 1)
 		once = experiment_once()
 		add_once(result_list, once)
 
