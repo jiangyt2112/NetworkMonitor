@@ -188,7 +188,8 @@ def getProcess(pName):
 
 
 if __name__ == '__main__':
-	experiment("1M")
-
+	#experiment("1M")
+	resource_usage()
+	getProcess("ovs-vswitchd")
 # iperf -f m -i 1 -p 5001 -u -b 1M -c -t 100 (-d)
 # iperf -f m -i 1 -p 5001 -u -s -o 1m.txt 
