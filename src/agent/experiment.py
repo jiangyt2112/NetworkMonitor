@@ -181,10 +181,10 @@ def experiment(bond, times = 30):
 	ovs_usg = "%d%%(%dM)" %(ovs.memory_percent(), ovs.memory_info().rss / 1024 / 1024)
 	ovs_cpu = ovs.cpu_percent(None)
 	last = stop - start
-	fp.write("start:%s\n" %(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))))
-	fp.write("stop:%s\n" %(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(stop))))
+	fp.write("start:%s\t" %(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))))
+	fp.write("stop:%s\t" %(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(stop))))
 	fp.write("last:%d:%d:%d\n" %(last / 3600, (last % 3600) / 60, last % 60))
-	fp.write("cpu usage: %d%%\tmemory usage: %s\tovs cpu usage:%d%%\t ovs memory usage:%s\n" 
+	fp.write("CPU: %d%%\t%s\tOVS CPU: %d%%\t OVS Memory: %s\n" 
 		%(cup_per, mem_usg, ovs_cpu, ovs_usg))
 	for result in result_list:
 		result_str = "%s\t%s\t\t%s\n" %(result['type'], result['name'], json.dumps(result['perf']))
