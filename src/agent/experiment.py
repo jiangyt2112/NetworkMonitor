@@ -75,12 +75,16 @@ def experiment_once():
 			{'type': 'ovs', 'name': 'qvoe5abd65e-b4'},
 			{'type': 'ovs', 'name': 'patch-tun'},
 			{'type': 'ovs', 'name': 'patch-int'},
+			{'type': 'ovs', 'name': 'vxlan-c0a89062'},
+			{'type': 'nic', 'name': 'vxlan_sys_4789'},
 			{'type': 'nic', 'name': 'ens4'},
 			{'type': 'delay', 'name': 'qdhcp-44609914-f133-4f66-bc6e-e16ecce7beec', 'addr': '192.168.1.3'}
 			]
 	else:
 		dev_list = [
 			{'type': 'nic', 'name': 'ens4'},
+			{'type': 'nic', 'name': 'vxlan_sys_4789'},
+			{'type': 'ovs', 'name': 'vxlan-c0a89009'},
 			{'type': 'ovs', 'name': 'patch-int'},
 			{'type': 'ovs', 'name': 'patch-tun'},
 			{'type': 'ovs', 'name': 'qvoaddfe2a4-7c'},
