@@ -200,9 +200,14 @@ def experiment(bond, times = 30):
 	fp.close()
 
 
-
+import sys
 if __name__ == '__main__':
-	experiment("1M", 60)
+	if len(sys.argv) == 1:
+		experiment("1M", 60)
+	elif len(sys.argv) == 2:
+		experiment(sys.argv[1], 60)
+	else:
+		experiment(sys.argv[1], int(sys.argv[2]))
 	#resource_usage()
 	#getProcess("ovs-vswitchd")
 # iperf -f m -i 1 -p 5001 -u -b 1M -c -t 100 (-d)
