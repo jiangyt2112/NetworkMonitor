@@ -172,7 +172,7 @@ def experiment(bond, seconds):
 	old_list = get_once()
 	time.sleep(seconds)
 	new_list = get_once()
-	result = process_result(old_list, new_list)
+	result_list = process_result(old_list, new_list)
 
 	stop = time.time()
 	cup_per = psutil.cpu_percent(None)
