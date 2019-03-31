@@ -178,7 +178,7 @@ def experiment(bond, times = 30):
 	stop = time.time()
 	cup_per = psutil.cpu_percent(None)
 	mem_usg = memory_usage()
-	ovs_usg = ovs.memory_percent()
+	ovs_usg = "%d%%(%dM)" %(ovs.memory_percent(), ovs.memory_info().rss / 1024 / 1024)
 	ovs_cpu = ovs.cpu_percent(None)
 	last = stop - start
 	fp.write("start:%s\n" %(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))))
@@ -195,7 +195,7 @@ def experiment(bond, times = 30):
 
 
 if __name__ == '__main__':
-	experiment("1M")
+	experiment("1M", 1)
 	#resource_usage()
 	#getProcess("ovs-vswitchd")
 # iperf -f m -i 1 -p 5001 -u -b 1M -c -t 100 (-d)
