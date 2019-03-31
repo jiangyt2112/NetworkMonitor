@@ -134,9 +134,32 @@ def avg_result(result_list, times):
 			i['perf'][1] /= float(times)
 			i['perf'][2] /= float(times)
 
+def memory_usage():
+	phymem = psutil.virtual_memory()
+	line = "Memory: %5s%% %6s/%s" %(
+            phymem.percent,
+            str(int(phymem.used/1024/1024))+"M",
+            str(int(phymem.total/1024/1024))+"M"
+            )
+	return line
+
+def getProcess(pName):
+	all_pids  = psutil.pids()
+	process = None
+
+	for pid in all_pids:
+		p = psutil.Process(pid)
+		if (p.name() == pName):
+			process = p
+
+	return process
+
 
 def experiment(bond, times = 30):
 	start = time.time()
+	ovs = getProcess("ovs-vswitchd")
+	psutil.cpu_percent(None)
+	ovs.cpu_percent(None)
 	name = bond + ".txt"
 	fp = open(name, 'w')
 	fp.write("iperf test: occur %s times.\n" %(times))
@@ -153,47 +176,27 @@ def experiment(bond, times = 30):
 	avg_result(result_list, times)
 
 	stop = time.time()
+	cup_per = psutil.cpu_percent(None)
+	mem_usg = memory_usage()
+	ovs_usg = ovs.memory_percent()
+	ovs_cpu = ovs.cpu_percent(None)
 	last = stop - start
 	fp.write("start:%s\n" %(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))))
 	fp.write("stop:%s\n" %(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(stop))))
 	fp.write("last:%d:%d:%d\n" %(last / 3600, (last % 3600) / 60, last % 60))
+	fp.write("cpu usage: %d%%\tmemory usage: %s\tovs cpu usage:%d%%\t ovs memory usage:%s\n" 
+		%(cup_per, mem_usg, ovs_cpu, ovs_usg))
 	for result in result_list:
 		result_str = "%s\t%s\t\t%s\n" %(result['type'], result['name'], json.dumps(result['perf']))
 		fp.write(result_str)
+
 	fp.close()
-
-
-def resource_usage():
-	phymem = psutil.virtual_memory()
-	line = "Memory: %5s%% %6s/%s"%(
-            phymem.percent,
-            str(int(phymem.used/1024/1024))+"M",
-            str(int(phymem.total/1024/1024))+"M"
-            )
-	print line
-	print psutil.cpu_percent(interval = 1)
-
-
-def getProcess(pName):
-	all_pids  = psutil.pids()
-	process = None
-
-	for pid in all_pids:
-		p = psutil.Process(pid)
-		if (p.name() == pName):
-			process = p
-
-	print process.memory_percent()
-
-	process.cpu_percent(None)
-	time.sleep(2) 
-	print process.cpu_percent(None)
 
 
 
 if __name__ == '__main__':
-	#experiment("1M")
-	resource_usage()
-	getProcess("ovs-vswitchd")
+	experiment("1M")
+	#resource_usage()
+	#getProcess("ovs-vswitchd")
 # iperf -f m -i 1 -p 5001 -u -b 1M -c -t 100 (-d)
 # iperf -f m -i 1 -p 5001 -u -s -o 1m.txt 
