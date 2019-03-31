@@ -165,9 +165,7 @@ def experiment(bond, times = 30):
 
 def resource_usage():
 	print psutil.virtual_memory().percent
-	psutil.cpu_percent(None)
-	time.sleep(3)
-	print psutil.cpu_percent(None)
+	print psutil.cpu_percent(interval = 1)
 
 
 def getProcess(pName):
