@@ -92,6 +92,8 @@ def get_delay(dev):
 
 def get_once():
 	dev_list = None
+	nic_port_bandwidth = get_nic_netstats()
+	vm_port_netinfo = get_vm_port_netinfo()
 	if is_network_node():
 		dev_list = [
 			{'type': 'vm_port', 'name': 'fa:16:3e:03:f1:60'},
@@ -122,7 +124,7 @@ def get_once():
 	result = []
 	for dev in dev_list:
 		if dev['type'] == 'vm_port':
-			ret = get_vm_port(dev)
+			ret = get_vm_port(dev, vm_port_netinfo)
 		elif dev['type'] == 'nic':
 			ret = get_nic_port(dev, nic_port_bandwidth)
 		elif dev['type'] == 'ovs':
@@ -171,7 +173,7 @@ def experiment(bond, seconds):
 	time.sleep(seconds)
 	new_list = get_once()
 	result = process_result(old_list, new_list)
-	
+
 	stop = time.time()
 	cup_per = psutil.cpu_percent(None)
 	mem_usg = memory_usage()
