@@ -8,6 +8,7 @@ from func import is_network_node
 import time
 import json
 import commands
+import psutil
 
 def exe(cmd):
 	ret, result = commands.getstatusoutput(cmd)
