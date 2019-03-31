@@ -161,6 +161,31 @@ def experiment(bond, times = 30):
 		fp.write(result_str)
 	fp.close()
 
+
+def resource_usage():
+	print psutil.virtual_memory().percent
+	psutil.cpu_percent(None)
+	sleep(3)
+	print psutil.cpu_percent(None)
+
+
+def getProcess(pName):
+	all_pids  = psutil.pids()
+	process = None
+
+	for pid in all_pids:
+		p = psutil.Process(pid)
+		if (p.name() == pName):
+			process = p
+
+	print process.memory_percent()
+
+	process.cpu_percent(None)
+	sleep(2) 
+	print process_instance.cpu_percent(None)
+
+
+
 if __name__ == '__main__':
 	experiment("1M")
 
