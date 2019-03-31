@@ -164,7 +164,13 @@ def experiment(bond, times = 30):
 
 
 def resource_usage():
-	print psutil.virtual_memory().percent
+	phymem = psutil.virtual_memory()
+	line = "Memory: %5s%% %6s/%s"%(
+            phymem.percent,
+            str(int(phymem.used/1024/1024))+"M",
+            str(int(phymem.total/1024/1024))+"M"
+            )
+	print line
 	print psutil.cpu_percent(interval = 1)
 
 
@@ -181,7 +187,7 @@ def getProcess(pName):
 
 	process.cpu_percent(None)
 	time.sleep(2) 
-	print process_instance.cpu_percent(None)
+	print process.cpu_percent(None)
 
 
 
