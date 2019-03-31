@@ -195,7 +195,7 @@ def experiment(bond, times = 30):
 
 
 if __name__ == '__main__':
-	experiment("1M", 1)
+	experiment("1M", 60)
 	#resource_usage()
 	#getProcess("ovs-vswitchd")
 # iperf -f m -i 1 -p 5001 -u -b 1M -c -t 100 (-d)
