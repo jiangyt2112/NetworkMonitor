@@ -92,7 +92,7 @@ def get_delay(dev):
 
 def get_once():
 	dev_list = None
-	nic_port_bandwidth = get_nic_netstats()
+	nic_port_bandwidth = get_nic_netinfo()
 	vm_port_netinfo = get_vm_port_netinfo()
 	if is_network_node():
 		dev_list = [
