@@ -156,10 +156,13 @@ def getProcess(pName):
 
 
 def experiment(bond, times = 30):
+	print "all iteration:%d\n." %(times)
 	start = time.time()
 	ovs = getProcess("ovs-vswitchd")
+	qemu = getProcess("qemu-kvm")
 	psutil.cpu_percent(None)
 	ovs.cpu_percent(None)
+	qemu.cpu_percent(None)
 	name = bond + ".txt"
 	fp = open(name, 'w')
 	fp.write("iperf test: occur %s times.\n" %(times))
@@ -170,6 +173,8 @@ def experiment(bond, times = 30):
 		result_list.append(i)
 
 	for i in range(times - 1):
+		if i % 10 == 0:
+			print "%d iteration.\n" %(i)
 		once = experiment_once()
 		add_once(result_list, once)
 
@@ -179,13 +184,15 @@ def experiment(bond, times = 30):
 	cup_per = psutil.cpu_percent(None)
 	mem_usg = memory_usage()
 	ovs_usg = "%d%%(%dM)" %(ovs.memory_percent(), ovs.memory_info().rss / 1024 / 1024)
+	qemu_usg = "%d%%(%dM)" %(qemu.memory_percent(), qemu.memory_info().rss / 1024 / 1024)
 	ovs_cpu = ovs.cpu_percent(None)
+	qemu_cpu = qemu.cpu_percent(None)
 	last = stop - start
 	fp.write("start:%s\t" %(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))))
 	fp.write("stop:%s\t" %(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(stop))))
 	fp.write("last:%d:%d:%d\n" %(last / 3600, (last % 3600) / 60, last % 60))
-	fp.write("CPU: %d%%\t%s\tOVS CPU: %d%%\t OVS Memory: %s\n" 
-		%(cup_per, mem_usg, ovs_cpu, ovs_usg))
+	fp.write("CPU: %d%%\t%s\tOVS CPU: %d%%\t OVS Memory: %s\t QEMU CPU: %d%%\tQEMU Memory: %s\n" 
+		%(cup_per, mem_usg, ovs_cpu, ovs_usg, qemu_cpu, qemu_usg))
 	for result in result_list:
 		result_str = "%-8s%-20s%-s\n" %(result['type'], result['name'][:20], json.dumps(result['perf']))
 		fp.write(result_str)
