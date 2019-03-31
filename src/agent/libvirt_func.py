@@ -189,10 +189,12 @@ def get_vm_port_netinfo():
                         netinfo[mac] = {}
                         netinfo[mac]['rd_bytes'] = int(stats[0])
                         netinfo[mac]['rd_pkts'] = int(stats[1])
+                        netinfo[mac]['rd_err'] = int(stats[2])
                         netinfo[mac]['rd_drop'] = int(stats[3])
 
                         netinfo[mac]['wr_bytes'] = int(stats[4])
                         netinfo[mac]['wr_pkts'] = int(stats[5])
+                        netinfo[mac]['wr_err'] = int(stats[6])
                         netinfo[mac]['wr_drop'] = int(stats[7])
     return netinfo
 
@@ -209,19 +211,21 @@ def get_vm_port_netstats():
         netstats[mac] = {
             "rx": {"packets": new_netinfo[mac]['rd_pkts'] - old_netinfo[mac]['rd_pkts'], 
                     "bytes": new_netinfo[mac]['rd_bytes'] - old_netinfo[mac]['rd_bytes'], 
-                    "drop": new_netinfo[mac]['rd_drop'] - old_netinfo[mac]['rd_drop']
+                    "drop": new_netinfo[mac]['rd_drop'] - old_netinfo[mac]['rd_drop'],
+                    "err": new_netinfo[mac]['rd_err'] - old_netinfo[mac]['rd_err']
                     },
             "tx": {"packets": new_netinfo[mac]['wr_pkts'] - old_netinfo[mac]['wr_pkts'], 
                     "bytes": new_netinfo[mac]['wr_bytes'] - old_netinfo[mac]['wr_bytes'], 
-                    "drop": new_netinfo[mac]['wr_drop'] - old_netinfo[mac]['wr_drop']
+                    "drop": new_netinfo[mac]['wr_drop'] - old_netinfo[mac]['wr_drop'],
+                    "err": new_netinfo[mac]['wr_err'] - old_netinfo[mac]['wr_err']
                     }
                 }
     return netstats
     
 def get_vm_port_netstat_down():
     return {
-        "rx": {"packets": 0, "bytes": 0, "drop": 0},
-        "tx": {"packets": 0, "bytes": 0, "drop": 0}
+        "rx": {"packets": 0, "bytes": 0, "drop": 0, "err": 0},
+        "tx": {"packets": 0, "bytes": 0, "drop": 0, "err": 0}
     }
 
 def get_nic_netinfo():
@@ -234,11 +238,13 @@ def get_nic_netinfo():
         ret[nic] = {
             "rx": {"packets": nic_info.packets_recv, 
                     "bytes": nic_info.bytes_recv, 
-                    "drop": nic_info.dropin
+                    "drop": nic_info.dropin,
+                    "err": nic_info.errin
                     },
             "tx": {"packets": nic_info.packets_sent, 
                     "bytes": nic_info.bytes_sent, 
-                    "drop": nic_info.dropout
+                    "drop": nic_info.dropout,
+                    "err": nic_info.errout
                     }
             }
     return ret
@@ -254,10 +260,13 @@ def get_nic_netstats():
         ret[nic] = {
             "rx": {"packets": new_info[nic]["rx"]['packets'] - old_info[nic]["rx"]['packets'], 
                     "bytes": new_info[nic]["rx"]['bytes'] - old_info[nic]["rx"]['bytes'], 
-                    "drop": new_info[nic]["rx"]['drop'] - old_info[nic]["rx"]['drop']
+                    "drop": new_info[nic]["rx"]['drop'] - old_info[nic]["rx"]['drop'],
+                    "err": new_info[nic]["rx"]['err'] - old_info[nic]["rx"]['err']
                     },
             "tx": {"packets": new_info[nic]["tx"]['packets'] - old_info[nic]["tx"]['packets'], 
                     "bytes": new_info[nic]["tx"]['bytes'] - old_info[nic]["tx"]['bytes'], 
-                    "drop": new_info[nic]["tx"]['drop'] - old_info[nic]["tx"]['drop']}
+                    "drop": new_info[nic]["tx"]['drop'] - old_info[nic]["tx"]['drop'],
+                    "err": new_info[nic]["tx"]['err'] - old_info[nic]["tx"]['err']
+                    }
             }
     return ret

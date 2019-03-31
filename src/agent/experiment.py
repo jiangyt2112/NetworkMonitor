@@ -33,11 +33,13 @@ def get_ovs_port(dev):
 	dev['perf'] = {
             "rx": {"packets": new_stat["rx"]['packets'] - old_stat["rx"]['packets'], 
                     "bytes": new_stat["rx"]['bytes'] - old_stat["rx"]['bytes'], 
-                    "drop": new_stat["rx"]['drop'] - old_stat["rx"]['drop']
+                    "drop": new_stat["rx"]['drop'] - old_stat["rx"]['drop'],
+                    "err": new_stat["rx"]['err'] - old_stat["rx"]['err']
                     },
             "tx": {"packets": new_stat["tx"]['packets'] - old_stat["tx"]['packets'], 
                     "bytes": new_stat["tx"]['bytes'] - old_stat["tx"]['bytes'], 
-                    "drop": new_stat["tx"]['drop'] - old_stat["tx"]['drop']
+                    "drop": new_stat["tx"]['drop'] - old_stat["tx"]['drop'],
+                    "err": new_stat["tx"]['err'] - old_stat["tx"]['err']
                 }
         	}
 	return dev
@@ -110,9 +112,11 @@ def add_once(result_list, once):
 			result_list[i]['perf']['rx']['packets'] += once[i]['perf']['rx']['packets']
 			result_list[i]['perf']['rx']['bytes'] += once[i]['perf']['rx']['bytes']
 			result_list[i]['perf']['rx']['drop'] += once[i]['perf']['rx']['drop']
+			result_list[i]['perf']['rx']['err'] += once[i]['perf']['rx']['err']
 			result_list[i]['perf']['tx']['packets'] += once[i]['perf']['tx']['packets']
 			result_list[i]['perf']['tx']['bytes'] += once[i]['perf']['tx']['bytes']
 			result_list[i]['perf']['tx']['drop'] += once[i]['perf']['tx']['drop']
+			result_list[i]['perf']['tx']['err'] += once[i]['perf']['tx']['err']
 		else:
 			# percent lost packages, max round trip time, avrg round trip
 			result_list[i]['perf'][0] += once[i]['perf'][0]
@@ -125,9 +129,11 @@ def avg_result(result_list, times):
 			i['perf']['rx']['packets'] /= times
 			i['perf']['rx']['bytes'] /= times
 			i['perf']['rx']['drop'] /= times
+			i['perf']['rx']['err'] /= times
 			i['perf']['tx']['packets'] /= times
 			i['perf']['tx']['bytes'] /= times
 			i['perf']['tx']['drop'] /= times
+			i['perf']['txt']['err'] /= times
 		else:
 			# percent lost packages, max round trip time, avrg round trip
 			i['perf'][0] /= times
@@ -156,7 +162,7 @@ def getProcess(pName):
 
 
 def experiment(bond, times = 30):
-	print "all iteration:%d.\n" %(times)
+	print "all iteration:%d\n" %(times)
 	start = time.time()
 	ovs = getProcess("ovs-vswitchd")
 	qemu = getProcess("qemu-kvm")
@@ -174,7 +180,7 @@ def experiment(bond, times = 30):
 
 	for i in range(times - 1):
 		if (i + 1) % 10 == 0:
-			print "%d iteration.\n" %(i + 1)
+			print "%d iteration\n" %(i + 1)
 		once = experiment_once()
 		add_once(result_list, once)
 

@@ -406,12 +406,20 @@ def get_port_netstats(port):
         netstats['rx']['drop'] = s['rx_dropped']
     else:
         netstats['rx']['drop'] = 0
+    if 'rx_errors' in s:
+        netstats['rx']['err'] = s['rx_errors']
+    else:
+        netstats['rx']['err'] = 0
     netstats['tx']['packets'] = s['tx_packets']
     netstats['tx']['bytes'] = s['tx_bytes']
     if 'tx_dropped' in s:
         netstats['tx']['drop'] = s['tx_dropped']
     else:
         netstats['tx']['drop'] = 0
+    if 'tx_errors' in s:
+        netstats['tx']['err'] = s['tx_errors']
+    else:
+        netstats['tx']['err'] = 0
     return netstats
 
 def get_ovs_port_netstats(brs):
@@ -434,11 +442,13 @@ def get_ovs_port_netstats(brs):
         interfaces[port]['bandwidth'] = {
             "rx": {"packets": new_stats[port]["rx"]['packets'] - old_stats[port]["rx"]['packets'], 
                     "bytes": new_stats[port]["rx"]['bytes'] - old_stats[port]["rx"]['bytes'], 
-                    "drop": new_stats[port]["rx"]['drop'] - old_stats[port]["rx"]['drop']
+                    "drop": new_stats[port]["rx"]['drop'] - old_stats[port]["rx"]['drop'],
+                    "err": new_stats[port]["rx"]['err'] - old_stats[port]["rx"]['err']
                     },
             "tx": {"packets": new_stats[port]["tx"]['packets'] - old_stats[port]["tx"]['packets'], 
                     "bytes": new_stats[port]["tx"]['bytes'] - old_stats[port]["tx"]['bytes'], 
-                    "drop": new_stats[port]["tx"]['drop'] - old_stats[port]["tx"]['drop']
+                    "drop": new_stats[port]["tx"]['drop'] - old_stats[port]["tx"]['drop'],
+                    "err": new_stats[port]["tx"]['err'] - old_stats[port]["tx"]['err']
                 }
         }
 
