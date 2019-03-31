@@ -137,7 +137,7 @@ def avg_result(result_list, times):
 			i['perf']['tx']['packets'] /= times
 			i['perf']['tx']['bytes'] /= times
 			i['perf']['tx']['drop'] /= times
-			i['perf']['txt']['err'] /= times
+			i['perf']['tx']['err'] /= times
 		else:
 			# percent lost packages, max round trip time, avrg round trip
 			i['perf'][0] /= times
