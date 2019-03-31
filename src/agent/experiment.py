@@ -187,7 +187,7 @@ def experiment(bond, times = 30):
 	fp.write("CPU: %d%%\t%s\tOVS CPU: %d%%\t OVS Memory: %s\n" 
 		%(cup_per, mem_usg, ovs_cpu, ovs_usg))
 	for result in result_list:
-		result_str = "%s\t%s\t\t%s\n" %(result['type'], result['name'], json.dumps(result['perf']))
+		result_str = "%8s\t%20s\t\t%s\n" %(result['type'], result['name'][:20], json.dumps(result['perf']))
 		fp.write(result_str)
 
 	fp.close()
