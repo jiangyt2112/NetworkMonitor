@@ -3,7 +3,7 @@ import __init__
 from func import ping_test
 from libvirt_func import get_nic_netstats
 from libvirt_func import get_vm_port_netstats
-from ovs.bridge import get_port_netstats
+from myovs.bridge import get_port_netstats
 from func import is_network_node
 import time
 import json

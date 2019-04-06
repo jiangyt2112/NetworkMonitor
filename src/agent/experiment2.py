@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 from libvirt_func import get_nic_netinfo
 from libvirt_func import get_vm_port_netinfo
-from ovs.bridge import get_port_netstats
+from myovs.bridge import get_port_netstats
 from func import is_network_node
 import time
 import json

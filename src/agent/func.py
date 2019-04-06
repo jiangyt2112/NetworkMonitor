@@ -4,7 +4,7 @@ import commands
 import libvirt
 import libxml2
 import json
-from ovs.bridge import get_ovs_info
+from myovs.bridge import get_ovs_info
 from utils.log import AGENTLOG
 from libvirt_func import get_vm_info_in_host
 from libvirt_func import get_vm_port_netstat_down
