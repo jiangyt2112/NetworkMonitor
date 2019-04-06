@@ -98,7 +98,7 @@ src_uuid = "552a000f-54"
 src_vxlan_id = "c0a89b02"
 src_nic = "ens6"
 src_dhcp_id = "95670e1f-8721-4c78-bc7f-388de5e463a1"
-src_dhcp_addr = "172.168.1.2"
+dst_addr = "172.168.1.7"
 
 dst_vm_port = "fa:16:3e:23:fa:2c"
 dst_uuid = "971d0c57-74"
@@ -122,7 +122,7 @@ def get_once():
 			{'type': 'ovs', 'name': 'vxlan-' + src_vxlan_id},
 			{'type': 'nic', 'name': 'vxlan_sys_4789'},
 			{'type': 'nic', 'name': src_nic},
-			{'type': 'delay', 'name': 'qdhcp-' + src_dhcp_id, 'addr': src_dhcp_addr}
+			{'type': 'delay', 'name': 'qdhcp-' + src_dhcp_id, 'addr': dst_addr}
 			]
 	else:
 		dev_list = [
