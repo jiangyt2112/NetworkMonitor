@@ -17,6 +17,7 @@ def exe(cmd):
 
 def get_vm_port(dev, vm_port_netstats):
 	print vm_port_netstats
+	print dev['name']
 	print dev['name'] in vm_port_netstats
 	dev['perf'] = {
             "rx": {"packets": vm_port_netstats[dev['name']]['rd_pkts'], 
@@ -92,7 +93,7 @@ def get_delay(dev):
 			dev['perf'] = info
 	return dev
 
-src_vm_port = "fe:16:3e:c0:f9:3d"
+src_vm_port = "fa:16:3e:c0:f9:3d"
 src_uuid = "552a000f-54"
 src_vxlan_id = "c0a89b02"
 src_nic = "ens6"
