@@ -16,9 +16,6 @@ def exe(cmd):
 		return False, result
 
 def get_vm_port(dev, vm_port_netstats):
-	print vm_port_netstats
-	print dev['name']
-	print dev['name'] in vm_port_netstats
 	dev['perf'] = {
             "rx": {"packets": vm_port_netstats[dev['name']]['rd_pkts'], 
                     "bytes": vm_port_netstats[dev['name']]['rd_bytes'], 
@@ -155,13 +152,21 @@ def get_once():
 
 def sub(dev1, dev2):
 	dev2['perf']['rx']['packets'] -= dev1['perf']['rx']['packets']
+	dev2['perf']['rx']['packets'] /= (1024 * 1024 /8)
 	dev2['perf']['rx']['bytes'] -= dev1['perf']['rx']['bytes'] 
+	dev2['perf']['rx']['bytes'] /= (1024 * 1024 /8)
 	dev2['perf']['rx']['drop'] -= dev1['perf']['rx']['drop']
+	dev2['perf']['rx']['drop'] /= (1024 * 1024 /8)
 	dev2['perf']['rx']['err'] -= dev1['perf']['rx']['err']
+	dev2['perf']['rx']['err'] /= (1024 * 1024 /8)
 	dev2['perf']['tx']['packets'] -= dev1['perf']['tx']['packets']
+	dev2['perf']['tx']['packets'] /= (1024 * 1024 /8)
 	dev2['perf']['tx']['bytes'] -= dev1['perf']['tx']['bytes']
+	dev2['perf']['tx']['bytes'] /= (1024 * 1024 /8)
 	dev2['perf']['tx']['drop'] -= dev1['perf']['tx']['drop']
+	dev2['perf']['tx']['drop'] /= (1024 * 1024 /8)
 	dev2['perf']['tx']['err'] -= dev1['perf']['tx']['err']
+	dev2['perf']['tx']['err'] /= (1024 * 1024 /8)
 	return dev2
  
 def process_result(old_list, new_list):
