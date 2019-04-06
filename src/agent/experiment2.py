@@ -16,6 +16,8 @@ def exe(cmd):
 		return False, result
 
 def get_vm_port(dev, vm_port_netstats):
+	print vm_port_netstats
+	print dev['name'] in vm_port_netstats
 	dev['perf'] = {
             "rx": {"packets": vm_port_netstats[dev['name']]['rd_pkts'], 
                     "bytes": vm_port_netstats[dev['name']]['rd_bytes'], 
