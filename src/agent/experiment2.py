@@ -90,36 +90,49 @@ def get_delay(dev):
 			dev['perf'] = info
 	return dev
 
+src_vm_port = "fe:16:3e:c0:f9:3d"
+src_uuid = "552a000f-54"
+src_vxlan_id = "c0a89b02"
+src_nic = "ens6"
+src_dhcp_id = "95670e1f-8721-4c78-bc7f-388de5e463a1"
+src_dhcp_addr = "172.168.1.2"
+
+dst_vm_port = "fa:16:3e:23:fa:2c"
+dst_uuid = "971d0c57-74"
+dst_vxlan_id = "c0a89b01"
+dst_nic = "ens6"
+
+
 def get_once():
 	dev_list = None
 	nic_port_bandwidth = get_nic_netinfo()
 	vm_port_netinfo = get_vm_port_netinfo()
 	if is_network_node():
 		dev_list = [
-			{'type': 'vm_port', 'name': 'fa:16:3e:03:f1:60'},
-			{'type': 'nic', 'name': 'tape5abd65e-b4'},
-			{'type': 'nic', 'name': 'qvbe5abd65e-b4'},
-			{'type': 'nic', 'name': 'qvoe5abd65e-b4'},
-			{'type': 'ovs', 'name': 'qvoe5abd65e-b4'},
+			{'type': 'vm_port', 'name': src_vm_port},
+			{'type': 'nic', 'name': 'tap' + src_uuid},
+			{'type': 'nic', 'name': 'qvb' + src_uuid},
+			{'type': 'nic', 'name': 'qvo' + src_uuid},
+			{'type': 'ovs', 'name': 'qvo' + src_uuid},
 			{'type': 'ovs', 'name': 'patch-tun'},
 			{'type': 'ovs', 'name': 'patch-int'},
-			{'type': 'ovs', 'name': 'vxlan-c0a89062'},
+			{'type': 'ovs', 'name': 'vxlan-' + src_vxlan_id},
 			{'type': 'nic', 'name': 'vxlan_sys_4789'},
-			{'type': 'nic', 'name': 'ens4'},
-			{'type': 'delay', 'name': 'qdhcp-44609914-f133-4f66-bc6e-e16ecce7beec', 'addr': '192.168.1.3'}
+			{'type': 'nic', 'name': src_nic},
+			{'type': 'delay', 'name': 'qdhcp-' + src_dhcp_id, 'addr': src_dhcp_addr}
 			]
 	else:
 		dev_list = [
-			{'type': 'nic', 'name': 'ens4'},
+			{'type': 'nic', 'name': dst_nic},
 			{'type': 'nic', 'name': 'vxlan_sys_4789'},
-			{'type': 'ovs', 'name': 'vxlan-c0a89009'},
+			{'type': 'ovs', 'name': 'vxlan-' + dst_vxlan_id},
 			{'type': 'ovs', 'name': 'patch-int'},
 			{'type': 'ovs', 'name': 'patch-tun'},
-			{'type': 'ovs', 'name': 'qvoaddfe2a4-7c'},
-			{'type': 'nic', 'name': 'qvoaddfe2a4-7c'},
-			{'type': 'nic', 'name': 'qvbaddfe2a4-7c'},
-			{'type': 'nic', 'name': 'tapaddfe2a4-7c'},
-			{'type': 'vm_port', 'name': 'fa:16:3e:7b:e3:9d'}
+			{'type': 'ovs', 'name': 'qvo' + dst_uuid},
+			{'type': 'nic', 'name': 'qvo' + dst_uuid},
+			{'type': 'nic', 'name': 'qvb' + dst_uuid},
+			{'type': 'nic', 'name': 'tap' + dst_uuid},
+			{'type': 'vm_port', 'name': dst_vm_port}
 			]
 	result = []
 	for dev in dev_list:
@@ -136,6 +149,7 @@ def get_once():
 			continue
 		result.append(ret)
 	return result
+
 def sub(dev1, dev2):
 	dev2['perf']['rx']['packets'] -= dev1['perf']['rx']['packets']
 	dev2['perf']['rx']['bytes'] -= dev1['perf']['rx']['bytes'] 
