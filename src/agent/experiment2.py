@@ -90,17 +90,17 @@ def get_delay(dev):
 			dev['perf'] = info
 	return dev
 
-src_vm_port = "fa:16:3e:c0:f9:3d"
-src_uuid = "552a000f-54"
-src_vxlan_id = "c0a89b02"
-src_nic = "ens6"
-src_dhcp_id = "95670e1f-8721-4c78-bc7f-388de5e463a1"
-dst_addr = "172.168.1.7"
+src_vm_port = "fa:16:3e:24:96:cb"
+src_uuid = "91eb9e6c-43"
+src_vxlan_id = "c0a87a03"
+src_nic = "ens4"
+src_dhcp_id = "71f1de3d-65c7-4a02-b67a-2ce9f811c72e"
+dst_addr = "172.168.1.5"
 
-dst_vm_port = "fa:16:3e:23:fa:2c"
-dst_uuid = "971d0c57-74"
-dst_vxlan_id = "c0a89b01"
-dst_nic = "ens6"
+dst_vm_port = "fa:16:3e:b5:03:8d"
+dst_uuid = "686930df-75"
+dst_vxlan_id = "c0a87a02"
+dst_nic = "ens4"
 
 
 def get_once():
