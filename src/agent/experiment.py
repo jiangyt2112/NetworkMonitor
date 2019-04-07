@@ -221,4 +221,4 @@ if __name__ == '__main__':
 	#resource_usage()
 	#getProcess("ovs-vswitchd")
 # iperf -f m -i 1 -p 5001 -u -b 1M -c -t 100 (-d)
-# iperf -f m -i 1 -p 5001 -s
+# iperf -f m -i 1 -p 5001 -u -s

@@ -220,8 +220,8 @@ def experiment(bond, seconds):
 import sys
 if __name__ == '__main__':
 	if len(sys.argv) == 1:
-		experiment("1M", 60)
+		experiment("1M", 180)
 	elif len(sys.argv) == 2:
-		experiment(sys.argv[1], 60)
+		experiment(sys.argv[1], 180)
 	else:
 		experiment(sys.argv[1], int(sys.argv[2]))
