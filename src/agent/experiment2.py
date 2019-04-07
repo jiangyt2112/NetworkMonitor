@@ -97,7 +97,7 @@ src_uuid = "2699eb78-a6"
 src_vxlan_id = "c0a87a03"
 src_nic = "ens3"
 src_dhcp_id = "71f1de3d-65c7-4a02-b67a-2ce9f811c72e"
-dst_addr = "172.168.1.5"
+dst_addr = "172.168.1.12"
 
 dst_vm_port = "fa:16:3e:7b:e8:00"
 dst_uuid = "057c070f-63"
@@ -225,3 +225,8 @@ if __name__ == '__main__':
 		experiment(sys.argv[1], 180)
 	else:
 		experiment(sys.argv[1], int(sys.argv[2]))
+
+
+
+# iperf -f m -i 1 -p 5001 -u -b 1M -c -t 100 (-d)
+# iperf -f m -i 5 -p 5001 -u -s
