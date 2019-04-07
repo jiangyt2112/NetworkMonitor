@@ -92,15 +92,15 @@ def get_delay(dev):
 			dev['perf'] = info
 	return dev
 
-src_vm_port = "fa:16:3e:b5:03:8d"
-src_uuid = "91eb9e6c-43"
+src_vm_port = "fa:16:3e:2d:65:e3"
+src_uuid = "2699eb78-a6"
 src_vxlan_id = "c0a87a03"
 src_nic = "ens3"
 src_dhcp_id = "71f1de3d-65c7-4a02-b67a-2ce9f811c72e"
 dst_addr = "172.168.1.5"
 
-dst_vm_port = "fa:16:3e:24:96:cb"
-dst_uuid = "686930df-75"
+dst_vm_port = "fa:16:3e:7b:e8:00"
+dst_uuid = "057c070f-63"
 dst_vxlan_id = "c0a87a02"
 dst_nic = "ens3"
 
