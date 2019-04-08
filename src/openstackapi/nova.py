@@ -28,9 +28,9 @@ def get_project_server_info(auth_token, auth_url, project_name):
 
 
 if __name__ == '__main__':
-    auth_url = 'http://192.168.122.9:5000/v3'
+    auth_url = 'http://192.168.122.2:5000/v3'
     username = 'admin'
-    password = 'e60ed34c828d44b9'
+    password = '1787f5020b4d451e'
     project_name = 'admin'
     auth_token = get_token(username, password, auth_url, project_name)
     if auth_token == None:
