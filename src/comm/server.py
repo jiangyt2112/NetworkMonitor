@@ -8,7 +8,7 @@ import json
 
 class Server(object):
     def __init__(self, exchange, binding_keys, exchange_type, username = 'network_monitor', passwd = '111111', vhost = 'network_monitor',
-                host = '192.168.122.9', port = 5672):
+                host = '192.168.122.2', port = 5672):
 
         self.exchange_type = exchange_type
         credentials = pika.PlainCredentials(username, passwd)
