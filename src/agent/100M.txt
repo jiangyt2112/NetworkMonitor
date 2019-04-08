@@ -1,0 +1,13 @@
+iperf test: last 180 seconds.
+start:2019-04-07 15:51:14	stop:2019-04-07 15:54:14	last:0:3:0
+CPU: 7%	Memory:  24.7%  1641M/7819M	OVS CPU: 0%	 OVS Memory: 1%(153M)	 QEMU CPU: 87%	QEMU Memory: 12%(978M)
+nic     ens3                {"rx": {"bytes": 18001, "drop": 0, "packets": 12, "err": 0}, "tx": {"bytes": 2, "drop": 0, "packets": 0, "err": 0}}
+nic     vxlan_sys_4789      {"rx": {"bytes": 17206, "drop": 0, "packets": 12, "err": 0}, "tx": {"bytes": 0, "drop": 0, "packets": 0, "err": 0}}
+ovs     vxlan-c0a87a02      {"rx": {"bytes": 17126, "drop": 0, "packets": 12, "err": 0}, "tx": {"bytes": 0, "drop": 0, "packets": 0, "err": 0}}
+ovs     patch-int           {"rx": {"bytes": 0, "drop": 0, "packets": 0, "err": 0}, "tx": {"bytes": 17126, "drop": 0, "packets": 12, "err": 0}}
+ovs     patch-tun           {"rx": {"bytes": 17126, "drop": 0, "packets": 12, "err": 0}, "tx": {"bytes": 0, "drop": 0, "packets": 0, "err": 0}}
+ovs     qvo057c070f-63      {"rx": {"bytes": 0, "drop": 0, "packets": 0, "err": 0}, "tx": {"bytes": 17137, "drop": 0, "packets": 12, "err": 0}}
+nic     qvo057c070f-63      {"rx": {"bytes": 0, "drop": 0, "packets": 0, "err": 0}, "tx": {"bytes": 17379, "drop": 0, "packets": 12, "err": 0}}
+nic     qvb057c070f-63      {"rx": {"bytes": 17379, "drop": 0, "packets": 12, "err": 0}, "tx": {"bytes": 0, "drop": 0, "packets": 0, "err": 0}}
+nic     tap057c070f-63      {"rx": {"bytes": 0, "drop": 0, "packets": 0, "err": 0}, "tx": {"bytes": 16836, "drop": 0, "packets": 12, "err": 0}}
+vm_port fa:16:3e:7b:e8:00   {"rx": {"bytes": 16836, "drop": 0, "packets": 12, "err": 0}, "tx": {"bytes": 0, "drop": 0, "packets": 0, "err": 0}}
