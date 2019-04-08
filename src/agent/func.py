@@ -718,7 +718,7 @@ def get_topo(vms_info, networks_info):
 	br_tun_info['type'] = "ovs bridge"
 	br_tun_info['check'] = {"result": None, "error_msg": ""}
 	br_tun_info['next'] = [0]
-	if br_info != None and 'br-tun' in br_tun_info:
+	if br_info != None and 'br-tun' in br_info:
 		br_tun_info['info'] = br_info['br-tun']
 	else:
 		br_tun_info['check']['result'] = False
