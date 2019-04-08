@@ -2,4 +2,4 @@ yum install python-pip
 pip install ping
 pip install flask
 pip install flask-restful
-pip install tornado
+pip install tornado==5.0
