@@ -269,7 +269,7 @@ class Manager(object):
             DBLOG.error("database.receive_item - project-%s req-%s receive item fail:%s" %(project_name, req_id, str(e)))
             return False, str(e)
         else:
-            DBLOG.error("database.receive_item - project-%s req-%s receive item:%s" %(project_name, req_id, receive_time))
+            DBLOG.info("database.receive_item - project-%s req-%s receive item:%s" %(project_name, req_id, receive_time))
             return True, None
         
     def stop_task(self, project_name, req_id, status, result):
