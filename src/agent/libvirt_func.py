@@ -153,7 +153,7 @@ def get_vm_cpu_info():
         doms = conn.listAllDomains()
 
         for dom in doms:
-            state, vcpus, cputime  = dom.info()
+            state, maxmem, usedmem, vcpus, cputime  = dom.info()
             uuid = dom.UUIDString()
             state_str = ""
             if state == 0:
