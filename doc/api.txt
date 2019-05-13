@@ -1,11 +1,17 @@
 # check
-curl http://127.0.0.1:8003/network_monitor/check/admin -X POST -H "Content-type:application/json" -d '{"token":"gAAAAABcrNk9xmhLNZ5zUz431rGuKVz8d14xhoGcj2IRiSBiHPA2XiH7s4veEGHYtkmQXdYq9mEH9Op2_cAqoa3D_om4bhysaU9g9zx1M5853FTQMTsYz_m7Yt7uPnO7E5x_K4KBpyzrl2-qZ1rBwHNfKymr2DLK3jrghSrNVAKWIvEiaiTy4qM"}'
+curl http://127.0.0.1:8003/network_monitor/check/admin -X POST -H "Content-type:application/json" -d '{"token":"gAAAAABctpg_sKPY9np_YmeGbmzp_6Eq9QZeMypk0lOz7DE_jdnKRw3yWQg5ND8GygT_t9roKdz-KQP_UAumNiDRhqDieGLP14Fuvug1-FRWsHOQy50kXontjlWlP90hf8o8faj_jKtDoQv0YJ4jWcjBo62nDRwh8gqR9cLArqeEI2ONXE8rBUA"}'
 
 # status
 curl http://127.0.0.1:8003/network_monitor/status/admin -X POST -H "Content-type:application/json" -d '{"token":"gAAAAABcrNk9xmhLNZ5zUz431rGuKVz8d14xhoGcj2IRiSBiHPA2XiH7s4veEGHYtkmQXdYq9mEH9Op2_cAqoa3D_om4bhysaU9g9zx1M5853FTQMTsYz_m7Yt7uPnO7E5x_K4KBpyzrl2-qZ1rBwHNfKymr2DLK3jrghSrNVAKWIvEiaiTy4qM"}'
 
+curl http://127.0.0.1:8003/network_monitor/status/admin?token=gAAAAABctpg_sKPY9np_YmeGbmzp_6Eq9QZeMypk0lOz7DE_jdnKRw3yWQg5ND8GygT_t9roKdz-KQP_UAumNiDRhqDieGLP14Fuvug1-FRWsHOQy50kXontjlWlP90hf8o8faj_jKtDoQv0YJ4jWcjBo62nDRwh8gqR9cLArqeEI2ONXE8rBUA
+
+
 # result
 curl http://127.0.0.1:8003/network_monitor/result/admin -X POST -H "Content-type:application/json" -d '{"token":"gAAAAABcrNk9xmhLNZ5zUz431rGuKVz8d14xhoGcj2IRiSBiHPA2XiH7s4veEGHYtkmQXdYq9mEH9Op2_cAqoa3D_om4bhysaU9g9zx1M5853FTQMTsYz_m7Yt7uPnO7E5x_K4KBpyzrl2-qZ1rBwHNfKymr2DLK3jrghSrNVAKWIvEiaiTy4qM"}'
+
+curl http://127.0.0.1:8003/network_monitor/result/admin?token=gAAAAABctpg_sKPY9np_YmeGbmzp_6Eq9QZeMypk0lOz7DE_jdnKRw3yWQg5ND8GygT_t9roKdz-KQP_UAumNiDRhqDieGLP14Fuvug1-FRWsHOQy50kXontjlWlP90hf8o8faj_jKtDoQv0YJ4jWcjBo62nDRwh8gqR9cLArqeEI2ONXE8rBUA
+
 
 # history
 curl http://127.0.0.1:8002/network_monitor/history/admin -X POST -H "Content-type:application/json" -d '{"token":"gAAAAABceIzLlS1NqlPOzKKSFemRFZwEO-GHujLpT7b8J1Zg6gy-1PSkdUm78L03XOLkMapQbQtJzkn1eso5Kvzgc37ME9FkQXbqmFyAYV4BWuvUgwXU_hnNryz2pYPT9-UeFhcHhOD4BylFFgGesDa6WIW2LIbJSvvwyu2fZ_SZiWTcuNx1cEQ"}'
