@@ -313,7 +313,7 @@ def get_nic_netstats():
 if __name__ == '__main__':
     start = time.time()
     old_info = get_vm_cpu_info()
-    for i in range(1000000000):
+    for i in range(100000000):
         pass
     end = time.time()
     dur = end - start
