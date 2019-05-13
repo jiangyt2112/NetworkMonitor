@@ -176,7 +176,7 @@ def get_vm_cpu_info():
             if state_str == 'running':    
                 cpustats = dom.getCPUStats(True)[0]
                 cpudic = {}
-                cpu_info[uuid] = cputime
+                cpu_info[uuid] = cpustats['cpu_time']
             else:
                 cpu_info[uuid] = 0
     return cpu_info
