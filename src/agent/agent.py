@@ -24,7 +24,8 @@ from func import check_network_connection
 from func import health_flag# = True
 from func import function_fault# = []
 from func import performance_fault# = []
-
+from func import get_mem_rate
+from func import get_cpu_rate
 
 class Task:
     def __init__(self, msg):
@@ -120,6 +121,8 @@ class Task:
         hostname = get_hostname()
         ips = get_host_ip()
         network_node_flag = is_network_node()
+        cpu_rate = get_cpu_rate()
+        mem_rate = get_mem_rate()
     
         AGENTLOG.info("agent.Task.get_info - project-%s - req_id-%s check_service start." 
         %(self.project, self.req_id))
@@ -160,7 +163,7 @@ class Task:
             'host': ips,
             'node_type': node_type,
             'topo': topo,
-            'check': {"service": service_status, "error_msg": ""},
+            'check': {"cpu_rate": cpu_rate, "mem_rate": mem_rate, "service": service_status, "error_msg": ""},
             'summary':{'health_flag': health_flag, 'function_fault': function_fault, 
                 'performance_fault': performance_fault}
         }

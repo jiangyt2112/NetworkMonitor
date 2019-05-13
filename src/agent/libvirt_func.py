@@ -144,6 +144,44 @@ def get_vm_info_in_host():
     return True, vm_info
 
 
+def get_vm_cpu_info():
+    cpu_info = {}
+    conn = libvirt.openReadOnly(None)
+    if conn is None:
+        return cpu_info
+    else:
+        doms = conn.listAllDomains()
+
+        for dom in doms:
+            state, vcpus, cputime  = dom.info()
+            uuid = dom.UUIDString()
+            state_str = ""
+            if state == 0:
+                state_str = 'nostate'
+            elif state == 1:
+                state_str = 'running'
+            elif state == 2:
+                state_str = 'blocked'
+            elif state == 3:
+                state_str = 'paused'
+            elif state == 4:
+                state_str = 'shutdown'
+            elif state == 5:
+                state_str = 'shutoff'
+            elif state == 6:
+                state_str = 'crashed'
+            elif state == 7:
+                state_str = 'pmsuspended'
+
+            if state_str == 'running':    
+                cpustats = dom.getCPUStats(True)[0]
+                cpudic = {}
+                cpu_info[uuid] = cputime
+            else:
+                cpu_info[uuid] = 0
+    return cpu_info
+
+
 def get_vm_port_netinfo():
     netinfo = {}
     conn = libvirt.openReadOnly(None)
@@ -270,3 +308,9 @@ def get_nic_netstats():
                     }
             }
     return ret
+
+
+if __name__ == '__main__':
+    print get_vm_cpu_info()
+    time.sleep(1)
+    print get_vm_cpu_info()

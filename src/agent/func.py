@@ -10,20 +10,33 @@ from libvirt_func import get_vm_info_in_host
 from libvirt_func import get_vm_port_netstat_down
 from libvirt_func import get_nic_netstats
 from libvirt_func import get_vm_port_netstats
+import psutil
+import time
 # 61205745-b2bf-4db0-ad50-e7a60bf08bd5
 # 61205745-b2bf-4db0-ad50-e7a60bf08bd5
 health_flag = True
 function_fault = []
 performance_fault = []
 
+def get_mem_rate():
+	phymem = psutil.virtual_memory()
+    return phymem.percent
+
+def get_cpu_rate():
+	psutil.cpu_percent(None)
+	time.sleep(1)
+	return psutil.cpu_percent(None)
+
 def add_function_fault(fault):
 	health_flag = False
 	if fault not in function_fault:
+		print fault
 		function_fault.append(fault)
 
 def add_performace_fault(fault):
 	health_flag = False
 	if fault not in performance_fault:
+		print fault
 		performance_fault.append(fault)
 
 def exe(cmd):
