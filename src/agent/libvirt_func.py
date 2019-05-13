@@ -312,8 +312,8 @@ def get_nic_netstats():
 
 if __name__ == '__main__':
     old_info = get_vm_cpu_info()
-    time.sleep(1)
+    time.sleep(10)
     new_info = get_vm_cpu_info()
     print old_info
     print new_info
-    print (new_info['585189ac-e6d0-4bc6-bef1-64bfac9b11f6'] - old_info['585189ac-e6d0-4bc6-bef1-64bfac9b11f6']) / 1000000000
+    print (new_info['585189ac-e6d0-4bc6-bef1-64bfac9b11f6'] - old_info['585189ac-e6d0-4bc6-bef1-64bfac9b11f6']) / (1000000000 * 4 * 10)
