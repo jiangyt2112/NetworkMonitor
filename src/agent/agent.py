@@ -27,6 +27,7 @@ from func import performance_fault# = []
 from func import get_mem_rate
 from func import get_cpu_rate
 
+
 class Task:
     def __init__(self, msg):
         #{'type': 'item', 'req_id': msg['req_id'], 'project': msg['project_name'], 'info': msg['info']}

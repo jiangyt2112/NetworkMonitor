@@ -181,6 +181,22 @@ def get_vm_cpu_info():
                 cpu_info[uuid] = 0
     return cpu_info
 
+def get_cpu_rate():
+    old_info = get_vm_cpu_info()
+    time.sleep(3)
+    new_info = get_vm_cpu_info()
+    ret = {}
+    conn = libvirt.openReadOnly(None)
+    if conn is None:
+        return cpu_info
+    else:
+        doms = conn.listAllDomains()
+        for dom in doms:
+            state, maxmem, usedmem, vcpus, cputime  = dom.info()
+            uuid = dom.UUIDString()
+            ret[uuid] = float(new_info[uuid] - old_info[uuid]) * 100 / (1e9 * vcpus * 3)
+    return ret
+
 
 def get_vm_port_netinfo():
     netinfo = {}

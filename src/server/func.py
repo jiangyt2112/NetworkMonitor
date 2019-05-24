@@ -69,3 +69,10 @@ def check_delay(result):
 				else:
 					for addr in dev['addresses']:
 						addr_delay(addr)
+
+
+def evaluate_performace(result):
+	for node in result['info']:
+		for dev in node['topo']['device']:
+			pass
+	pass
