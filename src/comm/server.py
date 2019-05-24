@@ -18,7 +18,7 @@ class Server(object):
         self.channel.exchange_declare(exchange= exchange,
                                 exchange_type= exchange_type)
 
-        result = self.channel.queue_declare(exclusive=True)
+        result = self.channel.queue_declare("", exclusive=True)
         queue_name = result.method.queue
 
         if exchange_type == "topic":
@@ -43,13 +43,12 @@ class Server(object):
             self.channel.basic_consume(self.callback, queue = queue_name, no_ack = True)
 
     def run(self):
-        while True:
-            try:
-                self.channel.start_consuming() 
-            except Exception, e:
-                print str(e) + "aaaa"
-                FALOG.error("network-monitor service down:%s" %(str(e)))
-            #sys.exit(1)
+        try:
+            self.channel.start_consuming() 
+        except Exception, e:
+            print str(e) + "aaaa"
+            FALOG.error("network-monitor service down:%s" %(str(e)))
+        #sys.exit(1)
 
     def callback(self, ch, method, props, body):
         """
