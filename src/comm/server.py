@@ -8,7 +8,7 @@ import json
 
 class Server(object):
     def __init__(self, exchange, binding_keys, exchange_type, username = 'network_monitor', passwd = '111111', vhost = 'network_monitor',
-                host = '192.168.122.2', port = 5672):
+                host = '192.168.122.1', port = 5672):
 
         self.exchange_type = exchange_type
         credentials = pika.PlainCredentials(username, passwd)
@@ -18,7 +18,7 @@ class Server(object):
         self.channel.exchange_declare(exchange= exchange,
                                 exchange_type= exchange_type)
 
-        result = self.channel.queue_declare("", exclusive=True)
+        result = self.channel.queue_declare(exclusive=True)
         queue_name = result.method.queue
 
         if exchange_type == "topic":
@@ -37,11 +37,13 @@ class Server(object):
         #self.callback()
         if exchange_type == "topic":
             self.channel.basic_qos(prefetch_count = 1)
-            self.channel.basic_consume(queue_name, self.callback)
+            self.channel.basic_consume(self.callback,
+                                   queue=queue_name)
         else:
             self.channel.basic_consume(self.callback, queue = queue_name, no_ack = True)
 
     def run(self):
+        
         try:
             self.channel.start_consuming() 
         except Exception, e:

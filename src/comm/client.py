@@ -6,7 +6,7 @@ import json
 
 class Client(object):
     def __init__(self, exchange, routing_key, message = "", username = 'network_monitor', passwd = '111111', vhost = "network_monitor",
-                host = '192.168.122.2', port = 5672):
+                host = '192.168.122.1', port = 5672):
         self.credentials = pika.PlainCredentials(username, passwd)
         # self.connection = pika.BlockingConnection(pika.ConnectionParameters(host, port, '/', credentials))
         # self.channel = self.connection.channel()
