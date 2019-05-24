@@ -14,7 +14,7 @@ from comm.client import server_to_agent_msg
 from openstackapi.nova import get_project_server_info
 from openstackapi.neutron import get_project_network_info
 from func import check_delay
-from func import evaluate_performance
+#from func import evaluate_performance
 
 class Task:
     def __init__(self, msg):
@@ -177,7 +177,7 @@ class Task:
             info.append(json.loads(i))
         result["info"] = info
         check_delay(result)
-        evaluate_performance(result)
+        #evaluate_performance(result)
         return json.dumps(result)
 
     def process_item(self, item):

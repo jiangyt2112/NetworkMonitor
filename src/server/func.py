@@ -71,7 +71,7 @@ def check_delay(result):
 						addr_delay(addr)
 
 
-def evaluate_performace(result):
+def evaluate_performance(result):
 	for node in result['info']:
 		for dev in node['topo']['device']:
 			pass
