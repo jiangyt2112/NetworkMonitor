@@ -46,7 +46,7 @@ class Server(object):
         try:
             self.channel.start_consuming() 
         except Exception, e:
-            print str(e)
+            print str(e) + "aaaa"
             FALOG.error("network-monitor service down:%s" %(str(e)))
             #sys.exit(1)
 
