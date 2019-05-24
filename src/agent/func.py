@@ -21,7 +21,7 @@ performance_fault = []
 
 def get_mem_rate():
 	phymem = psutil.virtual_memory()
-    return phymem.percent
+	return phymem.percent
 
 def get_cpu_rate():
 	psutil.cpu_percent(None)
