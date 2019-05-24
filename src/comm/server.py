@@ -43,11 +43,12 @@ class Server(object):
             self.channel.basic_consume(self.callback, queue = queue_name, no_ack = True)
 
     def run(self):
-        try:
-            self.channel.start_consuming() 
-        except Exception, e:
-            print str(e) + "aaaa"
-            FALOG.error("network-monitor service down:%s" %(str(e)))
+        while True:
+            try:
+                self.channel.start_consuming() 
+            except Exception, e:
+                print str(e) + "aaaa"
+                FALOG.error("network-monitor service down:%s" %(str(e)))
             #sys.exit(1)
 
     def callback(self, ch, method, props, body):
