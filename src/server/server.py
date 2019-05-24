@@ -14,7 +14,7 @@ from comm.client import server_to_agent_msg
 from openstackapi.nova import get_project_server_info
 from openstackapi.neutron import get_project_network_info
 from func import check_delay
-from func import evaluate_performace
+from func import evaluate_performance
 
 class Task:
     def __init__(self, msg):
@@ -177,7 +177,7 @@ class Task:
             info.append(json.loads(i))
         result["info"] = info
         check_delay(result)
-        evaluate_performace(result)
+        evaluate_performance(result)
         return json.dumps(result)
 
     def process_item(self, item):
@@ -375,6 +375,7 @@ class Server(Base_Server):
                 msg = json.loads(body)
                 # {'type': 'check', 'req_id': msg['req_id'], 'project': msg['project_name'], 'token': msg['token']}
                 if msg['type'] == 'check':
+                    print "check"
                     self.worker_poll.push_task(Task(msg))
                 else:
                     SERVERLOG.error("receive api to server msg: invalid msg type %s" %(msg['type']))
