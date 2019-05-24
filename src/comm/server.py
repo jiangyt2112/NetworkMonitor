@@ -37,8 +37,7 @@ class Server(object):
         #self.callback()
         if exchange_type == "topic":
             self.channel.basic_qos(prefetch_count = 1)
-            self.channel.basic_consume(self.callback,
-                                   queue=queue_name)
+            self.channel.basic_consume(queue_name, self.callback)
         else:
             self.channel.basic_consume(self.callback, queue = queue_name, no_ack = True)
 
