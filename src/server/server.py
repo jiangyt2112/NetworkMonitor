@@ -281,6 +281,7 @@ class Worker(threading.Thread):
         while True:
             task = self.queue.get()
             if isinstance(task, Task):
+                print "get a task type"
                 SERVERLOG.info("server.Worker.run - project-%s - req_id-%s get a task type:%s." %(task.project, task.req_id, "Task"))
                 ret = task.start_task()
                 if ret:
@@ -327,6 +328,7 @@ class WorkerPoll:
     def push_task(self, task):
         if self.worker_poll_flag == True:
             self.queue.put(task)
+            print "put task"
             return True
         else:
             return False
