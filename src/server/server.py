@@ -68,6 +68,7 @@ class Task:
                 'vm_info': self.vm_info,
                 'network_info': self.network_info
             }
+        print "server to agent msg"
         ret, msg = server_to_agent_msg(msg)
         if ret == False:
             self.status = "ERROR"
