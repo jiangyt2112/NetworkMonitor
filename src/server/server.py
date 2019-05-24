@@ -14,7 +14,7 @@ from comm.client import server_to_agent_msg
 from openstackapi.nova import get_project_server_info
 from openstackapi.neutron import get_project_network_info
 from func import check_delay
-from func import check_performance
+from func import evaluate_performace
 
 class Task:
     def __init__(self, msg):
