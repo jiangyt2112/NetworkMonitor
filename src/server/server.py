@@ -326,6 +326,7 @@ class WorkerPoll:
             w.stop()
 
     def push_task(self, task):
+        print "put task"
         if self.worker_poll_flag == True:
             self.queue.put(task)
             print "put task"
