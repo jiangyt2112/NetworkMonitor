@@ -176,7 +176,7 @@ class Task:
             info.append(json.loads(i))
         result["info"] = info
         check_delay(result)
-        check_performance(result)
+        evaluate_performace(result)
         return json.dumps(result)
 
     def process_item(self, item):
