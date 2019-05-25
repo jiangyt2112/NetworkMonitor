@@ -1041,7 +1041,7 @@ def check_tap(dev, topo):
 			else:
 				ret, info = exe("ip addr show %s" %(dev['name']))
 
-			print ret, info
+			#print ret, info
 
 			if ret == False:
 				dev['check']['result'] = False
@@ -1060,7 +1060,9 @@ def check_tap(dev, topo):
 				#	dev['status'] = "unactive"
 				#	dev['check']['error_msg'] = "tap mac not match: %s - %s" %(tap_info['mac'], dev['mac_address'])
 				#	add_function_fault("tap mac not match: %s - %s" %(tap_info['mac'], dev['mac_address']))
-				elif not is_addr_match(tap_info['inets'], dev['addresses']):
+				elif "netns" in dev and dev['netns'] != None and not is_addr_match(tap_info['inets'], dev['addresses']):
+					print tap_info['inets']
+					print dev['addresses']
 					dev['check']['result'] = False
 					dev['status'] = "unactive"
 					dev['check']['error_msg'] = "tap %s addr lost." %(dev['name'])
