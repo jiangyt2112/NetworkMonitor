@@ -108,10 +108,10 @@ class Task:
         if ret == False:
             AGENTLOG.info("agent.Task.is_consumer - project-%s - req_id-%s get uuids error:%s." %(self.project, self.req_id, uuids))
             return False
-        print uuids
+        #print uuids 
         self.valid_vm_info = []
         for info in self.vm_info:
-            print info["id"]
+            #print info["id"]
             if info["id"] in uuids:
                 self.valid_vm_info.append(info)
 

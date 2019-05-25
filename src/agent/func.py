@@ -1022,6 +1022,7 @@ def is_addr_match(tap_inets, dev_addrs):
 	tap_inet_ips = set()
 	for addr in tap_inets:
 		tap_inet_ips.add(addr.split("/")[0])
+	#dev_ips = set()
 	for addr in dev_addrs:
 		if addr['ip_address'] not in tap_inet_ips:
 			return False
@@ -1061,8 +1062,6 @@ def check_tap(dev, topo):
 				#	dev['check']['error_msg'] = "tap mac not match: %s - %s" %(tap_info['mac'], dev['mac_address'])
 				#	add_function_fault("tap mac not match: %s - %s" %(tap_info['mac'], dev['mac_address']))
 				elif "netns" in dev and dev['netns'] != None and not is_addr_match(tap_info['inets'], dev['addresses']):
-					print tap_info['inets']
-					print dev['addresses']
 					dev['check']['result'] = False
 					dev['status'] = "unactive"
 					dev['check']['error_msg'] = "tap %s addr lost." %(dev['name'])
