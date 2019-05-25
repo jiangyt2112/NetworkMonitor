@@ -72,5 +72,7 @@ def check_delay(result):
 
 
 def evaluate_performance(result):
+	rules = ["compute_node_cpu_rate >= 90% => current network performance is low, CPU is the bottleneck."]
 	for node in result['info']:
-		print node['check']
+		if node['check']['cpu_rate'] >= 90:
+			print "%s stisfys the rule: %s" %(node['hostname'], rules[0]) 
