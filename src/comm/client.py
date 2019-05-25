@@ -133,10 +133,10 @@ def server_to_agent_msg(msg):
 def test(req_id, vm_id):
     msg = {"req_id": req_id, "vm_id": vm_id}
     print api_to_server_msg(msg)
-    print api_to_server_rpc(msg)
+    #print api_to_server_rpc(msg)
     print agent_to_server_msg(msg)
-    print agent_to_server_rpc(msg)
-    print server_to_agent_msg(msg)
+    #print agent_to_server_rpc(msg)
+    #print server_to_agent_msg(msg)
 
 if __name__ == "__main__":
     req_id = str(uuid.uuid4())

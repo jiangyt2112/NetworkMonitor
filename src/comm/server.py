@@ -73,10 +73,6 @@ class Server(object):
                         "task_type": "start_re",
                         "exe_res": True,
                         "error_msg": "",
-                        #"req_id": eval(body)['req_id'],
-                        #"vm_id": eval(body)['vm_id'],
-                        #"task_start_time": 
-                        #time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(eval(body)['start_time']))
                         }
                 ch.basic_publish(exchange='',
                      routing_key=props.reply_to,
@@ -95,10 +91,6 @@ class Server(object):
                         "task_type": "end_re",
                         "exe_res": True,
                         "error_msg": "",
-                        #"req_id": eval(body)['req_id'],
-                        #"vm_id": eval(body)['vm_id'],
-                        #"task_end_time": 
-                        #time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(eval(body)['end_time']))
                         }
                 ch.basic_publish(exchange='',
                      routing_key=props.reply_to,
@@ -126,6 +118,6 @@ class T(Server):
     # override callback    
 
 if __name__ == "__main__":
-    server = Server("server", ["api_to_server", "agent_to_server"], topic)
+    server = Server("server", ["api_to_server.*", "agent_to_server.*"], 'topic')
     server.run()
     #t = T("top", ["bbb"])
