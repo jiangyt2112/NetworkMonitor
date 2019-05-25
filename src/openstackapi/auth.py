@@ -30,7 +30,7 @@ def get_token(username, password, auth_url, project_name):
 #print keystone.projects.list()
 
 def check_auth(auth_url, auth_token, project_name):
-	print auth_url
+	#print auth_url
 	ret = False
 	try:
 		keystone = client.Client(token = auth_token, auth_url = auth_url)#, endpoint = auth_url)
