@@ -24,6 +24,7 @@ class Task:
         self.project = msg['project']
         self.token = msg['token']
         self.item_flag = False
+        print "task in"
         self.get_info_from_openstack()
         self.status = None
         self.start_time = None
