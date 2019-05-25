@@ -1041,7 +1041,7 @@ def check_tap(dev, topo):
 			else:
 				ret, info = exe("ip addr show %s" %(dev['name']))
 
-			# print ret, info
+			print ret, info
 
 			if ret == False:
 				dev['check']['result'] = False
