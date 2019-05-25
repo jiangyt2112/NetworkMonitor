@@ -788,7 +788,7 @@ def get_topo(vms_info, networks_info):
 		nic_tun_info['performance']['bandwidth'] = nic_stats[nic_tun_info['name']]
 	else:
 		if nic_tun_info['name'] not in nic_stats:
-			nic_tun_info['performance']['error_msg'] = "can't get %s performance info." %(nic_tun_info['name'])
+			nic_tun_info['performance']['error_msg'] = "can not get %s performance info." %(nic_tun_info['name'])
 	topo['nic'].append(nic_tun_info)
 
 	physical_switch_info = {}
@@ -852,11 +852,11 @@ def get_topo(vms_info, networks_info):
 			if nic_ex_info['name'] != "" and nic_ex_info['name'] in nic_stats:
 				nic_ex_info['performance']['bandwidth'] = nic_stats[nic_ex_info['name']]
 			elif nic_ex_info['name'] not in nic_stats:
-				nic_ex_info['performance']['error_msg'] = "can't get %s performance info." %(nic_ex_info['name'])
+				nic_ex_info['performance']['error_msg'] = "can not get %s performance info." %(nic_ex_info['name'])
 			nic_ex_info['remote'] = get_extnet_gateway(nic_ex_info['ip_address'], networks_info)
 			if nic_ex_info['remote'] == [] and nic_ex_info['ip_address'] != "":
 				nic_ex_info['check']['result'] = False
-				nic_ex_info['check']['error_msg'] = "can't get external nic network gateway."
+				nic_ex_info['check']['error_msg'] = "can not get external nic network gateway."
 				add_function_fault("can not get external nic network gateway.")
 			AGENTLOG.info("agent.func.get_topo -  get_nic_ex_info done.")
 	
@@ -1521,7 +1521,7 @@ def is_connect_internal(vm_id, ip, mask, tag):
 	ret, msg = ping_test(ip, netns)
 	if ret == False:
 		clear_netns_and_port(netns, port)
-		return ret, "can't reach %s by ping, %s." %(ip, msg)
+		return ret, "can not reach %s by ping, %s." %(ip, msg)
 
 	#clear
 	clear_netns_and_port(netns, port)
@@ -1531,7 +1531,7 @@ def is_connect_external(ip, mask, tag = None):
 	netns = None
 	ret, msg = ping_test(ip, netns)
 	if ret == False:
-		return ret, "can't reach %s by ping, %s." %(ip, msg)
+		return ret, "can not reach %s by ping, %s." %(ip, msg)
 	return True, None
 
 def get_device_vm_tag(dev, topo):
