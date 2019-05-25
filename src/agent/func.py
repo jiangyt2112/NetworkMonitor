@@ -1585,9 +1585,9 @@ def check_device_connection(dev, topo):
 	for dst in dest_list:
 			ret, error_info = is_connect_internal(dst['id'], dst['ip'], dst['mask'], dst['tag'])
 			if ret == False:
-				set_check(dst['addr'], False, "dev:%s addr:%s can't reach openvswitch, %s." 
+				set_check(dst['addr'], False, "dev:%s addr:%s can not reach openvswitch, %s." 
 					%(dev['name'], dst['addr']['addr'], error_info))
-				set_check(dev, False, "addr:%s can't reach openvswitch, %s." 
+				set_check(dev, False, "addr:%s can not reach openvswitch, %s." 
 					%(dst['addr']['addr'], error_info))
 				add_function_fault("dev:%s addr:%s can not reach openvswitch, %s." 
 					%(dev['name'], dst['addr']['addr'], error_info))
@@ -1600,7 +1600,7 @@ def check_nic_connection(dev, topo):
 		for ip in dev['remote']:
 			ret, info = ping_test(ip, "")
 			if ret == False:
-				set_check(dev, False, "can't reach %s, %s" %(ip, info))
+				set_check(dev, False, "can not reach %s, %s" %(ip, info))
 				add_function_fault("dev:%s can not reach %s, %s" %(dev['name'], ip, info))
 				return                                    
 
