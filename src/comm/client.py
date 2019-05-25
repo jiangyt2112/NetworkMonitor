@@ -81,6 +81,7 @@ class Client(object):
             return True, self.response
         else:
             try:
+                self.channel.exchange_declare(exchange= self.exchange, exchange_type= 'topic')
                 self.channel.basic_publish(exchange = self.exchange,
                                         routing_key = self.routing_key,
                                         body = self.message)
