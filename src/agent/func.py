@@ -1521,7 +1521,7 @@ def is_connect_internal(vm_id, ip, mask, tag):
 	ret, msg = ping_test(ip, netns)
 	if ret == False:
 		clear_netns_and_port(netns, port)
-		return ret, "can not reach %s by ping, %s." %(ip, msg)
+		return ret, "can not reach %s by ping, %s." %(ip, msg.split('\n')[0].strip())
 
 	#clear
 	clear_netns_and_port(netns, port)
@@ -1531,7 +1531,7 @@ def is_connect_external(ip, mask, tag = None):
 	netns = None
 	ret, msg = ping_test(ip, netns)
 	if ret == False:
-		return ret, "can not reach %s by ping, %s." %(ip, msg)
+		return ret, "can not reach %s by ping, %s." %(ip, msg.split('\n')[0].strip())
 	return True, None
 
 def get_device_vm_tag(dev, topo):
