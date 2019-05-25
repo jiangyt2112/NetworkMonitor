@@ -18,7 +18,7 @@ class Server(object):
         self.channel.exchange_declare(exchange= exchange,
                                 exchange_type= exchange_type)
 
-        result = self.channel.queue_declare(exclusive=True)
+        result = self.channel.queue_declare('', exclusive=True)
         queue_name = result.method.queue
 
         if exchange_type == "topic":
@@ -37,10 +37,10 @@ class Server(object):
         #self.callback()
         if exchange_type == "topic":
             self.channel.basic_qos(prefetch_count = 1)
-            self.channel.basic_consume(self.callback,
+            self.channel.basic_consume(on_message_callback = self.callback,
                                    queue=queue_name)
         else:
-            self.channel.basic_consume(self.callback, queue = queue_name, no_ack = True)
+            self.channel.basic_consume(on_message_callback = self.callback, queue = queue_name, no_ack = True)
 
     def run(self):
         
