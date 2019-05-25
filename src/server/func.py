@@ -13,8 +13,8 @@ def exe(cmd):
 
 
 def addr_delay(addr):
-	print type(addr)
-	print addr
+	#print type(addr)
+	#print addr
 	if addr['dhcp_netns'] != None:
 		cmd = "ip netns exec %s python test_delay.py %s" %(addr['dhcp_netns'], addr['addr'])
 		ret, info = exe(cmd)
@@ -37,7 +37,7 @@ def addr_delay(addr):
 			return
 		else:
 			addr['performance']['delay'] = info
-			print info
+			#print info
 
 def check_delay(result):
 	#result = {
@@ -56,8 +56,8 @@ def check_delay(result):
 	#     "topo": "topo_struct"
 	# }
 	node = result['info'][0]
-	for key in node:
-		print key + " "
+	# for key in node:
+	# 	print key + " "
 
 	for node in result['info']:
 		for dev in node['topo']['device']:

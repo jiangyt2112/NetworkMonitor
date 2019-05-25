@@ -402,7 +402,7 @@ def get_network_topo(networks_info, topo, touch_ips):
 		
 		for port in networks_info['ports']:
 			if port['device_id'] == router_info['id']:
-				print router_info['next']
+				# print router_info['next']
 				#router_info['next'].append(len(topo['tap']))
 				q_info = {}
 				q_info['id'] = port['id']
