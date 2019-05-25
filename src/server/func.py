@@ -73,6 +73,4 @@ def check_delay(result):
 
 def evaluate_performance(result):
 	for node in result['info']:
-		for dev in node['topo']['device']:
-			pass
-	pass
+		print node['check']
