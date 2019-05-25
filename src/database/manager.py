@@ -256,6 +256,7 @@ class Manager(object):
         set_task_sql = ("update task set status = 'RUNNING', "
                 "receive_vm_num = %d, receive_network_num = %d "
                 "where project = '%s';") %(receive_vm_num, receive_network_num, project_name)
+        info = info.replace("'", ' ')
         store_item_sql = ("insert into item set task_id = %d, receive_time = '%s', "
             "info = '%s';") %(task_id, receive_time, info)
 
