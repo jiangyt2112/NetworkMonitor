@@ -24,14 +24,14 @@ class Task:
         self.project = msg['project']
         self.token = msg['token']
         self.item_flag = False
-        print "task in"
+        #print "task in"
         self.get_info_from_openstack()
         self.status = None
         self.start_time = None
         self.receive_time = None
         self.stop_time = None
         self.max_task_time = CONF.server_conf['max_task_time']
-        print "Task"
+        #print "Task"
 
     def get_info_from_openstack(self):
         self.network_info = None
@@ -44,11 +44,11 @@ class Task:
         # to do
         auth_url = CONF.openstack_conf["auth_url"]
         endpoint_url = CONF.openstack_conf["endpoint_url"]
-        print "get openstack in server"
+        #print "get openstack in server"
         self.vm_info = get_project_server_info(self.token, auth_url, self.project)
         self.vm_num = len(self.vm_info)
 
-        print "get openstack in network"
+        #print "get openstack in network"
         self.network_info = get_project_network_info(self.token, auth_url, endpoint_url)
         self.network_num = self.vm_num + 1
     
@@ -330,10 +330,10 @@ class WorkerPoll:
             w.stop()
 
     def push_task(self, task):
-        print "put task"
+        #print "put task"
         if self.worker_poll_flag == True:
             self.queue.put(task)
-            print "put task"
+            #print "put task"
             return True
         else:
             return False

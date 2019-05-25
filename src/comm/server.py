@@ -40,7 +40,7 @@ class Server(object):
             self.channel.basic_consume(on_message_callback = self.callback,
                                    queue=queue_name)
         else:
-            self.channel.basic_consume(on_message_callback = self.callback, queue = queue_name, no_ack = True)
+            self.channel.basic_consume(on_message_callback = self.callback, queue = queue_name, auto_ack = False)
 
     def run(self):
         
