@@ -30,6 +30,7 @@ class Task:
         self.receive_time = None
         self.stop_time = None
         self.max_task_time = CONF.server_conf['max_task_time']
+        print "Task"
 
     def get_info_from_openstack(self):
         self.network_info = None
