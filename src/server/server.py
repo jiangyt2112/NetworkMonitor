@@ -415,8 +415,7 @@ class Server(Base_Server):
         print(" [x] %r:%r" % (method.routing_key, body))
 
 if __name__ == "__main__":
-    #wp = WorkerPoll()
-    #wp.run()
-    wp = []
+    wp = WorkerPoll()
+    wp.run()
     server = Server(wp)
     server.run()
