@@ -1060,7 +1060,7 @@ def check_tap(dev, topo):
 				#	dev['status'] = "unactive"
 				#	dev['check']['error_msg'] = "tap mac not match: %s - %s" %(tap_info['mac'], dev['mac_address'])
 				#	add_function_fault("tap mac not match: %s - %s" %(tap_info['mac'], dev['mac_address']))
-				elif is_addr_match(tap_info['inets'], dev['addresses']):
+				elif not is_addr_match(tap_info['inets'], dev['addresses']):
 					dev['check']['result'] = False
 					dev['status'] = "unactive"
 					dev['check']['error_msg'] = "tap %s addr lost." %(dev['name'])
