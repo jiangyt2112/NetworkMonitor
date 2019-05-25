@@ -44,9 +44,11 @@ class Task:
         # to do
         auth_url = CONF.openstack_conf["auth_url"]
         endpoint_url = CONF.openstack_conf["endpoint_url"]
+        print "get openstack in server"
         self.vm_info = get_project_server_info(self.token, auth_url, self.project)
         self.vm_num = len(self.vm_info)
 
+        print "get openstack in network"
         self.network_info = get_project_network_info(self.token, auth_url, endpoint_url)
         self.network_num = self.vm_num + 1
     
