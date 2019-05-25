@@ -202,7 +202,7 @@ class Task:
             self.receive_network_num += info["vm_num"] + 1
         else:
             self.receive_network_num += info["vm_num"]
-        
+
         return json.dumps(info)
 
 class Tasks:
@@ -224,8 +224,8 @@ class Tasks:
 
     def update_task(self, item):
         self.mutex.acquire()
-        print item.project
-        print self.tasks
+        #print item.project
+        #print self.tasks
         if item.project not in self.tasks:
             SERVERLOG.error("server.Tasks.update_task - project-%s - req_id-%s task not in tasks." %(item.project, item.req_id))
         else:
@@ -286,7 +286,7 @@ class Worker(threading.Thread):
         while True:
             task = self.queue.get()
             if isinstance(task, Task):
-                print "get a task type"
+                # print "get a task type"
                 SERVERLOG.info("server.Worker.run - project-%s - req_id-%s get a task type:%s." %(task.project, task.req_id, "Task"))
                 ret = task.start_task()
                 if ret:
@@ -379,7 +379,7 @@ class Server(Base_Server):
                 msg = json.loads(body)
                 # {'type': 'check', 'req_id': msg['req_id'], 'project': msg['project_name'], 'token': msg['token']}
                 if msg['type'] == 'check':
-                    print "check"
+                    # print "check"
                     self.worker_poll.push_task(Task(msg))
                 else:
                     SERVERLOG.error("receive api to server msg: invalid msg type %s" %(msg['type']))
@@ -413,7 +413,7 @@ class Server(Base_Server):
             FALOG.error("receive msg routing_key with wrong format[part 1].")
             
         ch.basic_ack(delivery_tag = method.delivery_tag)
-        print(" [x] %r:%r" % (method.routing_key, body))
+        print(" [x] %r" % (method.routing_key))
 
 if __name__ == "__main__":
     wp = WorkerPoll()
