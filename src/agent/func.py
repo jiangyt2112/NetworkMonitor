@@ -1036,7 +1036,7 @@ def check_tap(dev, topo):
 		else:
 			ret = None
 			info = None
-			if "netns" in dev:
+			if "netns" in dev and dev['netns'] != None:
 				ret, info = exe("ip netns exec %s ip addr show %s" %(dev['netns'], dev['name']))
 			else:
 				ret, info = exe("ip addr show %s" %(dev['name']))
