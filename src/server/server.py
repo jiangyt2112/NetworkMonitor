@@ -202,6 +202,7 @@ class Task:
             self.receive_network_num += info["vm_num"] + 1
         else:
             self.receive_network_num += info["vm_num"]
+        
         return json.dumps(info)
 
 class Tasks:

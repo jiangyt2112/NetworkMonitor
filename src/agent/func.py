@@ -87,7 +87,7 @@ def get_host_ip():
 	ret, info = exe(cmd)
 	if not ret:
 		AGENTLOG.info("func.get_host_ip - cmd:%s return error, %s" %(cmd, info))
-		add_function_fault("can't get host ip(%s)" %(info))
+		add_function_fault("can not get host ip(%s)" %(info))
 		return []
 	return info.split()
 
@@ -857,7 +857,7 @@ def get_topo(vms_info, networks_info):
 			if nic_ex_info['remote'] == [] and nic_ex_info['ip_address'] != "":
 				nic_ex_info['check']['result'] = False
 				nic_ex_info['check']['error_msg'] = "can't get external nic network gateway."
-				add_function_fault("can't get external nic network gateway.")
+				add_function_fault("can not get external nic network gateway.")
 			AGENTLOG.info("agent.func.get_topo -  get_nic_ex_info done.")
 	
 			physical_switch_info = {}
@@ -1120,7 +1120,7 @@ def check_vm(dev, topo):
 def get_all_ns():
 	ret, info = exe("ip netns show")
 	if not ret:
-		add_function_fault("cmd:'ip netns show' return error.")
+		add_function_fault("cmd:ip netns show return error.")
 		return False, "cmd:'ip netns show' return error."
 	else:
 		all_ns = set()
@@ -1589,7 +1589,7 @@ def check_device_connection(dev, topo):
 					%(dev['name'], dst['addr']['addr'], error_info))
 				set_check(dev, False, "addr:%s can't reach openvswitch, %s." 
 					%(dst['addr']['addr'], error_info))
-				add_function_fault("dev:%s addr:%s can't reach openvswitch, %s." 
+				add_function_fault("dev:%s addr:%s can not reach openvswitch, %s." 
 					%(dev['name'], dst['addr']['addr'], error_info))
 			else:
 				set_check(dst['addr'], True)
@@ -1601,7 +1601,7 @@ def check_nic_connection(dev, topo):
 			ret, info = ping_test(ip, "")
 			if ret == False:
 				set_check(dev, False, "can't reach %s, %s" %(ip, info))
-				add_function_fault("dev:%s cant't reach %s, %s" %(dev['name'], ip, info))
+				add_function_fault("dev:%s can not reach %s, %s" %(dev['name'], ip, info))
 				return                                    
 
 def check_network_connection(topo):
