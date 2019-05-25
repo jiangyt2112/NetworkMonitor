@@ -10,7 +10,7 @@ from libvirt_func import get_vm_info_in_host
 from libvirt_func import get_vm_port_netstat_down
 from libvirt_func import get_nic_netstats
 from libvirt_func import get_vm_port_netstats
-from libvirt_func import get_cpu_rate
+from libvirt_func import get_vms_cpu_rate
 import psutil
 import time
 # 61205745-b2bf-4db0-ad50-e7a60bf08bd5
@@ -636,7 +636,7 @@ def check_service_status():
 	# libvirt
 	# openvswitch
 	# other service
-	all_node_service = ['libvirtd.service', 'openvswitch.service', 'rabbitmq-server.service']
+	all_node_service = ['libvirtd.service', 'openvswitch.service']
 	network_node_service = ['neutron-dhcp-agent.service', 'neutron-metadata-agent.service',
 							'neutron-server.service', 'neutron-dhcp-agent.service', 
 							'neutron-l3-agent.service',  'neutron-openvswitch-agent.service',
@@ -691,7 +691,7 @@ def get_topo(vms_info, networks_info):
 
 
 	AGENTLOG.info("agent.func.get_topo -  get vm topo start.")
-	vms_cpu_rate = get_cpu_rate()
+	vms_cpu_rate = get_vms_cpu_rate()
 	for vm in vms_info:
 		get_vm_topo(vm, networks_info, topo, touch_ips, vm_port_netstats, vms_cpu_rate)
 	AGENTLOG.info("agent.func.get_topo -  get vm topo done.")
