@@ -362,11 +362,7 @@ class Server(Base_Server):
                 response = {
                         "task_type": "test",
                         "exe_res": True,
-                        "error_msg": "",
-                        #"req_id": eval(body)['req_id'],
-                        #"vm_id": eval(body)['vm_id'],
-                        #"task_start_time": 
-                        #time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(eval(body)['start_time']))
+                        "error_msg": ""
                         }
                 ch.basic_publish(exchange='',
                      routing_key=props.reply_to,
@@ -379,7 +375,7 @@ class Server(Base_Server):
                 # {'type': 'check', 'req_id': msg['req_id'], 'project': msg['project_name'], 'token': msg['token']}
                 if msg['type'] == 'check':
                     print "check"
-                    self.worker_poll.push_task(Task(msg))
+                    #self.worker_poll.push_task(Task(msg))
                 else:
                     SERVERLOG.error("receive api to server msg: invalid msg type %s" %(msg['type']))
             else:
@@ -419,19 +415,8 @@ class Server(Base_Server):
         print(" [x] %r:%r" % (method.routing_key, body))
 
 if __name__ == "__main__":
-	#ser = Server()
-	#ser.run()
-    # msg_task = {'type': 'check', 'req_id': "1", 'project': "admin", 'token': "123456"}
-    # msg_item = {'type': 'item', 'req_id': "1", 'project': "admin", 'info': "info"}
-    # wp = WorkerPoll()
-    # wp.run()
-    # wp.push_task(Task(msg_task))
-    # time.sleep(1)
-    # wp.push_task(Item(msg_item))
-    # wp.stop()
-
-
-    wp = WorkerPoll()
-    wp.run()
+    #wp = WorkerPoll()
+    #wp.run()
+    wp = []
     server = Server(wp)
     server.run()
