@@ -72,7 +72,7 @@ class Task:
                 'vm_info': self.vm_info,
                 'network_info': self.network_info
             }
-        print "server to agent msg"
+        print "monitor project %s: server send msg to agent." %(msg['project'])
         ret, msg = server_to_agent_msg(msg)
         if ret == False:
             self.status = "ERROR"
@@ -180,7 +180,9 @@ class Task:
         for i in items["item_info"]:
             info.append(json.loads(i))
         result["info"] = info
+        print "monitor project %s: check delay." %(result['project'])
         check_delay(result)
+        print "monitor project %s: evaluate performance." %(result['project'])
         evaluate_performance(result)
         return json.dumps(result)
 
@@ -282,7 +284,7 @@ class Worker(threading.Thread):
         self.tasks = tasks
 
     def run(self):
-        print "worker is running"
+        #print "worker is running"
         while True:
             task = self.queue.get()
             if isinstance(task, Task):
@@ -380,6 +382,7 @@ class Server(Base_Server):
                 # {'type': 'check', 'req_id': msg['req_id'], 'project': msg['project_name'], 'token': msg['token']}
                 if msg['type'] == 'check':
                     # print "check"
+                    print "receive api to server msg: monitor project %s network." %(msg['project'])
                     self.worker_poll.push_task(Task(msg))
                 else:
                     SERVERLOG.error("receive api to server msg: invalid msg type %s" %(msg['type']))
@@ -400,7 +403,9 @@ class Server(Base_Server):
                      body=json.dumps(response))
             elif msg_type[1] == "msg":
                 SERVERLOG.info("receive agent to server msg: %s" %(body))
+
                 msg = json.loads(body)
+                print "receive agent to server msg: agent send item[%s] to server." %(msg['project'])
                 # {'type': 'item', 'req_id': msg['req_id'], 'project': msg['project_name'], 'info': msg['info']}
                 if msg['type'] == 'item':
                     self.worker_poll.push_task(Item(msg))
@@ -413,7 +418,7 @@ class Server(Base_Server):
             FALOG.error("receive msg routing_key with wrong format[part 1].")
             
         ch.basic_ack(delivery_tag = method.delivery_tag)
-        print(" [x] %r" % (method.routing_key))
+        #print(" [x] %r" % (method.routing_key))
 
 if __name__ == "__main__":
     wp = WorkerPoll()

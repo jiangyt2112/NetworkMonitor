@@ -46,7 +46,7 @@ class NetworkMonitorCheck(Resource):
         #print "get vm_id"
         req_id = str(uuid.uuid4())
         data = request.get_json()       
-        print data
+        #print data
 
         if data == None or "token" not in data:
             response = {
@@ -62,15 +62,18 @@ class NetworkMonitorCheck(Resource):
         
         msg = {'req_id': req_id, 'project_name': project_name, 'token': data['token']}
 
+        print "api.NetworkMonitorCheck.post - req-%s - project-%s api get request:check project start" %(req_id, project_name)
         APILOG.info("api.NetworkMonitorCheck.post - req-%s - project-%s api get request:check project start" %(req_id, project_name))
         
         # exception
         response = check_msg(msg)
-        
+        print "send task msg: %s" %(msg)
+
         if response['exe_result'] == False:
             APILOG.info("api.NetworkMonitorCheck.post - req-%s - project-%s check project:fail info:%s" %(req_id, project_name, response['error_msg']))
             return response, 400
         else:
+            print "api.NetworkMonitorCheck.post - req-%s - project-%s check project:success info:%s" %(req_id, project_name, response['result'])
             APILOG.info("api.NetworkMonitorCheck.post - req-%s - project-%s check project:success info:%s" %(req_id, project_name, response['result']))
             return response, 200
 

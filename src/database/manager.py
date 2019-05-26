@@ -221,7 +221,7 @@ class Manager(object):
         update_sql = ("update task set status = 'START', start_time = '%s',"
                 "network_info = '%s', vm_info = '%s', vm_num = %d, network_num = %d "
                 "where project = '%s';") %(start_time, network_info, vm_info, vm_num, network_num, project_name)
-        print update_sql
+        #print update_sql
         conn = None
         try:
             conn = connection.Connection(conf_dict = self.db_conf)

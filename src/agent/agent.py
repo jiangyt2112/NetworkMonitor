@@ -131,7 +131,7 @@ class Task:
         AGENTLOG.info("agent.Task.get_info - project-%s - req_id-%s check_service done." 
                 %(self.project, self.req_id))
 
-
+        print "monitor project %s: get project network data model." %(self.project)
         AGENTLOG.info("agent.Task.get_info - project-%s - req_id-%s get topo start." 
                 %(self.project, self.req_id))
         ret, topo = get_topo(self.valid_vm_info, self.network_info)
@@ -144,11 +144,13 @@ class Task:
 
         AGENTLOG.info("agent.Task.get_info - project-%s - req_id-%s check_network_config start." 
                 %(self.project, self.req_id))
+        print "monitor project %s: check network config." %(self.project)
         check_network_config(topo)
         AGENTLOG.info("agent.Task.get_info - project-%s - req_id-%s gcheck_network_config done." 
                 %(self.project, self.req_id))
         AGENTLOG.info("agent.Task.get_info - project-%s - req_id-%s check_network_connection start." 
                 %(self.project, self.req_id))
+        print "monitor project %s: check network connection." %(self.project)
         check_network_connection(topo)
         AGENTLOG.info("agent.Task.get_info - project-%s - req_id-%s check_network_connection done." 
                 %(self.project, self.req_id))
@@ -177,7 +179,7 @@ class Worker(threading.Thread):
         self.queue = queue
 
     def run(self):
-        print "worker is running"
+        #print "worker is running"
         while True:
             task = self.queue.get()
 
@@ -245,8 +247,10 @@ class Server(Base_Server):
         """
         # FALOG.error("receive msg routing_key with wrong format[part 2].")
         AGENTLOG.info("agent.Server.callback - receive server to agent msg: %s" %(body))
+
         msg = json.loads(body)
         # {'type': 'check', 'req_id': msg['req_id'], 'project': msg['project_name'], 'token': msg['token']}
+        print "receive server to agent msg: monitor project %s."
         if msg['type'] == 'check':
             AGENTLOG.info("agent.Server.callback - project-%s - req_id-%s get a task type:check." 
                 %(msg['project'], msg['req_id']))
@@ -254,7 +258,7 @@ class Server(Base_Server):
         else:
             AGENTLOG.error("agent.Server.callback - receive server to agent msg: invalid msg type:%s." %(msg['type']))
 
-        print(" [x] %r:%s - %s" % (method.routing_key, msg['type'], msg['project']))
+        #print(" [x] %r:%s - %s" % (method.routing_key, msg['type'], msg['project']))
 
 if __name__ == "__main__":
 	#ser = Server()
